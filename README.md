@@ -11,7 +11,7 @@ A Next.js-based hotel management application demonstrating integration patterns 
 
 ## System Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 20+ and npm
 - SQLite (included via better-sqlite3)
 - Python 3.8+ (for Workato CLI)
 - curl and tar (for Salesforce CLI)
@@ -60,11 +60,13 @@ See [MOCK_DEVICE_QUICKSTART.md](./docs/MOCK_DEVICE_QUICKSTART.md) for detailed c
 This project integrates with Workato and Salesforce. Install the CLIs to manage metadata and enviroments related to live integrations:
 
 #### Option A: Install All CLIs (Workato & Salesforce)
+
 ```bash
 make setup
 ```
 
 #### Option B: Install Specific CLIs
+
 ```bash
 # Workato only
 make setup tool=workato
@@ -74,6 +76,7 @@ make setup tool=salesforce
 ```
 
 #### Verify Installation
+
 ```bash
 make status              # Check all CLIs
 make status tool=salesforce  # Check specific CLI
@@ -81,15 +84,16 @@ make status tool=salesforce  # Check specific CLI
 
 #### Configure Credentials
 
-**For Workato:**
-Create `.workatoenv` file:
+Copy `.env.example` to `.env` and configure
+
 ```bash
-WORKATO_API_KEY=your_api_key_here
+WORKATO_API_TOKEN=your_api_key_here
 WORKATO_API_EMAIL=your_email@example.com
 ```
 
 **For Salesforce:**
 Authenticate to your org:
+
 ```bash
 bin/sf org login web --alias myDevOrg
 bin/sf org list  # Verify authentication
@@ -104,9 +108,10 @@ bin/sf org list  # Verify authentication
 make sf-deploy org=myDevOrg
 ```
 
-This deploys custom objects (Booking__c, Hotel_Room__c, etc.), the Lightning app, and seed data to your Salesforce org.
+This deploys custom objects (Booking**c, Hotel_Room**c, etc.), the Lightning app, and seed data to your Salesforce org.
 
 **Verify deployment:**
+
 ```bash
 # Open Salesforce org
 bin/sf org open --target-org myDevOrg
@@ -215,7 +220,8 @@ make sf-deploy org=myDevOrg
 ```
 
 This single command will:
-- Deploy 4 custom objects (Booking__c, Hotel_Room__c, Payment_Transaction__c, SMS_Notification__c)
+
+- Deploy 4 custom objects (Booking**c, Hotel_Room**c, Payment_Transaction**c, SMS_Notification**c)
 - Deploy Lightning application with custom tabs and logo
 - Deploy custom fields on Case, Contact, and Opportunity
 - Assign the Hotel_Management_Admin permission set to your user
@@ -235,20 +241,24 @@ bin/sf org open --target-org myDevOrg
 ### What Gets Deployed
 
 **Custom Objects:**
-- **Booking__c** - Junction object for room reservations (links Contacts, Opportunities, Rooms)
-- **Hotel_Room__c** - Master data for room inventory (10 rooms: 101-105, 201-205)
-- **Payment_Transaction__c** - Payment records via Stripe integration
-- **SMS_Notification__c** - SMS communication logs via Twilio integration
+
+- **Booking\_\_c** - Junction object for room reservations (links Contacts, Opportunities, Rooms)
+- **Hotel_Room\_\_c** - Master data for room inventory (10 rooms: 101-105, 201-205)
+- **Payment_Transaction\_\_c** - Payment records via Stripe integration
+- **SMS_Notification\_\_c** - SMS communication logs via Twilio integration
 
 **Standard Object Customizations:**
-- **Case** - Added fields: External_ID__c, Room__c, Booking__c
-- **Contact** - Added fields: Contact_Type__c, Employee_ID__c, Loyalty_Number__c
-- **Opportunity** - Added fields: Total_Nights__c, Arrival_Date__c, Departure_Date__c
+
+- **Case** - Added fields: External_ID**c, Room**c, Booking\_\_c
+- **Contact** - Added fields: Contact_Type**c, Employee_ID**c, Loyalty_Number\_\_c
+- **Opportunity** - Added fields: Total_Nights**c, Arrival_Date**c, Departure_Date\_\_c
 
 **Lightning Application:**
+
 - Dewy Hotel Management app with custom tabs, logo, and utility bar
 
 **Seed Data:**
+
 - 23 Accounts (1 hotel + 11 guest households + 11 vendor companies)
 - 24 Contacts (1 manager + 12 guests + 11 vendors)
 - 10 Hotel Rooms (rooms 101-105, 201-205)
@@ -272,19 +282,23 @@ cd salesforce
 ### Troubleshooting Salesforce Deployment
 
 **Error: "Cannot delete this object because it is referenced by..."**
+
 - Objects are deployed in correct order automatically by the script
 - If manual deployment, deploy standalone objects first, then parents, then children
 
 **Error: "Field integrity exception"**
-- Ensure all required fields are included (Booking__c requires Opportunity__c)
+
+- Ensure all required fields are included (Booking**c requires Opportunity**c)
 - Check that parent objects exist before deploying child objects
 
 **Error: "Picklist value not found"**
+
 - For Case.Type picklist, add custom values in Setup:
   - Setup → Object Manager → Case → Fields & Relationships → Type
   - Add values: "Facilities", "Service Request"
 
 **Error: "Authentication expired"**
+
 - Re-authenticate: `bin/sf org login web --alias myDevOrg`
 
 For detailed documentation, troubleshooting, and advanced scenarios, see [salesforce/README.md](./salesforce/README.md).
@@ -292,7 +306,7 @@ For detailed documentation, troubleshooting, and advanced scenarios, see [salesf
 ## Project Structure
 
 ```
-hotel-management-demo/
+dewy-resort/
 ├── app/                    # Next.js App Router pages
 │   ├── (auth)/            # Authentication pages
 │   ├── guest/             # Guest portal pages
@@ -325,7 +339,7 @@ hotel-management-demo/
 
 ### Environment Variables
 
-The application uses environment variables for configuration. Copy `.env.example` to `.env` and configure:
+The application uses environment variables for configuration:
 
 #### Authentication Provider Selection
 
@@ -358,6 +372,7 @@ WORKATO_MOCK_MODE=false
 **⚠️ IMPORTANT**: After changing `WORKATO_MOCK_MODE`, you MUST restart the Next.js development server for the change to take effect. Environment variables are loaded at server startup.
 
 **Verify your configuration:**
+
 ```bash
 npm run verify:mock
 ```
@@ -365,6 +380,7 @@ npm run verify:mock
 **Troubleshooting:** If mock mode isn't working as expected, see [MOCK_MODE_GUIDE.md](./docs/MOCK_MODE_GUIDE.md) for detailed troubleshooting steps.
 
 **Mock Mode (`AUTH_PROVIDER=mock` or `WORKATO_MOCK_MODE=true`)**:
+
 - Uses local email/password authentication
 - All Workato API calls return simulated responses
 - No external API requests are made
@@ -372,6 +388,7 @@ npm run verify:mock
 - Useful for development, testing, and demos without API credentials
 
 **Real Mode with Cognito (`AUTH_PROVIDER=cognito`)**:
+
 - Uses Amazon Cognito for user authentication (direct in-app login)
 - Makes real API calls to Workato and other services
 - Requires AWS Cognito User Pool configuration
@@ -399,6 +416,7 @@ The application supports Amazon Cognito for user authentication with direct in-a
 #### Current Configuration
 
 The application is currently configured with:
+
 - **User Pool ID**: `us-west-2_l1yPytMyD`
 - **Region**: `us-west-2`
 - **Authentication Flow**: USER_PASSWORD_AUTH (direct login)
@@ -439,6 +457,7 @@ cd aws/cloudformation
 ```
 
 The deployment script will:
+
 - Create a Cognito User Pool with email verification
 - Configure an App Client with USER_PASSWORD_AUTH enabled
 - Set up custom `role` attribute for guest/manager roles
@@ -489,6 +508,7 @@ AWS_SECRET_ACCESS_KEY=your_secret_key
 The easiest way to set up Cognito for this application is using the provided CloudFormation templates.
 
 **Prerequisites**:
+
 - AWS account with appropriate permissions
 - AWS CLI installed and configured
 - Basic understanding of AWS CloudFormation
@@ -496,16 +516,19 @@ The easiest way to set up Cognito for this application is using the provided Clo
 **Quick Setup**:
 
 1. Navigate to the CloudFormation directory:
+
 ```bash
 cd aws/cloudformation
 ```
 
 2. Deploy the Cognito User Pool:
+
 ```bash
 ./deploy.sh dev http://localhost:3000/api/auth/cognito/callback http://localhost:3000/login
 ```
 
 3. The script will output the configuration values. Copy them to your `.env` file:
+
 ```bash
 COGNITO_USER_POOL_ID=us-east-1_ABC123
 COGNITO_CLIENT_ID=your_client_id
@@ -514,11 +537,13 @@ COGNITO_REGION=us-east-1
 ```
 
 4. Set the authentication provider:
+
 ```bash
 AUTH_PROVIDER=cognito
 ```
 
 5. Restart your development server:
+
 ```bash
 npm run dev
 ```
@@ -532,15 +557,18 @@ For complete deployment instructions, troubleshooting, and advanced configuratio
 The CloudFormation template creates a User Pool with the following configuration:
 
 **Authentication Settings**:
+
 - Username attribute: Email address
 - Password policy: Minimum 8 characters, requires uppercase, lowercase, numbers, and symbols
 - Auto-verified attributes: Email
 - MFA: Optional (can be enabled per-user)
 
 **Custom Attributes**:
+
 - `custom:role` (string): User role with allowed values `guest` or `manager`
 
 **OAuth 2.0 Settings**:
+
 - Flows: Authorization Code Grant with PKCE
 - Scopes: `openid`, `email`, `profile`
 - Token validity: ID token 60 minutes, access token 60 minutes, refresh token 30 days
@@ -584,6 +612,7 @@ aws cognito-idp admin-create-user \
 You can easily switch between authentication providers by changing the `AUTH_PROVIDER` environment variable:
 
 **Switch to Mock Mode**:
+
 ```bash
 # In .env file
 AUTH_PROVIDER=mock
@@ -592,6 +621,7 @@ WORKATO_MOCK_MODE=true
 ```
 
 **Switch to Cognito**:
+
 ```bash
 # In .env file
 AUTH_PROVIDER=cognito
@@ -602,6 +632,7 @@ COGNITO_REGION=us-east-1
 ```
 
 **Important**: Always restart the development server after changing `AUTH_PROVIDER`:
+
 ```bash
 # Stop the server (Ctrl+C), then restart
 npm run dev
@@ -610,51 +641,61 @@ npm run dev
 #### Troubleshooting Cognito Integration
 
 **"USER_PASSWORD_AUTH flow not enabled" error**:
+
 - Ensure the App Client has USER_PASSWORD_AUTH enabled in AWS Console
 - Go to Cognito → User Pools → App clients → Edit → Enable "ALLOW_USER_PASSWORD_AUTH"
 
 **"Authentication service not configured" error**:
+
 - Ensure `AUTH_PROVIDER=cognito` in your `.env` file
 - Verify all required Cognito environment variables are set
 - Check that `COGNITO_REGION` format is correct (e.g., `us-east-1`)
 - Restart the development server
 
 **Environment variable caching**:
+
 - If changes to `.env` aren't taking effect, check for shell environment variables: `env | grep COGNITO`
 - Unset any conflicting shell variables or restart your terminal
 - Clear Next.js cache: `rm -rf .next && npm run dev`
 
 **"Email not verified" error**:
+
 - Complete the email verification flow at `/verify-email`
 - Check spam folder for verification email
 - Use "Resend Code" button if needed
 
 **"Your account is not properly configured" error**:
+
 - Ensure the user has a `custom:role` attribute set in Cognito
 - Verify the role value is either `guest` or `manager`
 - Check that the User Pool includes the custom attribute definition
 
 **"Authentication failed" error**:
+
 - Verify the callback URL in Cognito matches your `COGNITO_REDIRECT_URI` or `{APP_URL}/api/auth/cognito/callback`
 - Check that the App Client secret is correct
 - Ensure the App Client has Authorization Code Grant flow enabled
 
 **"Invalid AWS region format" error**:
+
 - Verify `COGNITO_REGION` uses the correct format (e.g., `us-east-1`, `eu-west-1`)
 - Check for typos or extra spaces in the region value
 
 **User registration not working**:
+
 - Verify AWS credentials are configured (environment variables or IAM role)
 - Ensure the credentials have `cognito-idp:AdminCreateUser` permission
 - Check that the password meets the User Pool password policy
 
 **CloudFormation deployment fails**:
+
 - Verify AWS CLI is installed and configured
 - Check that your AWS account has CloudFormation and Cognito permissions
 - Ensure the domain prefix is unique (not already in use)
 - See the [CloudFormation Deployment Guide](./aws/cloudformation/README.md) for detailed troubleshooting
 
 **Session issues**:
+
 - Clear browser cookies and try again
 - Check that cookies are enabled in your browser
 - Verify the session hasn't expired (24-hour default)
@@ -718,6 +759,7 @@ npm run dev
 **6. Test Chat Functionality**
 
 Navigate to:
+
 - Guest chat: http://localhost:3000/guest/chat
 - Manager chat: http://localhost:3000/manager/chat
 - Housekeeping chat: http://localhost:3000/housekeeping/chat
@@ -728,11 +770,13 @@ Navigate to:
 The application validates Bedrock configuration on startup. If configuration is invalid, you'll see clear error messages indicating what needs to be fixed.
 
 **Manual Validation**:
+
 ```bash
 npm run verify:bedrock
 ```
 
 **Validation Checks**:
+
 - ✓ AUTH_PROVIDER is set to "cognito"
 - ✓ COGNITO_IDENTITY_POOL_ID is configured and valid format
 - ✓ AWS_REGION or COGNITO_REGION is set
@@ -744,16 +788,16 @@ npm run verify:bedrock
 
 #### Environment Variables Reference
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `COGNITO_IDENTITY_POOL_ID` | Yes | - | Identity Pool ID (format: region:uuid) |
-| `AWS_REGION` | Yes* | `COGNITO_REGION` | AWS region for Bedrock and Identity Pool |
-| `BEDROCK_MODEL_ID` | No | `anthropic.claude-3-sonnet-20240229-v1:0` | Bedrock model to use |
-| `BEDROCK_MAX_TOKENS` | No | `4096` | Maximum tokens to generate (1-200000) |
-| `BEDROCK_TEMPERATURE` | No | `0.7` | Response randomness (0.0-1.0) |
-| `MCP_CONFIG_PATH` | No | `config/mcp` | Path to MCP configuration files |
+| Variable                   | Required | Default                                   | Description                              |
+| -------------------------- | -------- | ----------------------------------------- | ---------------------------------------- |
+| `COGNITO_IDENTITY_POOL_ID` | Yes      | -                                         | Identity Pool ID (format: region:uuid)   |
+| `AWS_REGION`               | Yes\*    | `COGNITO_REGION`                          | AWS region for Bedrock and Identity Pool |
+| `BEDROCK_MODEL_ID`         | No       | `anthropic.claude-3-sonnet-20240229-v1:0` | Bedrock model to use                     |
+| `BEDROCK_MAX_TOKENS`       | No       | `4096`                                    | Maximum tokens to generate (1-200000)    |
+| `BEDROCK_TEMPERATURE`      | No       | `0.7`                                     | Response randomness (0.0-1.0)            |
+| `MCP_CONFIG_PATH`          | No       | `config/mcp`                              | Path to MCP configuration files          |
 
-*Required if `COGNITO_REGION` is not set
+\*Required if `COGNITO_REGION` is not set
 
 #### Supported Models
 
@@ -791,25 +835,30 @@ For detailed troubleshooting information, see the [Bedrock Troubleshooting Guide
 **Quick Fixes**:
 
 **"Bedrock integration requires AUTH_PROVIDER=cognito"**
+
 - Set `AUTH_PROVIDER=cognito` in `.env`
 - Restart the development server
 
 **"Bedrock integration requires COGNITO_IDENTITY_POOL_ID to be configured"**
+
 - Deploy Identity Pool using CloudFormation
 - Add `COGNITO_IDENTITY_POOL_ID` to `.env`
 - Restart the development server
 
 **"Unable to authenticate with AI service"**
+
 - Verify Identity Pool is linked to User Pool
 - Check IAM role mappings in Identity Pool
 - Ensure user has valid `custom:role` attribute
 
 **"AI service temporarily unavailable"**
+
 - Verify Bedrock model access is enabled
 - Check AWS region matches Identity Pool region
 - Verify IAM roles have Bedrock invoke permissions
 
 **Configuration validation fails**
+
 - Run `npm run verify:bedrock` for detailed diagnostics
 - Check all required environment variables are set
 - Verify MCP configuration files exist and are valid JSON
@@ -817,6 +866,7 @@ For detailed troubleshooting information, see the [Bedrock Troubleshooting Guide
 #### Additional Resources
 
 **Deployment & Testing**:
+
 - [Testing Quick Start](./docs/testing/TESTING_COMPLETE.md) - Start here for testing!
 - [Manual Test Guide](./docs/testing/MANUAL_TEST_GUIDE.md) - Step-by-step testing instructions
 - [Deployment Guide](./docs/deployment/DEPLOYMENT_GUIDE.md) - Complete deployment guide
@@ -824,6 +874,7 @@ For detailed troubleshooting information, see the [Bedrock Troubleshooting Guide
 - [Claude 4.5 Upgrade Details](./docs/deployment/CLAUDE_4.5_UPGRADE.md) - Model upgrade information
 
 **Configuration & Setup**:
+
 - [Bedrock Configuration Guide](./docs/BEDROCK_CONFIGURATION.md) - Comprehensive configuration reference
 - [Bedrock Troubleshooting Guide](./docs/BEDROCK_TROUBLESHOOTING.md) - Solutions to common issues
 - [Identity Pool Deployment Guide](./aws/cloudformation/README-IDENTITY-POOL.md) - CloudFormation deployment
@@ -832,11 +883,13 @@ For detailed troubleshooting information, see the [Bedrock Troubleshooting Guide
 - [MCP Server Development Guide](./docs/MCP_SERVER_DEVELOPMENT.md) - Building custom MCP servers
 
 **Technical Documentation**:
+
 - [Bedrock Services Documentation](./lib/bedrock/README.md) - Service implementation details
 - [AWS Bedrock Documentation](https://docs.aws.amazon.com/bedrock/) - Official AWS docs
 - [Cognito Identity Pools Documentation](https://docs.aws.amazon.com/cognito/latest/developerguide/identity-pools.html) - Official AWS docs
 
 **Testing Scripts**:
+
 - `./scripts/test-bedrock-chat.sh` - Automated test script
 
 ## Development

@@ -3,7 +3,7 @@
 cd projects
 export $(grep -v '^#' ../.env | xargs)
 
-folders=("Salesforce" "atomic-salesforce-recipes" "atomic-stripe-recipes" "orchestrator-recipes")
+folders=("Workspace-Connections" "Salesforce" "atomic-salesforce-recipes" "atomic-stripe-recipes" "orchestrator-recipes")
 
 for folder in "${folders[@]}"; do
     workato init --profile default --region custom --non-interactive --project-name "$folder" --api-url "$WORKATO_HOST" 2>/dev/null || true

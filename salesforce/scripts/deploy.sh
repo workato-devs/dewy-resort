@@ -91,15 +91,11 @@ echo "========================================="
 echo ""
 echo "Importing Accounts, Contacts, and Hotel Rooms..."
 
-# Change to data directory
-cd ../data
-
 # Import data using the data plan
 $SF_CLI data import tree \
-    --plan data-plan.json \
+    --plan data/data-plan.json \
     --target-org "$TARGET_ORG"
 
-cd ../scripts
 
 echo ""
 echo "✓ Seed data imported successfully"
@@ -126,5 +122,5 @@ echo "  3. Test creating sample Booking records"
 echo "  4. Configure Workato connection to this org"
 echo ""
 echo "To open the org:"
-echo "  $SF_CLI org open --target-org $TARGET_ORG"
+echo "  bin/sf org open --target-org $TARGET_ORG"
 echo ""
