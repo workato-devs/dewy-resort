@@ -40,7 +40,7 @@ fi
 echo -e "${YELLOW}Fetching all recipes...${NC}"
 
 RECIPES_JSON=$(curl -s -X GET \
-    "https://www.workato.com/api/recipes?per_page=100" \
+    "https://app.trial.workato.com/api/recipes?per_page=100" \
     -H "Authorization: Bearer ${WORKATO_API_TOKEN}" \
     -H "Content-Type: application/json")
 
@@ -86,7 +86,7 @@ for RECIPE_ID in $RECIPE_IDS; do
     
     # Start the recipe
     START_RESPONSE=$(curl -s -X PUT \
-        "https://www.workato.com/api/recipes/${RECIPE_ID}/start" \
+        "https://app.trial.workato.com/api/recipes/${RECIPE_ID}/start" \
         -H "Authorization: Bearer ${WORKATO_API_TOKEN}" \
         -H "Content-Type: application/json")
     
