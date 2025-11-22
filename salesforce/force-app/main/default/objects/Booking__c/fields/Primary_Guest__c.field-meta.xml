@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Primary_Guest__c</fullName>
+    <label>Primary Guest</label>
+    <referenceTo>Contact</referenceTo>
+    <relationshipLabel>Bookings</relationshipLabel>
+    <relationshipName>Bookings</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+    <deleteConstraint>Restrict</deleteConstraint>
+</CustomField>

@@ -1,0 +1,30 @@
+{
+  "role": "housekeeping",
+  "servers": [
+    {
+      "name": "hotel-db",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "lib/mcp/hotel-db-server.ts"],
+      "tools": [
+        "find_service_request_by_token",
+        "get_guest_service_requests"
+      ]
+    },
+    {
+      "name": "housekeeping-tasks",
+      "type": "http",
+      "url": "${MCP_HOUSEKEEPING_URL}",
+      "auth": {
+        "type": "bearer",
+        "token": "${MCP_HOUSEKEEPING_TOKEN}"
+      },
+      "tools": [
+        "view_my_tasks",
+        "update_room_cleaning_status",
+        "report_maintenance_issue",
+        "request_supplies"
+      ]
+    }
+  ]
+}

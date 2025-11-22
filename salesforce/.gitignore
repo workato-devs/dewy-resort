@@ -1,0 +1,53 @@
+# Salesforce DX .gitignore
+
+# Salesforce cache
+.sfdx/
+.sf/
+
+# Scratch org files
+.sfdx/tools/
+.sfdx/typings/
+
+# LWC VSCode autocomplete
+**/lwc/**/*.d.ts
+
+# LWC Jest coverage reports
+coverage/
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+
+# Temp files
+*.tmp
+temp/
+
+# Auth files (NEVER commit these!)
+*.key
+*.pem
+server.key
+auth.json
+
+# Local config overrides
+.env.local
+*.local
+
+# Node modules (if using SFDX plugins)
+node_modules/
+
+# Build artifacts
+dist/

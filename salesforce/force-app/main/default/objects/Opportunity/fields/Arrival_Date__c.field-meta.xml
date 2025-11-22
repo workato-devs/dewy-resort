@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Arrival_Date__c</fullName>
+    <label>Arrival Date</label>
+    <description>Earliest check-in date from related bookings. Note: Must be populated by automation (Flow/Trigger) as cross-object MIN formula not supported.</description>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Date</type>
+</CustomField>

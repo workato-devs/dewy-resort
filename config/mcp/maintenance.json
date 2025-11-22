@@ -1,0 +1,30 @@
+{
+  "role": "maintenance",
+  "servers": [
+    {
+      "name": "hotel-db",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "lib/mcp/hotel-db-server.ts"],
+      "tools": [
+        "find_maintenance_task_by_token",
+        "get_room_maintenance_tasks"
+      ]
+    },
+    {
+      "name": "maintenance-tasks",
+      "type": "http",
+      "url": "${MCP_MAINTENANCE_URL}",
+      "auth": {
+        "type": "bearer",
+        "token": "${MCP_MAINTENANCE_TOKEN}"
+      },
+      "tools": [
+        "view_my_work_orders",
+        "update_task_status",
+        "get_equipment_info",
+        "order_parts"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1505 @@
+{
+  "name": "Upsert case",
+  "version": 1,
+  "private": true,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_recipe_function",
+    "name": "execute",
+    "as": "trigger",
+    "keyword": "trigger",
+    "input": {
+      "parameters_schema_json": "[{\"name\":\"idempotency_token\",\"label\":\"Idempotency token\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Client-generated UUID (External_ID__c)\"},{\"name\":\"contact_id\",\"label\":\"Contact ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Salesforce Contact.Id\"},{\"name\":\"room_id\",\"label\":\"Room ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Salesforce Hotel_Room__c.Id\"},{\"name\":\"type\",\"label\":\"Type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case.Type picklist value\"},{\"name\":\"priority\",\"label\":\"Priority\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case.Priority picklist value\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case.Status picklist value\"},{\"name\":\"subject\",\"label\":\"Subject\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case.Subject (max 255 chars)\"},{\"name\":\"description\",\"label\":\"Description\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case.Description (long text)\"},{\"name\":\"origin\",\"label\":\"Origin\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case.Origin picklist value\"}]",
+      "result_schema_json": "[{\"name\":\"case_id\",\"label\":\"Case ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"case_number\",\"label\":\"Case number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"created\",\"label\":\"Created\",\"type\":\"boolean\",\"control_type\":\"checkbox\"}]"
+    },
+    "extended_output_schema": [
+      {
+        "label": "Parameters",
+        "name": "parameters",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Idempotency token",
+            "name": "idempotency_token",
+            "type": "string",
+            "optional": false,
+            "hint": "Client-generated UUID (External_ID__c)"
+          },
+          {
+            "control_type": "text",
+            "label": "Contact ID",
+            "name": "contact_id",
+            "type": "string",
+            "optional": true,
+            "hint": "Salesforce Contact.Id"
+          },
+          {
+            "control_type": "text",
+            "label": "Room ID",
+            "name": "room_id",
+            "type": "string",
+            "optional": true,
+            "hint": "Salesforce Hotel_Room__c.Id"
+          },
+          {
+            "control_type": "text",
+            "label": "Type",
+            "name": "type",
+            "type": "string",
+            "optional": true,
+            "hint": "Case.Type picklist value"
+          },
+          {
+            "control_type": "text",
+            "label": "Priority",
+            "name": "priority",
+            "type": "string",
+            "optional": true,
+            "hint": "Case.Priority picklist value"
+          },
+          {
+            "control_type": "text",
+            "label": "Status",
+            "name": "status",
+            "type": "string",
+            "optional": true,
+            "hint": "Case.Status picklist value"
+          },
+          {
+            "control_type": "text",
+            "label": "Subject",
+            "name": "subject",
+            "type": "string",
+            "optional": true,
+            "hint": "Case.Subject (max 255 chars)"
+          },
+          {
+            "control_type": "text",
+            "label": "Description",
+            "name": "description",
+            "type": "string",
+            "optional": true,
+            "hint": "Case.Description (long text)"
+          },
+          {
+            "control_type": "text",
+            "label": "Origin",
+            "name": "origin",
+            "type": "string",
+            "optional": true,
+            "hint": "Case.Origin picklist value"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "provider": "salesforce",
+            "name": "upsert_sobject",
+            "as": "upsert_case",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "query_field.primary_key": [
+                {
+                  "label": "External ID",
+                  "value": "External_ID__c"
+                }
+              ]
+            },
+            "toggleCfg": {
+              "Origin": false,
+              "Type": false,
+              "Priority": false,
+              "Status": false
+            },
+            "input": {
+              "sobject_name": "Case",
+              "External_ID__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"idempotency_token\"]}')}",
+              "ContactId": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_id\"]}') : skip",
+              "Room__c": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"room_id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"room_id\"]}') : skip",
+              "Type": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"type\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"type\"]}') : skip",
+              "Priority": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"priority\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"priority\"]}') : skip",
+              "Status": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}') : skip",
+              "Subject": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"subject\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"subject\"]}') : skip",
+              "Description": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"description\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"description\"]}') : skip",
+              "Origin": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"origin\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"origin\"]}') : skip",
+              "query_field": {
+                "primary_key": "External_ID__c"
+              }
+            },
+            "extended_input_schema": [
+              {
+                "control_type": "text",
+                "custom": true,
+                "hint": "Search for  where External ID has this value. If a record already exists, it will be updated. Otherwise, a new record will be created",
+                "label": "External ID",
+                "name": "External_ID__c",
+                "optional": true,
+                "sticky": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Account ID",
+                "name": "AccountId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Asset ID",
+                "name": "AssetId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Case Origin",
+                "name": "Origin",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Origin\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Case Origin",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Origin"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Case Reason",
+                "name": "Reason",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Reason\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Case Reason",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Reason"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Case Source ID",
+                "name": "SourceId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Case Type",
+                "name": "Type",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Type\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Case Type",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Type"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Company",
+                "name": "SuppliedCompany",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Contact ID",
+                "name": "ContactId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text-area",
+                "custom": false,
+                "label": "Description",
+                "name": "Description",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Email Address",
+                "name": "SuppliedEmail",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "checkbox",
+                "custom": false,
+                "label": "Escalated",
+                "name": "IsEscalated",
+                "optional": true,
+                "toggle_field": {
+                  "label": "Escalated",
+                  "control_type": "text",
+                  "toggle_hint": "Use custom value",
+                  "render_input": null,
+                  "parse_output": null,
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "boolean",
+                  "name": "IsEscalated"
+                },
+                "toggle_hint": "Select from option list",
+                "type": "boolean",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text-area",
+                "custom": false,
+                "label": "Internal Comments",
+                "name": "Comments",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Name",
+                "name": "SuppliedName",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Owner ID",
+                "name": "OwnerId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Parent Case ID",
+                "name": "ParentId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Phone",
+                "name": "SuppliedPhone",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Priority",
+                "name": "Priority",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Priority\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Priority",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Priority"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Status",
+                "name": "Status",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Status\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Status",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Status"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Subject",
+                "name": "Subject",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Booking",
+                "name": "Booking__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Engineering Req Number",
+                "name": "EngineeringReqNumber__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Potential Liability",
+                "name": "PotentialLiability__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"PotentialLiability__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Potential Liability",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "PotentialLiability__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Product",
+                "name": "Product__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Product__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Product",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Product__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Room",
+                "name": "Room__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "SLA Violation",
+                "name": "SLAViolation__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"SLAViolation__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "SLA Violation",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "SLAViolation__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              }
+            ],
+            "uuid": "upsert-case-upsert-001"
+          },
+          {
+            "number": 3,
+            "provider": "salesforce",
+            "name": "get_custom_object",
+            "as": "get_case",
+            "keyword": "action",
+            "input": {
+              "sobject_name": "Case",
+              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"id\"]}')}"
+            },
+            "extended_output_schema": [
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: Account)",
+                "label": "Account ID",
+                "name": "AccountId",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "Account",
+                "join_point_label": "Account",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "fetch_with": "get_custom_object(AccountId>id, sobject_name: Account)",
+                "join_point": true,
+                "label": "Account",
+                "name": "get_custom_object+AccountId",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: Asset)",
+                "label": "Asset ID",
+                "name": "AssetId",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "Asset",
+                "join_point_label": "Asset",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "fetch_with": "get_custom_object(AssetId>id, sobject_name: Asset)",
+                "join_point": true,
+                "label": "Asset",
+                "name": "get_custom_object+AssetId",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Case ID",
+                "name": "Id",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Case Number",
+                "name": "CaseNumber",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Case Origin",
+                "name": "Origin",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Origin\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Case Origin",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Origin"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Case Reason",
+                "name": "Reason",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Reason\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Case Reason",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Reason"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: EmailMessage)",
+                "label": "Case Source ID",
+                "name": "SourceId",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "EmailMessage",
+                "join_point_label": "Case  source",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "fetch_with": "get_custom_object(SourceId>id, sobject_name: EmailMessage)",
+                "join_point": true,
+                "label": "Case  source",
+                "name": "get_custom_object+SourceId",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Case Type",
+                "name": "Type",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Type\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Case Type",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Type"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "checkbox",
+                "custom": false,
+                "label": "Closed",
+                "name": "IsClosed",
+                "optional": true,
+                "toggle_field": {
+                  "label": "Closed",
+                  "control_type": "text",
+                  "toggle_hint": "Use custom value",
+                  "render_input": null,
+                  "parse_output": null,
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": false,
+                  "sfdc_updateable": false,
+                  "type": "boolean",
+                  "name": "IsClosed"
+                },
+                "toggle_hint": "Select from option list",
+                "type": "boolean",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Closed Date",
+                "name": "ClosedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "type": "date_time",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Company",
+                "name": "SuppliedCompany",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Contact Email",
+                "name": "ContactEmail",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Contact Fax",
+                "name": "ContactFax",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: Contact)",
+                "label": "Contact ID",
+                "name": "ContactId",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "Contact",
+                "join_point_label": "Contact",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "fetch_with": "get_custom_object(ContactId>id, sobject_name: Contact)",
+                "join_point": true,
+                "label": "Contact",
+                "name": "get_custom_object+ContactId",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Contact Mobile",
+                "name": "ContactMobile",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Contact Phone",
+                "name": "ContactPhone",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: User)",
+                "label": "Created By ID",
+                "name": "CreatedById",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "User",
+                "join_point_label": "Created  by",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "fetch_with": "get_custom_object(CreatedById>id, sobject_name: User)",
+                "join_point": true,
+                "label": "Created  by",
+                "name": "get_custom_object+CreatedById",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Created Date",
+                "name": "CreatedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "type": "date_time",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "checkbox",
+                "custom": false,
+                "label": "Deleted",
+                "name": "IsDeleted",
+                "optional": true,
+                "toggle_field": {
+                  "label": "Deleted",
+                  "control_type": "text",
+                  "toggle_hint": "Use custom value",
+                  "render_input": null,
+                  "parse_output": null,
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": false,
+                  "sfdc_updateable": false,
+                  "type": "boolean",
+                  "name": "IsDeleted"
+                },
+                "toggle_hint": "Select from option list",
+                "type": "boolean",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "text-area",
+                "custom": false,
+                "label": "Description",
+                "name": "Description",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Email Address",
+                "name": "SuppliedEmail",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "checkbox",
+                "custom": false,
+                "label": "Escalated",
+                "name": "IsEscalated",
+                "optional": true,
+                "toggle_field": {
+                  "label": "Escalated",
+                  "control_type": "text",
+                  "toggle_hint": "Use custom value",
+                  "render_input": null,
+                  "parse_output": null,
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "boolean",
+                  "name": "IsEscalated"
+                },
+                "toggle_hint": "Select from option list",
+                "type": "boolean",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text-area",
+                "custom": false,
+                "label": "Internal Comments",
+                "name": "Comments",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: User)",
+                "label": "Last Modified By ID",
+                "name": "LastModifiedById",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "User",
+                "join_point_label": "Last  modified  by",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "fetch_with": "get_custom_object(LastModifiedById>id, sobject_name: User)",
+                "join_point": true,
+                "label": "Last  modified  by",
+                "name": "get_custom_object+LastModifiedById",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Last Modified Date",
+                "name": "LastModifiedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "type": "date_time",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Last Referenced Date",
+                "name": "LastReferencedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "type": "date_time",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Last Viewed Date",
+                "name": "LastViewedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "type": "date_time",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: Case)",
+                "label": "Master Record ID",
+                "name": "MasterRecordId",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "Case",
+                "join_point_label": "Master  record",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "fetch_with": "get_custom_object(MasterRecordId>id, sobject_name: Case)",
+                "join_point": true,
+                "label": "Master  record",
+                "name": "get_custom_object+MasterRecordId",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Name",
+                "name": "SuppliedName",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: Group)",
+                "label": "Owner ID",
+                "name": "OwnerId",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "Group",
+                "join_point_label": "Owner",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "fetch_with": "get_custom_object(OwnerId>id, sobject_name: Group)",
+                "join_point": true,
+                "label": "Owner",
+                "name": "get_custom_object+OwnerId",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "fetch_with": "get_custom_object(id, sobject_name: Case)",
+                "label": "Parent Case ID",
+                "name": "ParentId",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "Case",
+                "join_point_label": "Parent  case",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "fetch_with": "get_custom_object(ParentId>id, sobject_name: Case)",
+                "join_point": true,
+                "label": "Parent  case",
+                "name": "get_custom_object+ParentId",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Phone",
+                "name": "SuppliedPhone",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Priority",
+                "name": "Priority",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Priority\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Priority",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Priority"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Status",
+                "name": "Status",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Status\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Status",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Status"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Subject",
+                "name": "Subject",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "System Modstamp",
+                "name": "SystemModstamp",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "type": "date_time",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "fetch_with": "get_custom_object(id, sobject_name: Booking__c)",
+                "label": "Booking",
+                "name": "Booking__c",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "Booking__c",
+                "join_point_label": "Booking",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "fetch_with": "get_custom_object(Booking__c>id, sobject_name: Booking__c)",
+                "join_point": true,
+                "label": "Booking",
+                "name": "get_custom_object+Booking__c",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Engineering Req Number",
+                "name": "EngineeringReqNumber__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "External ID",
+                "name": "External_ID__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Potential Liability",
+                "name": "PotentialLiability__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"PotentialLiability__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Potential Liability",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "PotentialLiability__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Product",
+                "name": "Product__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"Product__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Product",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Product__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "fetch_with": "get_custom_object(id, sobject_name: Hotel_Room__c)",
+                "label": "Room",
+                "name": "Room__c",
+                "optional": true,
+                "type": "string",
+                "foreign_key": "Hotel_Room__c",
+                "join_point_label": "Room",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "fetch_with": "get_custom_object(Room__c>id, sobject_name: Hotel_Room__c)",
+                "join_point": true,
+                "label": "Room",
+                "name": "get_custom_object+Room__c",
+                "properties": [
+
+                ],
+                "type": "object"
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "SLA Violation",
+                "name": "SLAViolation__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Case\"",
+                  "field_name": "\"SLAViolation__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "SLA Violation",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "SLAViolation__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              }
+            ],
+            "uuid": "upsert-case-get-001"
+          },
+          {
+            "number": 4,
+            "provider": "workato_recipe_function",
+            "name": "return_result",
+            "as": "return_result",
+            "keyword": "action",
+            "toggleCfg": {
+              "result.created": true
+            },
+            "input": {
+              "result": {
+                "case_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"id\"]}')}",
+                "case_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"get_case\",\"path\":[\"CaseNumber\"]}')}",
+                "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"status\"]}')}",
+                "created": "true"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Case ID",
+                    "name": "case_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Case number",
+                    "name": "case_number",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Created",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "created",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Created",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "created",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Case ID",
+                    "name": "case_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Case number",
+                    "name": "case_number",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Created",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "created",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Created",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "created",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "upsert-case-return-001"
+          },
+          {
+            "number": 5,
+            "as": "upsert-case-catch-001",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 6,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"upsert-case-catch-001\",\"path\":[\"message\"]}')}",
+                  "user_logs_enabled": "false"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "upsert-case-log-001"
+              }
+            ],
+            "uuid": "upsert-case-catch-001"
+          }
+        ],
+        "uuid": "upsert-case-try-001"
+      }
+    ],
+    "uuid": "upsert-case-trigger-001",
+    "format_version": 2
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_recipe_function",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "salesforce",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "Workspace Connections/zt_dev_account.connection.json",
+        "name": "ZT Dev account",
+        "folder": "Workspace Connections"
+      }
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>View_Type__c</fullName>
+    <label>View Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>City</fullName>
+                <default>false</default>
+                <label>City</label>
+            </value>
+            <value>
+                <fullName>Ocean</fullName>
+                <default>false</default>
+                <label>Ocean</label>
+            </value>
+            <value>
+                <fullName>Garden</fullName>
+                <default>false</default>
+                <label>Garden</label>
+            </value>
+            <value>
+                <fullName>Mountain</fullName>
+                <default>false</default>
+                <label>Mountain</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

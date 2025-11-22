@@ -1,0 +1,1025 @@
+{
+  "name": "Upsert contact",
+  "version": 1,
+  "private": true,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_recipe_function",
+    "name": "execute",
+    "as": "trigger",
+    "keyword": "trigger",
+    "input": {
+      "parameters_schema_json": "[{\"name\":\"email\",\"label\":\"Email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Contact email (External ID)\"},{\"name\":\"first_name\",\"label\":\"First name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact first name\"},{\"name\":\"last_name\",\"label\":\"Last name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Contact last name (Salesforce required)\"},{\"name\":\"phone\",\"label\":\"Phone\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact phone number\"},{\"name\":\"contact_type\",\"label\":\"Contact type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact_Type__c picklist value\"},{\"name\":\"account_id\",\"label\":\"Account ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Salesforce Account.Id\"}]",
+      "result_schema_json": "[{\"name\":\"id\",\"label\":\"Contact ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"email\",\"label\":\"Email\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"created\",\"label\":\"Created\",\"type\":\"boolean\",\"control_type\":\"checkbox\"}]"
+    },
+    "extended_output_schema": [
+      {
+        "label": "Parameters",
+        "name": "parameters",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Email",
+            "name": "email",
+            "type": "string",
+            "optional": false,
+            "hint": "Contact email (External ID)"
+          },
+          {
+            "control_type": "text",
+            "label": "First name",
+            "name": "first_name",
+            "type": "string",
+            "optional": true,
+            "hint": "Contact first name"
+          },
+          {
+            "control_type": "text",
+            "label": "Last name",
+            "name": "last_name",
+            "type": "string",
+            "optional": false,
+            "hint": "Contact last name (Salesforce required)"
+          },
+          {
+            "control_type": "text",
+            "label": "Phone",
+            "name": "phone",
+            "type": "string",
+            "optional": true,
+            "hint": "Contact phone number"
+          },
+          {
+            "control_type": "text",
+            "label": "Contact type",
+            "name": "contact_type",
+            "type": "string",
+            "optional": true,
+            "hint": "Contact_Type__c picklist value"
+          },
+          {
+            "control_type": "text",
+            "label": "Account ID",
+            "name": "account_id",
+            "type": "string",
+            "optional": true,
+            "hint": "Salesforce Account.Id"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "provider": "salesforce",
+            "name": "upsert_sobject",
+            "as": "upsert_contact",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "sobject_name": "Contact",
+              "query_field.primary_key": [
+                {
+                  "label": "Unique Email",
+                  "value": "Unique_Email__c"
+                }
+              ]
+            },
+            "toggleCfg": {
+              "Contact_Type__c": false
+            },
+            "input": {
+              "sobject_name": "Contact",
+              "query_field": {
+                "primary_key": "Unique_Email__c"
+              },
+              "Unique_Email__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"email\"]}')}",
+              "Email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"email\"]}')}",
+              "FirstName": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"first_name\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"first_name\"]}') : skip",
+              "LastName": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"last_name\"]}')}",
+              "Phone": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"phone\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"phone\"]}') : skip",
+              "Contact_Type__c": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_type\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_type\"]}') : skip",
+              "AccountId": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"account_id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"account_id\"]}') : skip"
+            },
+            "extended_input_schema": [
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Last Name",
+                "name": "LastName",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "hint": "Search for  where Unique Email has this value. If a record already exists, it will be updated. Otherwise, a new record will be created",
+                "label": "Unique Email",
+                "name": "Unique_Email__c",
+                "optional": true,
+                "sticky": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Account ID",
+                "name": "AccountId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Assistant's Name",
+                "name": "AssistantName",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Asst. Phone",
+                "name": "AssistantPhone",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "date",
+                "custom": false,
+                "label": "Birthdate",
+                "name": "Birthdate",
+                "optional": true,
+                "parse_output": "parse_iso8601_date",
+                "type": "date_time",
+                "render_input": "render_iso8601_date",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Business Fax",
+                "name": "Fax",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Business Phone",
+                "name": "Phone",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Clean Status",
+                "name": "CleanStatus",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"CleanStatus\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Clean Status",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "CleanStatus"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text-area",
+                "custom": false,
+                "label": "Contact Description",
+                "name": "Description",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Creation Source",
+                "name": "ContactSource",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"ContactSource\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Creation Source",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "ContactSource"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Data.com Key",
+                "name": "Jigsaw",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Department",
+                "name": "Department",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Email",
+                "name": "Email",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Email Bounced Date",
+                "name": "EmailBouncedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "type": "date_time",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Email Bounced Reason",
+                "name": "EmailBouncedReason",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "First Name",
+                "name": "FirstName",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Home Phone",
+                "name": "HomePhone",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Individual ID",
+                "name": "IndividualId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Lead Source",
+                "name": "LeadSource",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"LeadSource\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Lead Source",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "LeadSource"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Mailing City",
+                "name": "MailingCity",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Mailing Country",
+                "name": "MailingCountry",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Mailing Country Code",
+                "name": "MailingCountryCode",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"MailingCountryCode\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Mailing Country Code",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "MailingCountryCode"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Mailing Geocode Accuracy",
+                "name": "MailingGeocodeAccuracy",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"MailingGeocodeAccuracy\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Mailing Geocode Accuracy",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "MailingGeocodeAccuracy"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "number",
+                "custom": false,
+                "label": "Mailing Latitude",
+                "name": "MailingLatitude",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "type": "number",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "number",
+                "custom": false,
+                "label": "Mailing Longitude",
+                "name": "MailingLongitude",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "type": "number",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Mailing State/Province",
+                "name": "MailingState",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Mailing State/Province Code",
+                "name": "MailingStateCode",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"MailingStateCode\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Mailing State/Province Code",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "MailingStateCode"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text-area",
+                "custom": false,
+                "label": "Mailing Street",
+                "name": "MailingStreet",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Mailing Zip/Postal Code",
+                "name": "MailingPostalCode",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Mobile Phone",
+                "name": "MobilePhone",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Other City",
+                "name": "OtherCity",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Other Country",
+                "name": "OtherCountry",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Other Country Code",
+                "name": "OtherCountryCode",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"OtherCountryCode\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Other Country Code",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "OtherCountryCode"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Other Geocode Accuracy",
+                "name": "OtherGeocodeAccuracy",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"OtherGeocodeAccuracy\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Other Geocode Accuracy",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "OtherGeocodeAccuracy"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "number",
+                "custom": false,
+                "label": "Other Latitude",
+                "name": "OtherLatitude",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "type": "number",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "number",
+                "custom": false,
+                "label": "Other Longitude",
+                "name": "OtherLongitude",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "type": "number",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "phone",
+                "custom": false,
+                "label": "Other Phone",
+                "name": "OtherPhone",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Other State/Province",
+                "name": "OtherState",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Other State/Province Code",
+                "name": "OtherStateCode",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"OtherStateCode\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Other State/Province Code",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "OtherStateCode"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text-area",
+                "custom": false,
+                "label": "Other Street",
+                "name": "OtherStreet",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Other Zip/Postal Code",
+                "name": "OtherPostalCode",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Owner ID",
+                "name": "OwnerId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Reports To ID",
+                "name": "ReportsToId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": false,
+                "label": "Salutation",
+                "name": "Salutation",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"Salutation\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Salutation",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": false,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Salutation"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Title",
+                "name": "Title",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Contact Type",
+                "name": "Contact_Type__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"Contact_Type__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Contact Type",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Contact_Type__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Employee ID",
+                "name": "Employee_ID__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Languages",
+                "name": "Languages__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Level",
+                "name": "Level__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"Level__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Level",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Level__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Loyalty Number",
+                "name": "Loyalty_Number__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Preferred Contact Method",
+                "name": "Preferred_Contact_Method__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Contact\"",
+                  "field_name": "\"Preferred_Contact_Method__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Preferred Contact Method",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Preferred_Contact_Method__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              }
+            ],
+            "uuid": "create-contact-upsert-001"
+          },
+          {
+            "number": 3,
+            "provider": "workato_recipe_function",
+            "name": "return_result",
+            "as": "return_result",
+            "keyword": "action",
+            "toggleCfg": {
+              "result.created": true
+            },
+            "input": {
+              "result": {
+                "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_contact\",\"path\":[\"id\"]}')}",
+                "email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"email\"]}')}",
+                "created": "true"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Contact ID",
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "name": "email",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Created",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "created",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Created",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "created",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Contact ID",
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "name": "email",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Created",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "created",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Created",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "created",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "create-contact-return-001"
+          },
+          {
+            "number": 4,
+            "as": "create-contact-catch-001",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 5,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-contact-catch-001\",\"path\":[\"message\"]}')}",
+                  "user_logs_enabled": "false"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "create-contact-log-001"
+              }
+            ],
+            "uuid": "create-contact-catch-001"
+          }
+        ],
+        "uuid": "create-contact-try-001"
+      }
+    ],
+    "uuid": "create-contact-trigger-001",
+    "format_version": 2
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_recipe_function",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "salesforce",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "Workspace Connections/zt_dev_account.connection.json",
+        "name": "ZT Dev account",
+        "folder": "Workspace Connections"
+      }
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}

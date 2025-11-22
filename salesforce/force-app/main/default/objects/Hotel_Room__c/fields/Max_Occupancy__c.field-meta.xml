@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Max_Occupancy__c</fullName>
+    <label>Max Occupancy</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <precision>1</precision>
+    <scale>0</scale>
+</CustomField>

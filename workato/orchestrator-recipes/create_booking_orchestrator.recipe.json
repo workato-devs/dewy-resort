@@ -1,0 +1,2796 @@
+{
+  "name": "Create booking orchestrator",
+  "version": 1,
+  "private": true,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_api_platform",
+    "name": "receive_request",
+    "as": "trigger",
+    "keyword": "trigger",
+    "dynamicPickListSelection": {
+      "response.responses.0.http_status_code": "201 - Created",
+      "response.responses.1.http_status_code": "400 - Bad Request",
+      "response.responses.2.http_status_code": "409 - Conflict",
+      "response.responses.3.http_status_code": "500 - Internal Server Error"
+    },
+    "toggleCfg": {
+      "response.responses.0.http_status_code": true,
+      "response.responses.1.http_status_code": true,
+      "response.responses.2.http_status_code": true,
+      "response.responses.3.http_status_code": true
+    },
+    "input": {
+      "request": {
+        "content_type": "json",
+        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest email address\"},{\"name\":\"guest_first_name\",\"label\":\"Guest first name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest first name\"},{\"name\":\"guest_last_name\",\"label\":\"Guest last name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest last name\"},{\"name\":\"guest_phone\",\"label\":\"Guest phone\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Guest phone number\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Hotel room number\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":false,\"hint\":\"Guest arrival date (ISO 8601)\"},{\"name\":\"check_out_date\",\"label\":\"Check-out date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":false,\"hint\":\"Guest departure date (ISO 8601)\"},{\"name\":\"number_of_guests\",\"label\":\"Number of guests\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Total guests in party (default: 1)\"},{\"name\":\"special_requests\",\"label\":\"Special requests\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Guest requests or notes\"},{\"name\":\"booking_external_id\",\"label\":\"Booking External ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Idempotency token for Booking__c.External_ID__c (UUID)\"}]"
+      },
+      "response": {
+        "content_type": "json",
+        "responses": [
+          {
+            "name": "Success",
+            "http_status_code": "201",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_id\",\"label\":\"Room ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_type\",\"label\":\"Room type\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"floor\",\"label\":\"Floor\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"check_out_date\",\"label\":\"Check-out date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"total_nights\",\"label\":\"Total nights\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"guest_id\",\"label\":\"Guest ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"guest_name\",\"label\":\"Guest name\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"created_at\",\"label\":\"Created at\",\"type\":\"date_time\",\"control_type\":\"date_time\"}]"
+          },
+          {
+            "name": "Bad Request",
+            "http_status_code": "400",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"details\",\"label\":\"Details\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Conflict",
+            "http_status_code": "409",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"details\",\"label\":\"Details\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Server Error",
+            "http_status_code": "500",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"details\",\"label\":\"Details\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          }
+        ]
+      }
+    },
+    "extended_output_schema": [
+      {
+        "label": "Context",
+        "name": "context",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Calling IP address",
+            "optional": true,
+            "type": "string",
+            "name": "calling_ip"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "integer",
+                "label": "Access profile ID",
+                "parse_output": "integer_conversion",
+                "optional": true,
+                "type": "integer",
+                "name": "id"
+              },
+              {
+                "control_type": "text",
+                "label": "Access profile name",
+                "optional": true,
+                "type": "string",
+                "name": "name"
+              },
+              {
+                "control_type": "text",
+                "label": "Access profile authentication type",
+                "optional": true,
+                "type": "string",
+                "name": "type"
+              }
+            ],
+            "label": "Access profile",
+            "type": "object",
+            "name": "access_profile"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "text",
+                "label": "API client ID",
+                "optional": true,
+                "type": "string",
+                "name": "id"
+              },
+              {
+                "control_type": "text",
+                "label": "API client name",
+                "optional": true,
+                "type": "string",
+                "name": "name"
+              }
+            ],
+            "label": "API client",
+            "type": "object",
+            "name": "client"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "integer",
+                "label": "Issued At",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "iat"
+              },
+              {
+                "control_type": "integer",
+                "label": "Not Before",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "nbf"
+              },
+              {
+                "control_type": "integer",
+                "label": "Expiration Time",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "exp"
+              },
+              {
+                "control_type": "text",
+                "label": "Audience",
+                "optional": true,
+                "type": "string",
+                "name": "aud"
+              },
+              {
+                "control_type": "text",
+                "label": "JWT ID",
+                "optional": true,
+                "type": "string",
+                "name": "jti"
+              },
+              {
+                "control_type": "text",
+                "label": "Issuer",
+                "optional": true,
+                "type": "string",
+                "name": "iss"
+              }
+            ],
+            "label": "JWT claims",
+            "type": "object",
+            "name": "jwt_payload"
+          },
+          {
+            "properties": [
+              {
+                "properties": [
+                  {
+                    "control_type": "checkbox",
+                    "label": "Active",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Active",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "optional": true,
+                      "type": "boolean",
+                      "name": "active"
+                    },
+                    "type": "boolean",
+                    "name": "active"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Scope",
+                    "optional": true,
+                    "type": "string",
+                    "name": "scope"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Client ID",
+                    "optional": true,
+                    "type": "string",
+                    "name": "client_id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Username",
+                    "optional": true,
+                    "type": "string",
+                    "name": "username"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Token type",
+                    "optional": true,
+                    "type": "string",
+                    "name": "token_type"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Exp",
+                    "optional": true,
+                    "type": "string",
+                    "name": "exp"
+                  }
+                ],
+                "label": "Response Body",
+                "type": "object",
+                "name": "payload"
+              }
+            ],
+            "label": "Token introspection",
+            "type": "object",
+            "name": "introspect"
+          }
+        ],
+        "type": "object"
+      },
+      {
+        "label": "Request parameters",
+        "name": "request",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Guest email",
+            "name": "guest_email",
+            "type": "string",
+            "optional": false,
+            "hint": "Guest email address"
+          },
+          {
+            "control_type": "text",
+            "label": "Guest first name",
+            "name": "guest_first_name",
+            "type": "string",
+            "optional": false,
+            "hint": "Guest first name"
+          },
+          {
+            "control_type": "text",
+            "label": "Guest last name",
+            "name": "guest_last_name",
+            "type": "string",
+            "optional": false,
+            "hint": "Guest last name"
+          },
+          {
+            "control_type": "text",
+            "label": "Guest phone",
+            "name": "guest_phone",
+            "type": "string",
+            "optional": true,
+            "hint": "Guest phone number"
+          },
+          {
+            "control_type": "text",
+            "label": "Room number",
+            "name": "room_number",
+            "type": "string",
+            "optional": false,
+            "hint": "Hotel room number"
+          },
+          {
+            "control_type": "date",
+            "label": "Check-in date",
+            "render_input": "date_conversion",
+            "parse_output": "date_conversion",
+            "name": "check_in_date",
+            "type": "date",
+            "optional": false,
+            "hint": "Guest arrival date (ISO 8601)"
+          },
+          {
+            "control_type": "date",
+            "label": "Check-out date",
+            "render_input": "date_conversion",
+            "parse_output": "date_conversion",
+            "name": "check_out_date",
+            "type": "date",
+            "optional": false,
+            "hint": "Guest departure date (ISO 8601)"
+          },
+          {
+            "control_type": "number",
+            "label": "Number of guests",
+            "parse_output": "float_conversion",
+            "name": "number_of_guests",
+            "type": "number",
+            "optional": true,
+            "hint": "Total guests in party (default: 1)"
+          },
+          {
+            "control_type": "text",
+            "label": "Special requests",
+            "name": "special_requests",
+            "type": "string",
+            "optional": true,
+            "hint": "Guest requests or notes"
+          },
+          {
+            "control_type": "text",
+            "label": "Booking External ID",
+            "name": "booking_external_id",
+            "type": "string",
+            "optional": true,
+            "hint": "Idempotency token for Booking__c.External_ID__c (UUID)"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "or",
+              "conditions": [
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"booking_external_id\"]}')}",
+                  "uuid": "external-id-missing-cond"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_first_name\"]}')}",
+                  "rhs": "",
+                  "uuid": "a06963e7-1af5-468b-a18e-bccfeb6129b9"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_last_name\"]}')}",
+                  "rhs": "",
+                  "uuid": "cb4e21b6-3fd2-49ef-b75a-8cce144e4cba"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}",
+                  "rhs": "",
+                  "uuid": "fd06d701-935a-4f47-9dce-52008c3bb860"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 3,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_external_id_missing",
+                "keyword": "action",
+                "toggleCfg": {
+                  "response.success": true
+                },
+                "input": {
+                  "http_status_code": "400",
+                  "response": {
+                    "error_code": "REQUIRED_FIELDS_MISSING",
+                    "error_message": "Booking External ID, Guest Email, First/Last Name required",
+                    "details": "Provide a unique UUID for Booking__c.External_ID__c to ensure safe retries, as well as mandatory contact fields",
+                    "success": "false"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-ext-id-missing-001"
+              }
+            ],
+            "uuid": "if-external-id-missing-001"
+          },
+          {
+            "number": 4,
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
+            "as": "call_search_contact",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "flow_id": "Search contact by email"
+            },
+            "input": {
+              "flow_id": {
+                "name": "Upsert case",
+                "folder": "atomic-salesforce-recipes",
+                "folder_full_path": "Home/atomic-salesforce-recipes"
+              },
+              "parameters": {
+                "email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Contact ID",
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "name": "email",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "First name",
+                    "name": "first_name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Last name",
+                    "name": "last_name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Contact type",
+                    "name": "contact_type",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Found",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "found",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Found",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "found",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "name": "email",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Contact email address to search for"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "search-contact-001"
+          },
+          {
+            "number": 5,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"found\"]}')}",
+                  "rhs": "",
+                  "uuid": "7ef144ae-412e-4c75-b9e2-5bdd64ec6271"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 6,
+                "provider": "workato_recipe_function",
+                "name": "call_recipe",
+                "as": "2a511209",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "flow_id": "Create contact"
+                },
+                "input": {
+                  "flow_id": {
+                    "name": "Upsert case",
+                    "folder": "atomic-salesforce-recipes",
+                    "folder_full_path": "Home/atomic-salesforce-recipes"
+                  },
+                  "parameters": {
+                    "email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}",
+                    "last_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_last_name\"]}')}",
+                    "first_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_first_name\"]}')}",
+                    "phone": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_phone\"]}')}",
+                    "contact_type": "Guest"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Contact ID",
+                        "name": "id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Email",
+                        "name": "email",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Created",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "created",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Created",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "created",
+                          "type": "boolean"
+                        }
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Parameters",
+                    "name": "parameters",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Email",
+                        "name": "email",
+                        "type": "string",
+                        "optional": false,
+                        "hint": "Contact email (External ID)"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "First name",
+                        "name": "first_name",
+                        "type": "string",
+                        "optional": true,
+                        "hint": "Contact first name"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Last name",
+                        "name": "last_name",
+                        "type": "string",
+                        "optional": false,
+                        "hint": "Contact last name (Salesforce required)"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Phone",
+                        "name": "phone",
+                        "type": "string",
+                        "optional": true,
+                        "hint": "Contact phone number"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Contact type",
+                        "name": "contact_type",
+                        "type": "string",
+                        "optional": true,
+                        "hint": "Contact_Type__c picklist value"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Account ID",
+                        "name": "account_id",
+                        "type": "string",
+                        "optional": true,
+                        "hint": "Salesforce Account.Id"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "visible_config_fields": [
+                  "flow_id",
+                  "parameters.contact_type",
+                  "parameters.phone",
+                  "parameters.first_name"
+                ],
+                "uuid": "a72890e3-58d6-4ccf-acf6-2476ceaf94d1"
+              },
+              {
+                "number": 7,
+                "keyword": "if",
+                "input": {
+                  "type": "compound",
+                  "operand": "and",
+                  "conditions": [
+                    {
+                      "operand": "blank",
+                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"2a511209\",\"path\":[\"result\",\"id\"]}')}",
+                      "rhs": "",
+                      "uuid": "91075960-c5cf-4bf0-992a-42ad0ba02d80"
+                    }
+                  ]
+                },
+                "block": [
+                  {
+                    "number": 8,
+                    "provider": "workato_api_platform",
+                    "name": "return_response",
+                    "as": "a9d0c738",
+                    "keyword": "action",
+                    "toggleCfg": {
+                      "response.success": true
+                    },
+                    "input": {
+                      "http_status_code": "400",
+                      "response": {
+                        "success": "false",
+                        "error_code": "SALESFORCE_ERROR",
+                        "error_message": "='ERROR CREATING CONTACT FOR ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}') + 'NO CONTACT CREATED'",
+                        "details": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"job_id\"]}') + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"job_url\"]}')"
+                      }
+                    },
+                    "extended_output_schema": [
+                      {
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "Success",
+                            "201"
+                          ],
+                          [
+                            "Bad Request",
+                            "400"
+                          ],
+                          [
+                            "Conflict",
+                            "409"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "label": "Response body",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "checkbox",
+                            "label": "Success",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "success",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Success",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "success",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error code",
+                            "name": "error_code",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error message",
+                            "name": "error_message",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Details",
+                            "name": "details",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "Success",
+                            "201"
+                          ],
+                          [
+                            "Bad Request",
+                            "400"
+                          ],
+                          [
+                            "Conflict",
+                            "409"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "label": "Response body",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "checkbox",
+                            "label": "Success",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "success",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Success",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "success",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error code",
+                            "name": "error_code",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error message",
+                            "name": "error_message",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Details",
+                            "name": "details",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "uuid": "6b42ebc3-b5c7-48ad-9e43-abcabccc0b5c"
+                  }
+                ],
+                "uuid": "4eccd9bf-ede3-4a6f-818f-9ae5679cf02b"
+              }
+            ],
+            "uuid": "05ccd78a-3a0a-48e7-b412-6605d5f0e278"
+          },
+          {
+            "number": 9,
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
+            "as": "call_search_room",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "flow_id": "Search room by number"
+            },
+            "input": {
+              "flow_id": {
+                "name": "Upsert case",
+                "folder": "atomic-salesforce-recipes",
+                "folder_full_path": "Home/atomic-salesforce-recipes"
+              },
+              "parameters": {
+                "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}')}"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room number",
+                    "name": "room_number",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room type",
+                    "name": "room_type",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Floor",
+                    "parse_output": "float_conversion",
+                    "name": "floor",
+                    "type": "number"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Found",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "found",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Found",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "found",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Room number",
+                    "name": "room_number",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Hotel room number (Name field)"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "search-room-001"
+          },
+          {
+            "number": 10,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "is_not_true",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_room\",\"path\":[\"result\",\"found\"]}')}",
+                  "rhs": "",
+                  "uuid": "4ca0d103-68a2-4c6b-b10e-36404a3435e2"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 11,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_room_not_found",
+                "keyword": "action",
+                "toggleCfg": {
+                  "response.success": true
+                },
+                "input": {
+                  "http_status_code": "400",
+                  "response": {
+                    "success": "false",
+                    "error_code": "ROOM_NOT_FOUND",
+                    "error_message": "='Room ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}') + ' does not exist'",
+                    "details": "='room_number: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}')"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "0d4d0e39-27c1-47a7-8584-0fad5af48154"
+              }
+            ],
+            "uuid": "d91e0026-33f6-4f55-b800-7ff552f37f4f"
+          },
+          {
+            "number": 12,
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
+            "as": "call_search_conflicts",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "flow_id": "Search bookings by room and dates"
+            },
+            "input": {
+              "flow_id": {
+                "name": "Upsert case",
+                "folder": "atomic-salesforce-recipes",
+                "folder_full_path": "Home/atomic-salesforce-recipes"
+              },
+              "parameters": {
+                "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}')}",
+                "check_in_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}')}",
+                "check_out_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_out_date\"]}')}"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "label": "Conflicts",
+                    "name": "conflicts",
+                    "type": "array",
+                    "of": "object",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Booking ID",
+                        "name": "booking_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Booking number",
+                        "name": "booking_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "date",
+                        "label": "Check-in date",
+                        "render_input": "date_conversion",
+                        "parse_output": "date_conversion",
+                        "name": "check_in_date",
+                        "type": "date"
+                      },
+                      {
+                        "control_type": "date",
+                        "label": "Check-out date",
+                        "render_input": "date_conversion",
+                        "parse_output": "date_conversion",
+                        "name": "check_out_date",
+                        "type": "date"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Guest name",
+                        "name": "guest_name",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Has conflicts",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "has_conflicts",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Has conflicts",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "has_conflicts",
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Conflict count",
+                    "parse_output": "float_conversion",
+                    "name": "conflict_count",
+                    "type": "number"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Room number",
+                    "name": "room_number",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Hotel room number"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-in date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_in_date",
+                    "type": "date",
+                    "optional": false,
+                    "hint": "Requested arrival date (ISO 8601)"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-out date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_out_date",
+                    "type": "date",
+                    "optional": false,
+                    "hint": "Requested departure date (ISO 8601)"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "search-conflicts-001"
+          },
+          {
+            "number": 13,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "is_true",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_conflicts\",\"path\":[\"result\",\"has_conflicts\"]}')}",
+                  "uuid": "has-conflicts-cond"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 14,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_room_booked",
+                "keyword": "action",
+                "toggleCfg": {
+                  "response.success": true
+                },
+                "input": {
+                  "http_status_code": "409",
+                  "response": {
+                    "success": "false",
+                    "error_code": "ROOM_ALREADY_BOOKED",
+                    "error_message": "='Room ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}') + ' is already booked for overlapping dates'",
+                    "details": "='room_number: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}') + ', requested: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}') + ' to ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_out_date\"]}')"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-room-booked-001"
+              }
+            ],
+            "uuid": "if-has-conflicts-001"
+          },
+          {
+            "number": 15,
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
+            "as": "call_create_opportunity",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "flow_id": "Create opportunity"
+            },
+            "input": {
+              "flow_id": {
+                "name": "Upsert case",
+                "folder": "atomic-salesforce-recipes",
+                "folder_full_path": "Home/atomic-salesforce-recipes"
+              },
+              "parameters": {
+                "contact_email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}",
+                "stage_name": "Booking Confirmed",
+                "close_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}')}"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Name",
+                    "name": "name",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Stage name",
+                    "name": "stage_name",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Close date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "close_date",
+                    "type": "date",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Amount",
+                    "parse_output": "float_conversion",
+                    "name": "amount",
+                    "type": "number",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "date_time",
+                    "label": "Created at",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "name": "created_at",
+                    "type": "date_time",
+                    "optional": true
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Contact email",
+                    "name": "contact_email",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Contact email address (business identifier)"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Stage name",
+                    "name": "stage_name",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Opportunity.StageName picklist value"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Close date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "close_date",
+                    "type": "date",
+                    "optional": false,
+                    "hint": "Opportunity close date (typically check-in date)"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Amount",
+                    "parse_output": "float_conversion",
+                    "name": "amount",
+                    "type": "number",
+                    "optional": true,
+                    "hint": "Opportunity amount (optional)"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity type",
+                    "name": "opportunity_type",
+                    "type": "string",
+                    "optional": true,
+                    "hint": "Opportunity.Type picklist value"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "create-opportunity-001"
+          },
+          {
+            "number": 16,
+            "provider": "logger",
+            "name": "log_message",
+            "as": "edeafce3",
+            "keyword": "action",
+            "input": {
+              "user_logs_enabled": "false",
+              "message": "=\"Opportunity info from child:\" + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_opportunity\",\"path\":[\"result\",\"opportunity_id\"]}')"
+            },
+            "extended_input_schema": [
+              {
+                "control_type": "switch",
+                "default": false,
+                "disable_formula": true,
+                "extends_schema": true,
+                "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                "label": "Send to Workato log service",
+                "name": "user_logs_enabled",
+                "optional": true,
+                "type": "string"
+              }
+            ],
+            "uuid": "37f03276-27db-4c57-8516-e4e507ca321d"
+          },
+          {
+            "number": 17,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_opportunity\",\"path\":[\"result\",\"opportunity_id\"]}')}",
+                  "rhs": "",
+                  "uuid": "9794ddb5-e8d8-428c-94f5-72dbae3e6d00"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 18,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "903a72a9",
+                "keyword": "action",
+                "toggleCfg": {
+                  "response.success": true
+                },
+                "input": {
+                  "http_status_code": "400",
+                  "response": {
+                    "success": "false",
+                    "error_code": "SALESFORCE_ERROR",
+                    "error_message": "='ERROR CREATING OPPORTUNITY FOR ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')",
+                    "details": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_opportunity\",\"path\":[\"job_id\"]}') + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_opportunity\",\"path\":[\"job_url\"]}')"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "7e4fdf82-b6ac-4b26-a696-2831e240e19b"
+              }
+            ],
+            "uuid": "127e3327-357b-4044-98ca-58c04dbcf74d"
+          },
+          {
+            "number": 19,
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
+            "as": "call_upsert_booking",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "flow_id": "Upsert booking"
+            },
+            "input": {
+              "flow_id": {
+                "name": "Upsert case",
+                "folder": "atomic-salesforce-recipes",
+                "folder_full_path": "Home/atomic-salesforce-recipes"
+              },
+              "parameters": {
+                "external_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"booking_external_id\"]}')}",
+                "opportunity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_opportunity\",\"path\":[\"result\",\"opportunity_id\"]}')",
+                "contact_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}') : _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"2a511209\",\"path\":[\"result\",\"id\"]}')",
+                "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_room\",\"path\":[\"result\",\"id\"]}')}",
+                "check_in_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}')}",
+                "check_out_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_out_date\"]}')}",
+                "number_of_guests": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"number_of_guests\"]}')}",
+                "special_requests": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"special_requests\"]}')}"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Booking ID",
+                    "name": "booking_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Booking number",
+                    "name": "booking_number",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "room_id",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Contact ID",
+                    "name": "contact_id",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-in date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_in_date",
+                    "type": "date",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-out date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_out_date",
+                    "type": "date",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Total nights",
+                    "parse_output": "float_conversion",
+                    "name": "total_nights",
+                    "type": "number",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string",
+                    "optional": true
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Created",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "created",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Created",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "created",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "External ID",
+                    "name": "external_id",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Idempotency token (UUID) - Upsert key"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string",
+                    "optional": true,
+                    "hint": "Salesforce Opportunity.Id (parent record)"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Contact ID",
+                    "name": "contact_id",
+                    "type": "string",
+                    "optional": true,
+                    "hint": "Salesforce Contact.Id (primary guest)"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "room_id",
+                    "type": "string",
+                    "optional": true,
+                    "hint": "Salesforce Hotel_Room__c.Id"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-in date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_in_date",
+                    "type": "date",
+                    "optional": true,
+                    "hint": "Guest arrival date (ISO 8601)"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-out date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_out_date",
+                    "type": "date",
+                    "optional": true,
+                    "hint": "Guest departure date (ISO 8601)"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Number of guests",
+                    "parse_output": "float_conversion",
+                    "name": "number_of_guests",
+                    "type": "number",
+                    "optional": true,
+                    "hint": "Party size (default: 1)"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Special requests",
+                    "name": "special_requests",
+                    "type": "string",
+                    "optional": true,
+                    "hint": "Guest requests or notes"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "upsert-booking-001"
+          },
+          {
+            "number": 20,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"result\",\"booking_id\"]}')}",
+                  "rhs": "",
+                  "uuid": "a425c19e-65ed-402d-89ab-2718761f00b5"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 21,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "e2d69693",
+                "keyword": "action",
+                "toggleCfg": {
+                  "response.success": true
+                },
+                "input": {
+                  "http_status_code": "400",
+                  "response": {
+                    "success": "false",
+                    "error_code": "SALESFORCE_ERROR",
+                    "error_message": "='ERROR CREATING BOOKING FOR ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')",
+                    "details": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"job_id\"]}') + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"job_url\"]}')"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "51f08342-58b8-43d0-8dfc-13e70ecba6e9"
+              }
+            ],
+            "uuid": "b39b0207-6366-4b3c-b1b0-7c8a5e34876b"
+          },
+          {
+            "number": 22,
+            "provider": "workato_api_platform",
+            "name": "return_response",
+            "as": "return_success",
+            "keyword": "action",
+            "toggleCfg": {
+              "response.success": true
+            },
+            "input": {
+              "http_status_code": "201",
+              "response": {
+                "success": "true",
+                "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_opportunity\",\"path\":[\"result\",\"opportunity_id\"]}')}",
+                "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"result\",\"booking_id\"]}')}",
+                "booking_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"result\",\"booking_number\"]}')}",
+                "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_room\",\"path\":[\"result\",\"id\"]}')}",
+                "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_room\",\"path\":[\"result\",\"room_number\"]}')}",
+                "room_type": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_room\",\"path\":[\"result\",\"room_type\"]}')}",
+                "floor": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_room\",\"path\":[\"result\",\"floor\"]}')}",
+                "check_in_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}')}",
+                "check_out_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_out_date\"]}')}",
+                "total_nights": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"result\",\"total_nights\"]}')}",
+                "guest_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}') : _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"2a511209\",\"path\":[\"result\",\"id\"]}')",
+                "guest_name": " #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_first_name\"]}')} #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_last_name\"]}')}",
+                "guest_email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}",
+                "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"result\",\"status\"]}')}",
+                "created_at": "=now"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "change_on_blur": true,
+                "control_type": "select",
+                "extends_schema": true,
+                "label": "Response",
+                "name": "http_status_code",
+                "pick_list": [
+                  [
+                    "Success",
+                    "201"
+                  ],
+                  [
+                    "Bad Request",
+                    "400"
+                  ],
+                  [
+                    "Conflict",
+                    "409"
+                  ],
+                  [
+                    "Server Error",
+                    "500"
+                  ]
+                ],
+                "type": "string"
+              },
+              {
+                "label": "Response body",
+                "name": "response",
+                "properties": [
+                  {
+                    "control_type": "checkbox",
+                    "label": "Success",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "success",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Success",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "success",
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Booking ID",
+                    "name": "booking_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Booking number",
+                    "name": "booking_number",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "room_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room number",
+                    "name": "room_number",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room type",
+                    "name": "room_type",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Floor",
+                    "parse_output": "float_conversion",
+                    "name": "floor",
+                    "type": "number"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-in date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_in_date",
+                    "type": "date"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-out date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_out_date",
+                    "type": "date"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Total nights",
+                    "parse_output": "float_conversion",
+                    "name": "total_nights",
+                    "type": "number"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Guest ID",
+                    "name": "guest_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Guest name",
+                    "name": "guest_name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Guest email",
+                    "name": "guest_email",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "date_time",
+                    "label": "Created at",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "name": "created_at",
+                    "type": "date_time"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "change_on_blur": true,
+                "control_type": "select",
+                "extends_schema": true,
+                "label": "Response",
+                "name": "http_status_code",
+                "pick_list": [
+                  [
+                    "Success",
+                    "201"
+                  ],
+                  [
+                    "Bad Request",
+                    "400"
+                  ],
+                  [
+                    "Conflict",
+                    "409"
+                  ],
+                  [
+                    "Server Error",
+                    "500"
+                  ]
+                ],
+                "type": "string"
+              },
+              {
+                "label": "Response body",
+                "name": "response",
+                "properties": [
+                  {
+                    "control_type": "checkbox",
+                    "label": "Success",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "success",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Success",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "success",
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Booking ID",
+                    "name": "booking_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Booking number",
+                    "name": "booking_number",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "room_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room number",
+                    "name": "room_number",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Room type",
+                    "name": "room_type",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Floor",
+                    "parse_output": "float_conversion",
+                    "name": "floor",
+                    "type": "number"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-in date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_in_date",
+                    "type": "date"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Check-out date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "check_out_date",
+                    "type": "date"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Total nights",
+                    "parse_output": "float_conversion",
+                    "name": "total_nights",
+                    "type": "number"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Guest ID",
+                    "name": "guest_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Guest name",
+                    "name": "guest_name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Guest email",
+                    "name": "guest_email",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "date_time",
+                    "label": "Created at",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "name": "created_at",
+                    "type": "date_time"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "return-success-001"
+          },
+          {
+            "number": 23,
+            "as": "create-booking-catch-001",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 24,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "='Failed to create booking for guest ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}') + ', room ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}') + ': ' + _dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-booking-catch-001\",\"path\":[\"message\"]}')",
+                  "user_logs_enabled": "false"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "log-error-001"
+              },
+              {
+                "number": 25,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_error",
+                "keyword": "action",
+                "toggleCfg": {
+                  "response.success": true
+                },
+                "input": {
+                  "http_status_code": "500",
+                  "response": {
+                    "success": "false",
+                    "error_code": "SALESFORCE_ERROR",
+                    "error_message": "='Failed to create booking: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-booking-catch-001\",\"path\":[\"message\"]}')",
+                    "details": "='guest_email: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}') + ', room_number: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}')"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "201"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Conflict",
+                        "409"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-error-001"
+              }
+            ],
+            "uuid": "create-booking-catch-001"
+          }
+        ],
+        "uuid": "create-booking-try-001"
+      }
+    ],
+    "uuid": "create-booking-trigger-001",
+    "format_version": 2
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_api_platform",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "workato_recipe_function",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_Guest__c</fullName>
+    <label>Current Guest</label>
+    <description>Contact ID of the guest currently occupying this room. Set on check-in, cleared on checkout. Null when room is vacant.</description>
+    <referenceTo>Contact</referenceTo>
+    <relationshipLabel>Current Room</relationshipLabel>
+    <relationshipName>Current_Room</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+    <deleteConstraint>SetNull</deleteConstraint>
+</CustomField>

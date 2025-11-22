@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <label>Status</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Vacant</fullName>
+                <default>true</default>
+                <label>Vacant</label>
+            </value>
+            <value>
+                <fullName>Occupied</fullName>
+                <default>false</default>
+                <label>Occupied</label>
+            </value>
+            <value>
+                <fullName>Cleaning</fullName>
+                <default>false</default>
+                <label>Cleaning</label>
+            </value>
+            <value>
+                <fullName>Maintenance</fullName>
+                <default>false</default>
+                <label>Maintenance</label>
+            </value>
+            <value>
+                <fullName>Out of Service</fullName>
+                <default>false</default>
+                <label>Out of Service</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

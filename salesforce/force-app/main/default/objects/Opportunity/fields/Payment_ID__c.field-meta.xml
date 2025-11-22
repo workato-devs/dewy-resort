@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Payment_ID__c</fullName>
+    <label>Payment ID</label>
+    <description>Stripe charge ID for payment reconciliation. Format: ch_XXXXXXXXXXXXXXX. Updated when payment is successfully processed during checkout. External ID for faster lookups.</description>
+    <externalId>true</externalId>
+    <length>100</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

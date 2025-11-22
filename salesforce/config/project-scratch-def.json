@@ -1,0 +1,33 @@
+{
+  "orgName": "Dewy Resort Hotel Demo",
+  "edition": "Developer",
+  "features": ["API", "AuthorApex", "ContactsToMultipleAccounts"],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "mobileSettings": {
+      "enableS1EncryptedStoragePref2": false
+    },
+    "chatterSettings": {
+      "enableChatter": false
+    },
+    "userEngagementSettings": {
+      "enableOrchestrationInSandbox": true
+    },
+    "languageSettings": {
+      "enableTranslationWorkbench": false
+    }
+  },
+  "objectSettings": {
+    "case": {
+      "sharingModel": "readWrite"
+    },
+    "contact": {
+      "sharingModel": "readWrite"
+    },
+    "opportunity": {
+      "sharingModel": "readWrite"
+    }
+  }
+}

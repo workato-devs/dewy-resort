@@ -1,0 +1,158 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking1_Kay"
+      },
+      "Opportunity__c": "@Opp1_KayWilson",
+      "Primary_Guest__c": "@GuestContact1",
+      "Room__c": "@Room201",
+      "Check_In_Date__c": "2025-12-20",
+      "Check_Out_Date__c": "2025-12-24",
+      "Status__c": "Reserved",
+      "Number_of_Guests__c": 2,
+      "Special_Requests__c": "Late check-in preferred, extra towels"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking2_Carl"
+      },
+      "Opportunity__c": "@Opp2_CarlSmith",
+      "Primary_Guest__c": "@GuestContact2",
+      "Room__c": "@Room101",
+      "Check_In_Date__c": "2025-11-22",
+      "Check_Out_Date__c": "2025-11-25",
+      "Status__c": "Checked In",
+      "Number_of_Guests__c": 1,
+      "Special_Requests__c": "Ground floor room, quiet area"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking3_Michael"
+      },
+      "Opportunity__c": "@Opp3_MichaelJohnson",
+      "Primary_Guest__c": "@GuestContact3",
+      "Room__c": "@Room205",
+      "Check_In_Date__c": "2025-11-25",
+      "Check_Out_Date__c": "2025-11-30",
+      "Status__c": "Reserved",
+      "Number_of_Guests__c": 1,
+      "Special_Requests__c": "Business center access, early breakfast"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking4_Sarah"
+      },
+      "Opportunity__c": "@Opp4_SarahDavis",
+      "Primary_Guest__c": "@GuestContact4",
+      "Room__c": "@Room206",
+      "Check_In_Date__c": "2025-12-14",
+      "Check_Out_Date__c": "2025-12-18",
+      "Status__c": "Reserved",
+      "Number_of_Guests__c": 2,
+      "Special_Requests__c": "Champagne on arrival, rose petals"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking5_James_Room1"
+      },
+      "Opportunity__c": "@Opp5_JamesBrown",
+      "Primary_Guest__c": "@GuestContact5",
+      "Room__c": "@Room102",
+      "Check_In_Date__c": "2025-11-28",
+      "Check_Out_Date__c": "2025-12-03",
+      "Status__c": "Reserved",
+      "Number_of_Guests__c": 1,
+      "Special_Requests__c": "King bed, desk workspace required"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking5_James_Room2"
+      },
+      "Opportunity__c": "@Opp5_JamesBrown",
+      "Primary_Guest__c": "@GuestContact5",
+      "Room__c": "@Room103",
+      "Check_In_Date__c": "2025-12-03",
+      "Check_Out_Date__c": "2025-12-08",
+      "Status__c": "Reserved",
+      "Number_of_Guests__c": 1,
+      "Special_Requests__c": "Extension stay - same guest, different room"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking6_Jennifer_Suite"
+      },
+      "Opportunity__c": "@Opp6_JenniferGarcia",
+      "Primary_Guest__c": "@GuestContact6",
+      "Room__c": "@Room210",
+      "Check_In_Date__c": "2025-12-27",
+      "Check_Out_Date__c": "2026-01-03",
+      "Status__c": "Reserved",
+      "Number_of_Guests__c": 4,
+      "Special_Requests__c": "Family of 4, connecting rooms if possible, crib needed"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking7_Robert"
+      },
+      "Opportunity__c": "@Opp7_RobertMiller",
+      "Primary_Guest__c": "@GuestContact7",
+      "Room__c": "@Room104",
+      "Check_In_Date__c": "2025-11-20",
+      "Check_Out_Date__c": "2025-11-22",
+      "Status__c": "Checked Out",
+      "Number_of_Guests__c": 1,
+      "Special_Requests__c": "Conference rate applied"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking8_Linda"
+      },
+      "Opportunity__c": "@Opp8_LindaWilson",
+      "Primary_Guest__c": "@GuestContact8",
+      "Room__c": "@Room207",
+      "Check_In_Date__c": "2025-12-06",
+      "Check_Out_Date__c": "2025-12-09",
+      "Status__c": "Reserved",
+      "Number_of_Guests__c": 2,
+      "Special_Requests__c": "Spa package booked, aromatherapy preferences"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking9_David"
+      },
+      "Opportunity__c": "@Opp9_DavidMartinez",
+      "Primary_Guest__c": "@GuestContact9",
+      "Room__c": "@Room105",
+      "Check_In_Date__c": "2025-11-21",
+      "Check_Out_Date__c": "2025-11-22",
+      "Status__c": "Checked In",
+      "Number_of_Guests__c": 1,
+      "Special_Requests__c": "Express checkout preferred"
+    },
+    {
+      "attributes": {
+        "type": "Booking__c",
+        "referenceId": "Booking10_Mary"
+      },
+      "Opportunity__c": "@Opp10_MaryAnderson",
+      "Primary_Guest__c": "@GuestContact10",
+      "Room__c": "@Room209",
+      "Check_In_Date__c": "2026-01-10",
+      "Check_Out_Date__c": "2026-01-16",
+      "Status__c": "Reserved",
+      "Number_of_Guests__c": 2,
+      "Special_Requests__c": "Anniversary package, special dinner reservation needed"
+    }
+  ]
+}

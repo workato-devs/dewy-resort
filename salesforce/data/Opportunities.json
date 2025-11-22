@@ -1,0 +1,144 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp1_KayWilson"
+      },
+      "Name": "Kay Wilson - Holiday Stay",
+      "AccountId": "@GuestHousehold",
+      "StageName": "Closed Won",
+      "CloseDate": "2025-11-15",
+      "Amount": 599.96,
+      "Arrival_Date__c": "2025-12-20",
+      "Departure_Date__c": "2025-12-24",
+      "Description": "4-night holiday stay for Kay Wilson"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp2_CarlSmith"
+      },
+      "Name": "Carl Smith - Weekend Getaway",
+      "AccountId": "@GuestHousehold2",
+      "StageName": "Closed Won",
+      "CloseDate": "2025-11-18",
+      "Amount": 449.97,
+      "Arrival_Date__c": "2025-11-22",
+      "Departure_Date__c": "2025-11-25",
+      "Description": "3-night weekend stay for Carl Smith"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp3_MichaelJohnson"
+      },
+      "Name": "Michael Johnson - Business Trip",
+      "AccountId": "@GuestHousehold3",
+      "StageName": "Closed Won",
+      "CloseDate": "2025-11-10",
+      "Amount": 999.94,
+      "Arrival_Date__c": "2025-11-25",
+      "Departure_Date__c": "2025-11-30",
+      "Description": "5-night business trip for Michael Johnson"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp4_SarahDavis"
+      },
+      "Name": "Sarah Davis - Romantic Weekend",
+      "AccountId": "@GuestHousehold4",
+      "StageName": "Closed Won",
+      "CloseDate": "2025-11-12",
+      "Amount": 799.96,
+      "Arrival_Date__c": "2025-12-14",
+      "Departure_Date__c": "2025-12-18",
+      "Description": "4-night romantic getaway for Sarah Davis"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp5_JamesBrown"
+      },
+      "Name": "James Brown - Extended Stay",
+      "AccountId": "@GuestHousehold5",
+      "StageName": "Closed Won",
+      "CloseDate": "2025-11-05",
+      "Amount": 1499.90,
+      "Arrival_Date__c": "2025-11-28",
+      "Departure_Date__c": "2025-12-08",
+      "Description": "10-night extended business stay for James Brown"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp6_JenniferGarcia"
+      },
+      "Name": "Jennifer Garcia - Family Vacation",
+      "AccountId": "@GuestHousehold6",
+      "StageName": "Prospecting",
+      "CloseDate": "2025-12-01",
+      "Amount": 1199.92,
+      "Arrival_Date__c": "2025-12-27",
+      "Departure_Date__c": "2026-01-03",
+      "Description": "7-night family vacation for Jennifer Garcia - pending confirmation"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp7_RobertMiller"
+      },
+      "Name": "Robert Miller - Conference Stay",
+      "AccountId": "@GuestHousehold7",
+      "StageName": "Closed Won",
+      "CloseDate": "2025-11-08",
+      "Amount": 299.98,
+      "Arrival_Date__c": "2025-11-20",
+      "Departure_Date__c": "2025-11-22",
+      "Description": "2-night conference stay for Robert Miller"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp8_LindaWilson"
+      },
+      "Name": "Linda Wilson - Spa Weekend",
+      "AccountId": "@GuestHousehold8",
+      "StageName": "Closed Won",
+      "CloseDate": "2025-11-14",
+      "Amount": 599.97,
+      "Arrival_Date__c": "2025-12-06",
+      "Departure_Date__c": "2025-12-09",
+      "Description": "3-night spa weekend for Linda Wilson"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp9_DavidMartinez"
+      },
+      "Name": "David Martinez - Quick Stay",
+      "AccountId": "@GuestHousehold9",
+      "StageName": "Closed Won",
+      "CloseDate": "2025-11-19",
+      "Amount": 149.99,
+      "Arrival_Date__c": "2025-11-21",
+      "Departure_Date__c": "2025-11-22",
+      "Description": "1-night quick business stop for David Martinez"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "referenceId": "Opp10_MaryAnderson"
+      },
+      "Name": "Mary Anderson - Anniversary Celebration",
+      "AccountId": "@GuestHousehold10",
+      "StageName": "Qualification",
+      "CloseDate": "2025-12-05",
+      "Amount": 1199.94,
+      "Arrival_Date__c": "2026-01-10",
+      "Departure_Date__c": "2026-01-16",
+      "Description": "6-night anniversary celebration - awaiting deposit"
+    }
+  ]
+}

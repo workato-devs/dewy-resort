@@ -1,0 +1,32 @@
+[
+  {
+    "sobject": "Account",
+    "saveRefs": true,
+    "resolveRefs": false,
+    "files": ["Accounts.json"]
+  },
+  {
+    "sobject": "Contact",
+    "saveRefs": true,
+    "resolveRefs": true,
+    "files": ["Contacts.json"]
+  },
+  {
+    "sobject": "Hotel_Room__c",
+    "saveRefs": true,
+    "resolveRefs": false,
+    "files": ["Hotel_Rooms.json"]
+  },
+  {
+    "sobject": "Opportunity",
+    "saveRefs": true,
+    "resolveRefs": true,
+    "files": ["Opportunities.json"]
+  },
+  {
+    "sobject": "Booking__c",
+    "saveRefs": false,
+    "resolveRefs": true,
+    "files": ["Bookings.json"]
+  }
+]

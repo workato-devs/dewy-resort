@@ -1,0 +1,378 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room100"
+      },
+      "Name": "Garden Standard",
+      "Room_Number__c": "100",
+      "Floor__c": 1,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "Garden",
+      "Bed_Configuration__c": "1 Queen",
+      "Accessible__c": true,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room101"
+      },
+      "Name": "Garden Standard Double",
+      "Room_Number__c": "101",
+      "Floor__c": 1,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "Garden",
+      "Bed_Configuration__c": "2 Doubles",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room102"
+      },
+      "Name": "Cityview Standard",
+      "Room_Number__c": "102",
+      "Floor__c": 1,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "City",
+      "Bed_Configuration__c": "1 Queen",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room103"
+      },
+      "Name": "Garden Standard King",
+      "Room_Number__c": "103",
+      "Floor__c": 1,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "Garden",
+      "Bed_Configuration__c": "1 King",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room104"
+      },
+      "Name": "Cityview Standard Double",
+      "Room_Number__c": "104",
+      "Floor__c": 1,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "City",
+      "Bed_Configuration__c": "2 Doubles",
+      "Accessible__c": true,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room105"
+      },
+      "Name": "Garden Standard Queen",
+      "Room_Number__c": "105",
+      "Floor__c": 1,
+      "Room_Type__c": "Standard",
+      "Status__c": "Vacant",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "Garden",
+      "Bed_Configuration__c": "1 Queen",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room106"
+      },
+      "Name": "Cityview Standard",
+      "Room_Number__c": "106",
+      "Floor__c": 1,
+      "Room_Type__c": "Standard",
+      "Status__c": "Cleaning",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "City",
+      "Bed_Configuration__c": "1 Queen",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room107"
+      },
+      "Name": "Oceanview Deluxe King",
+      "Room_Number__c": "107",
+      "Floor__c": 1,
+      "Room_Type__c": "Deluxe",
+      "Status__c": "Maintenance",
+      "Max_Occupancy__c": 3,
+      "Nightly_Rate__c": 199.99,
+      "View_Type__c": "Ocean",
+      "Bed_Configuration__c": "1 King",
+      "Accessible__c": false,
+      "Square_Footage__c": 450
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room108"
+      },
+      "Name": "Oceanview Deluxe Double Queen",
+      "Room_Number__c": "108",
+      "Floor__c": 1,
+      "Room_Type__c": "Deluxe",
+      "Status__c": "Vacant",
+      "Max_Occupancy__c": 4,
+      "Nightly_Rate__c": 199.99,
+      "View_Type__c": "Ocean",
+      "Bed_Configuration__c": "2 Queens",
+      "Accessible__c": true,
+      "Square_Footage__c": 450
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room109"
+      },
+      "Name": "Oceanview Deluxe King Premium",
+      "Room_Number__c": "109",
+      "Floor__c": 1,
+      "Room_Type__c": "Deluxe",
+      "Status__c": "Vacant",
+      "Max_Occupancy__c": 3,
+      "Nightly_Rate__c": 199.99,
+      "View_Type__c": "Ocean",
+      "Bed_Configuration__c": "1 King",
+      "Accessible__c": false,
+      "Square_Footage__c": 450
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room110"
+      },
+      "Name": "Oceanview Suite",
+      "Room_Number__c": "110",
+      "Floor__c": 1,
+      "Room_Type__c": "Suite",
+      "Status__c": "Vacant",
+      "Max_Occupancy__c": 4,
+      "Nightly_Rate__c": 299.99,
+      "View_Type__c": "Ocean",
+      "Bed_Configuration__c": "1 King",
+      "Accessible__c": false,
+      "Square_Footage__c": 650
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room200"
+      },
+      "Name": "Garden Standard Premium",
+      "Room_Number__c": "200",
+      "Floor__c": 2,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "Garden",
+      "Bed_Configuration__c": "1 Queen",
+      "Accessible__c": true,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room201"
+      },
+      "Name": "Cityview Standard Double",
+      "Room_Number__c": "201",
+      "Floor__c": 2,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "City",
+      "Bed_Configuration__c": "2 Doubles",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room202"
+      },
+      "Name": "Garden Standard King",
+      "Room_Number__c": "202",
+      "Floor__c": 2,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "Garden",
+      "Bed_Configuration__c": "1 King",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room203"
+      },
+      "Name": "Cityview Standard Queen",
+      "Room_Number__c": "203",
+      "Floor__c": 2,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "City",
+      "Bed_Configuration__c": "1 Queen",
+      "Accessible__c": true,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room204"
+      },
+      "Name": "Garden Standard Double",
+      "Room_Number__c": "204",
+      "Floor__c": 2,
+      "Room_Type__c": "Standard",
+      "Status__c": "Occupied",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "Garden",
+      "Bed_Configuration__c": "2 Doubles",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room205"
+      },
+      "Name": "Mountain View Standard",
+      "Room_Number__c": "205",
+      "Floor__c": 2,
+      "Room_Type__c": "Standard",
+      "Status__c": "Vacant",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "Mountain",
+      "Bed_Configuration__c": "1 Queen",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room206"
+      },
+      "Name": "Cityview Standard",
+      "Room_Number__c": "206",
+      "Floor__c": 2,
+      "Room_Type__c": "Standard",
+      "Status__c": "Cleaning",
+      "Max_Occupancy__c": 2,
+      "Nightly_Rate__c": 149.99,
+      "View_Type__c": "City",
+      "Bed_Configuration__c": "1 Queen",
+      "Accessible__c": false,
+      "Square_Footage__c": 350
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room207"
+      },
+      "Name": "Oceanview Deluxe King",
+      "Room_Number__c": "207",
+      "Floor__c": 2,
+      "Room_Type__c": "Deluxe",
+      "Status__c": "Maintenance",
+      "Max_Occupancy__c": 3,
+      "Nightly_Rate__c": 199.99,
+      "View_Type__c": "Ocean",
+      "Bed_Configuration__c": "1 King",
+      "Accessible__c": false,
+      "Square_Footage__c": 450
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room208"
+      },
+      "Name": "Oceanview Deluxe Double Queen",
+      "Room_Number__c": "208",
+      "Floor__c": 2,
+      "Room_Type__c": "Deluxe",
+      "Status__c": "Vacant",
+      "Max_Occupancy__c": 4,
+      "Nightly_Rate__c": 199.99,
+      "View_Type__c": "Ocean",
+      "Bed_Configuration__c": "2 Queens",
+      "Accessible__c": true,
+      "Square_Footage__c": 450
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room209"
+      },
+      "Name": "Oceanview Deluxe King Premium",
+      "Room_Number__c": "209",
+      "Floor__c": 2,
+      "Room_Type__c": "Deluxe",
+      "Status__c": "Vacant",
+      "Max_Occupancy__c": 3,
+      "Nightly_Rate__c": 199.99,
+      "View_Type__c": "Ocean",
+      "Bed_Configuration__c": "1 King",
+      "Accessible__c": false,
+      "Square_Footage__c": 450
+    },
+    {
+      "attributes": {
+        "type": "Hotel_Room__c",
+        "referenceId": "Room210"
+      },
+      "Name": "Oceanview Suite Premium",
+      "Room_Number__c": "210",
+      "Floor__c": 2,
+      "Room_Type__c": "Suite",
+      "Status__c": "Vacant",
+      "Max_Occupancy__c": 4,
+      "Nightly_Rate__c": 299.99,
+      "View_Type__c": "Ocean",
+      "Bed_Configuration__c": "1 King",
+      "Accessible__c": false,
+      "Square_Footage__c": 650
+    }
+  ]
+}

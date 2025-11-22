@@ -1,0 +1,548 @@
+{
+  "name": "Update room status",
+  "version": 1,
+  "private": true,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_recipe_function",
+    "name": "execute",
+    "as": "trigger",
+    "keyword": "trigger",
+    "input": {
+      "parameters_schema_json": "[{\"name\":\"room_id\",\"label\":\"Room ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Salesforce Hotel_Room__c ID\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"New room status (e.g., Cleaning, Occupied, Vacant)\"},{\"name\":\"current_guest_id\",\"label\":\"Current guest ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact ID to assign (null to clear guest)\"}]",
+      "result_schema_json": "[{\"name\":\"room_id\",\"label\":\"Room ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"current_guest_id\",\"label\":\"Current guest ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"updated\",\"label\":\"Updated\",\"type\":\"boolean\",\"control_type\":\"checkbox\"}]"
+    },
+    "extended_output_schema": [
+      {
+        "label": "Parameters",
+        "name": "parameters",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Room ID",
+            "name": "room_id",
+            "type": "string",
+            "optional": false,
+            "hint": "Salesforce Hotel_Room__c ID"
+          },
+          {
+            "control_type": "text",
+            "label": "Status",
+            "name": "status",
+            "type": "string",
+            "optional": false,
+            "hint": "New room status (e.g., Cleaning, Occupied, Vacant)"
+          },
+          {
+            "control_type": "text",
+            "label": "Current guest ID",
+            "name": "current_guest_id",
+            "type": "string",
+            "optional": true,
+            "hint": "Contact ID to assign (null to clear guest)"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "provider": "salesforce",
+            "name": "update_sobject",
+            "as": "update_room",
+            "keyword": "action",
+            "toggleCfg": {
+              "Status__c": false,
+              "Current_Guest__c": true
+            },
+            "input": {
+              "sobject_name": "Hotel_Room__c",
+              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"room_id\"]}')}",
+              "Status__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}')}",
+              "Current_Guest__c": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"current_guest_id\"]}')"
+            },
+            "extended_output_schema": [
+              {
+                "control_type": "text",
+                "label": "ID",
+                "name": "id",
+                "type": "string"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "control_type": "text",
+                "hint": "Salesforce internal ID of Hotel Room to update",
+                "label": "Hotel Room ID",
+                "name": "id",
+                "type": "string",
+                "key_scope": "hotel_room__c"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Owner ID",
+                "name": "OwnerId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Room Name",
+                "name": "Name",
+                "optional": true,
+                "type": "string",
+                "event_title": true,
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "checkbox",
+                "custom": true,
+                "label": "ADA Accessible",
+                "name": "Accessible__c",
+                "optional": true,
+                "toggle_field": {
+                  "label": "ADA Accessible",
+                  "control_type": "text",
+                  "toggle_hint": "Use custom value",
+                  "render_input": null,
+                  "parse_output": null,
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "boolean",
+                  "name": "Accessible__c"
+                },
+                "toggle_hint": "Select from option list",
+                "type": "boolean",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Bed Configuration",
+                "name": "Bed_Configuration__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Hotel_Room__c\"",
+                  "field_name": "\"Bed_Configuration__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Bed Configuration",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Bed_Configuration__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Current Guest",
+                "name": "Current_Guest__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "number",
+                "custom": true,
+                "label": "Floor",
+                "name": "Floor__c",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "type": "number",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "number",
+                "custom": true,
+                "label": "Max Occupancy",
+                "name": "Max_Occupancy__c",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "type": "number",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "number",
+                "custom": true,
+                "label": "Nightly Rate",
+                "name": "Nightly_Rate__c",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "type": "number",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Room Number",
+                "name": "Room_Number__c",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Room Type",
+                "name": "Room_Type__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Hotel_Room__c\"",
+                  "field_name": "\"Room_Type__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Room Type",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Room_Type__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "number",
+                "custom": true,
+                "label": "Square Footage",
+                "name": "Square_Footage__c",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "type": "number",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Status",
+                "name": "Status__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Hotel_Room__c\"",
+                  "field_name": "\"Status__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "Status",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "Status__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "View Type",
+                "name": "View_Type__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "sobject_name": "\"Hotel_Room__c\"",
+                  "field_name": "\"View_Type__c\""
+                },
+                "toggle_field": {
+                  "control_type": "text",
+                  "label": "View Type",
+                  "toggle_hint": "Enter custom value",
+                  "optional": true,
+                  "custom": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "type": "string",
+                  "name": "View_Type__c"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              }
+            ],
+            "visible_config_fields": [
+              "sobject_name",
+              "id",
+              "Status__c",
+              "Current_Guest__c"
+            ],
+            "uuid": "update-room-action-001"
+          },
+          {
+            "number": 3,
+            "provider": "workato_recipe_function",
+            "name": "return_result",
+            "as": "return_success",
+            "keyword": "action",
+            "input": {
+              "result": {
+                "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"room_id\"]}')}",
+                "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}')}",
+                "current_guest_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"current_guest_id\"]}')}",
+                "updated": "true"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "room_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Current guest ID",
+                    "name": "current_guest_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Updated",
+                    "name": "updated",
+                    "type": "boolean"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "room_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Current guest ID",
+                    "name": "current_guest_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Updated",
+                    "name": "updated",
+                    "type": "boolean"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "return-success-001"
+          },
+          {
+            "number": 4,
+            "provider": null,
+            "name": "catch",
+            "as": "update_room_catch",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 5,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "Error updating room status: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"update_room_catch\",\"path\":[\"message\"]}')}",
+                  "user_logs_enabled": "false"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "log-error-001"
+              },
+              {
+                "number": 6,
+                "provider": "workato_recipe_function",
+                "name": "return_result",
+                "as": "return_error",
+                "keyword": "action",
+                "input": {
+                  "result": {
+                    "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"room_id\"]}')}",
+                    "status": "=null",
+                    "current_guest_id": "=null",
+                    "updated": "false"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Room ID",
+                        "name": "room_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Current guest ID",
+                        "name": "current_guest_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Updated",
+                        "name": "updated",
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Room ID",
+                        "name": "room_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Current guest ID",
+                        "name": "current_guest_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Updated",
+                        "name": "updated",
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-error-001"
+              }
+            ],
+            "uuid": "update-room-catch-001"
+          }
+        ],
+        "uuid": "try-001"
+      }
+    ],
+    "uuid": "a1b2c3d4-5e6f-7890-abcd-ef9876543210"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_recipe_function",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "salesforce",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "Workspace Connections/zt_dev_account.connection.json",
+        "name": "ZT Dev account",
+        "folder": "Workspace Connections"
+      }
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}

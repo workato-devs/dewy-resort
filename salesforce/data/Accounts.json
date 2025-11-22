@@ -1,0 +1,188 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "HotelAccount"
+      },
+      "Name": "Dewy Resort Hotel",
+      "Type": "Other"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold"
+      },
+      "Name": "Carl Smith and Kay Wilson Household",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold2"
+      },
+      "Name": "Johnson Family",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold3"
+      },
+      "Name": "Martinez Household",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold4"
+      },
+      "Name": "Chen Family",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold5"
+      },
+      "Name": "Anderson Household",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold6"
+      },
+      "Name": "Thompson Family",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold7"
+      },
+      "Name": "Garcia Household",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold8"
+      },
+      "Name": "Davis Family",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold9"
+      },
+      "Name": "Patel Household",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold10"
+      },
+      "Name": "O'Brien Family",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "GuestHousehold11"
+      },
+      "Name": "Kim Household",
+      "Type": "Customer"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorElectric"
+      },
+      "Name": "Bright Spark Electrical Services",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorPainting"
+      },
+      "Name": "Premium Paint & Finishes",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorGeneral"
+      },
+      "Name": "Sierra Construction Group",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorCatering"
+      },
+      "Name": "Elegant Events Catering",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorRoofing"
+      },
+      "Name": "Summit Roofing Solutions",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorConcrete"
+      },
+      "Name": "Solid Ground Paving & Concrete",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorDrywall"
+      },
+      "Name": "Perfect Walls Interior Solutions",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorGarage"
+      },
+      "Name": "Precision Garage Door Services",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorCarpentry"
+      },
+      "Name": "Master Craftsman Carpentry",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorHVAC"
+      },
+      "Name": "Climate Control HVAC Systems",
+      "Type": "Vendor"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "referenceId": "VendorPlumbing"
+      },
+      "Name": "Bob's Plumbing Inc",
+      "Type": "Vendor"
+    }
+  ]
+}

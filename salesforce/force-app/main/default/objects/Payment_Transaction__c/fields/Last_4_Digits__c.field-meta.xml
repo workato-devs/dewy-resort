@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Last_4_Digits__c</fullName>
+    <label>Last 4 Digits</label>
+    <description>Last 4 digits of card number (if applicable)</description>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <length>4</length>
+    <unique>false</unique>
+    <caseSensitive>false</caseSensitive>
+</CustomField>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Employee_ID__c</fullName>
+    <label>Employee ID</label>
+    <description>For Manager contacts (workshop attendee ID)</description>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <length>20</length>
+    <unique>false</unique>
+    <caseSensitive>false</caseSensitive>
+</CustomField>

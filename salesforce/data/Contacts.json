@@ -1,0 +1,339 @@
+{
+  "records": [
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "ManagerContact"
+      },
+      "FirstName": "Workshop",
+      "LastName": "Manager",
+      "Email": "manager@dewyhotel.com",
+      "Unique_Email__c": "manager@dewyhotel.com",
+      "Contact_Type__c": "Manager",
+      "AccountId": "@HotelAccount"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact1"
+      },
+      "FirstName": "Kay",
+      "LastName": "Wilson",
+      "Email": "kay@example.com",
+      "Phone": "+15551234567",
+      "MobilePhone": "+15551234567",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "SMS",
+      "AccountId": "@GuestHousehold",
+      "Unique_Email__c": "kay@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact2"
+      },
+      "FirstName": "Carl",
+      "LastName": "Smith",
+      "Email": "carl.smith@example.com",
+      "Phone": "+15551234568",
+      "MobilePhone": "+15551234568",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "Email",
+      "AccountId": "@GuestHousehold",
+      "Unique_Email__c": "carl.smith@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact3"
+      },
+      "FirstName": "Michael",
+      "LastName": "Johnson",
+      "Email": "mjohnson@example.com",
+      "Phone": "+15552345678",
+      "MobilePhone": "+15552345678",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "SMS",
+      "AccountId": "@GuestHousehold2",
+      "Unique_Email__c": "mjohnson@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact4"
+      },
+      "FirstName": "Sofia",
+      "LastName": "Martinez",
+      "Email": "sofia.martinez@example.com",
+      "Phone": "+15553456789",
+      "MobilePhone": "+15553456789",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "Email",
+      "AccountId": "@GuestHousehold3",
+      "Unique_Email__c": "sofia.martinez@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact5"
+      },
+      "FirstName": "Wei",
+      "LastName": "Chen",
+      "Email": "wei.chen@example.com",
+      "Phone": "+15554567890",
+      "MobilePhone": "+15554567890",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "SMS",
+      "AccountId": "@GuestHousehold4",
+      "Unique_Email__c": "wei.chen@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact6"
+      },
+      "FirstName": "Jennifer",
+      "LastName": "Anderson",
+      "Email": "janderson@example.com",
+      "Phone": "+15555678901",
+      "MobilePhone": "+15555678901",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "Email",
+      "AccountId": "@GuestHousehold5",
+      "Unique_Email__c": "janderson@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact7"
+      },
+      "FirstName": "Robert",
+      "LastName": "Thompson",
+      "Email": "rthompson@example.com",
+      "Phone": "+15556789012",
+      "MobilePhone": "+15556789012",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "SMS",
+      "AccountId": "@GuestHousehold6",
+      "Unique_Email__c": "rthompson@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact8"
+      },
+      "FirstName": "Maria",
+      "LastName": "Garcia",
+      "Email": "maria.garcia@example.com",
+      "Phone": "+15557890123",
+      "MobilePhone": "+15557890123",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "Email",
+      "AccountId": "@GuestHousehold7",
+      "Unique_Email__c": "maria.garcia@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact9"
+      },
+      "FirstName": "James",
+      "LastName": "Davis",
+      "Email": "james.davis@example.com",
+      "Phone": "+15558901234",
+      "MobilePhone": "+15558901234",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "SMS",
+      "AccountId": "@GuestHousehold8",
+      "Unique_Email__c": "james.davis@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact10"
+      },
+      "FirstName": "Priya",
+      "LastName": "Patel",
+      "Email": "priya.patel@example.com",
+      "Phone": "+15559012345",
+      "MobilePhone": "+15559012345",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "Email",
+      "AccountId": "@GuestHousehold9",
+      "Unique_Email__c": "priya.patel@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact11"
+      },
+      "FirstName": "Patrick",
+      "LastName": "O'Brien",
+      "Email": "patrick.obrien@example.com",
+      "Phone": "+15550123456",
+      "MobilePhone": "+15550123456",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "SMS",
+      "AccountId": "@GuestHousehold10",
+      "Unique_Email__c": "patrick.obrien@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "GuestContact12"
+      },
+      "FirstName": "Soo-Jin",
+      "LastName": "Kim",
+      "Email": "soojin.kim@example.com",
+      "Phone": "+15551236789",
+      "MobilePhone": "+15551236789",
+      "Contact_Type__c": "Guest",
+      "Preferred_Contact_Method__c": "Email",
+      "AccountId": "@GuestHousehold11",
+      "Unique_Email__c": "soojin.kim@example.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorElectric"
+      },
+      "FirstName": "Thomas",
+      "LastName": "Martinez",
+      "Email": "thomas@brightspark.com",
+      "Phone": "+15559876543",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorElectric",
+      "Unique_Email__c": "thomas@brightspark.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorPainting"
+      },
+      "FirstName": "Linda",
+      "LastName": "Chen",
+      "Email": "linda@premiumpaint.com",
+      "Phone": "+15558765432",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorPainting",
+      "Unique_Email__c": "linda@premiumpaint.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorGeneral"
+      },
+      "FirstName": "David",
+      "LastName": "Rodriguez",
+      "Email": "david@sierraconstruction.com",
+      "Phone": "+15557654321",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorGeneral",
+      "Unique_Email__c": "david@sierraconstruction.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorCatering"
+      },
+      "FirstName": "Sarah",
+      "LastName": "Williams",
+      "Email": "sarah@elegantevents.com",
+      "Phone": "+15556543210",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorCatering",
+      "Unique_Email__c": "sarah@elegantevents.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorRoofing"
+      },
+      "FirstName": "Mark",
+      "LastName": "Anderson",
+      "Email": "mark@summitroofing.com",
+      "Phone": "+15555432109",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorRoofing",
+      "Unique_Email__c": "mark@summitroofing.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorConcrete"
+      },
+      "FirstName": "Antonio",
+      "LastName": "Garcia",
+      "Email": "antonio@solidgroundpaving.com",
+      "Phone": "+15554321098",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorConcrete",
+      "Unique_Email__c": "antonio@solidgroundpaving.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorDrywall"
+      },
+      "FirstName": "Jessica",
+      "LastName": "Taylor",
+      "Email": "jessica@perfectwalls.com",
+      "Phone": "+15553210987",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorDrywall",
+      "Unique_Email__c": "jessica@perfectwalls.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorGarage"
+      },
+      "FirstName": "Kevin",
+      "LastName": "Brown",
+      "Email": "kevin@precisiongarage.com",
+      "Phone": "+15552109876",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorGarage",
+      "Unique_Email__c": "kevin@precisiongarage.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorCarpentry"
+      },
+      "FirstName": "Christopher",
+      "LastName": "Wilson",
+      "Email": "chris@mastercraftsman.com",
+      "Phone": "+15551098765",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorCarpentry",
+      "Unique_Email__c": "chris@mastercraftsman.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorHVAC"
+      },
+      "FirstName": "Rachel",
+      "LastName": "Moore",
+      "Email": "rachel@climatecontrol.com",
+      "Phone": "+15550987654",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorHVAC",
+      "Unique_Email__c": "rachel@climatecontrol.com"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "referenceId": "VendorPlumbing"
+      },
+      "FirstName": "Bob",
+      "LastName": "Smith",
+      "Email": "bob@bobsplumbing.com",
+      "Phone": "+15559876543",
+      "Contact_Type__c": "Vendor",
+      "AccountId": "@VendorPlumbing",
+      "Unique_Email__c": "bob@bobsplumbing.com"
+    }
+  ]
+}

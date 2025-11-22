@@ -1,0 +1,1021 @@
+{
+  "name": "Create opportunity",
+  "version": 2,
+  "private": true,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_recipe_function",
+    "name": "execute",
+    "as": "trigger",
+    "keyword": "trigger",
+    "input": {
+      "parameters_schema_json": "[{\"name\":\"contact_email\",\"label\":\"Contact email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Contact email address (business identifier)\"},{\"name\":\"stage_name\",\"label\":\"Stage name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Opportunity.StageName picklist value\"},{\"name\":\"close_date\",\"label\":\"Close date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":false,\"hint\":\"Opportunity close date (typically check-in date)\"},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Opportunity amount (optional)\"},{\"name\":\"opportunity_type\",\"label\":\"Opportunity type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Opportunity.Type picklist value\"}]",
+      "result_schema_json": "[{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true},{\"name\":\"name\",\"label\":\"Name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true},{\"name\":\"stage_name\",\"label\":\"Stage name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true},{\"name\":\"close_date\",\"label\":\"Close date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":true},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true},{\"name\":\"created_at\",\"label\":\"Created at\",\"type\":\"date_time\",\"control_type\":\"date_time\",\"optional\":true}]"
+    },
+    "extended_output_schema": [
+      {
+        "label": "Parameters",
+        "name": "parameters",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Contact email",
+            "name": "contact_email",
+            "type": "string",
+            "optional": false,
+            "hint": "Contact email address (business identifier)"
+          },
+          {
+            "control_type": "text",
+            "label": "Stage name",
+            "name": "stage_name",
+            "type": "string",
+            "optional": false,
+            "hint": "Opportunity.StageName picklist value"
+          },
+          {
+            "control_type": "date",
+            "label": "Close date",
+            "render_input": "date_conversion",
+            "parse_output": "date_conversion",
+            "name": "close_date",
+            "type": "date",
+            "optional": false,
+            "hint": "Opportunity close date (typically check-in date)"
+          },
+          {
+            "control_type": "number",
+            "label": "Amount",
+            "parse_output": "float_conversion",
+            "name": "amount",
+            "type": "number",
+            "optional": true,
+            "hint": "Opportunity amount (optional)"
+          },
+          {
+            "control_type": "text",
+            "label": "Opportunity type",
+            "name": "opportunity_type",
+            "type": "string",
+            "optional": true,
+            "hint": "Opportunity.Type picklist value"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "provider": "salesforce",
+            "name": "search_sobjects",
+            "as": "search_contact",
+            "keyword": "action",
+            "input": {
+              "sobject_name": "Contact",
+              "limit": "1",
+              "Email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_email\"]}')}"
+            },
+            "extended_output_schema": [
+              {
+                "label": "Contacts",
+                "name": "Contact",
+                "of": "object",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Record ID",
+                    "optional": true,
+                    "custom": false,
+                    "sfdc_createable": false,
+                    "sfdc_updateable": false,
+                    "type": "string",
+                    "name": "Id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Account ID",
+                    "name": "AccountId",
+                    "optional": true,
+                    "type": "string",
+                    "custom": false,
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "First Name",
+                    "name": "FirstName",
+                    "optional": true,
+                    "type": "string",
+                    "custom": false,
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Last Name",
+                    "name": "LastName",
+                    "type": "string",
+                    "custom": false,
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Email",
+                    "name": "Email",
+                    "optional": true,
+                    "type": "string",
+                    "custom": false,
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "control_type": "number",
+                "label": "List size",
+                "name": "list_size",
+                "parse_output": "integer_conversion",
+                "type": "integer"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Email",
+                "name": "Email",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "First Name",
+                "name": "FirstName",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Last Name",
+                "name": "LastName",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Account ID",
+                "name": "AccountId",
+                "optional": true,
+                "type": "string",
+                "sfdc_createable": true,
+                "sfdc_updateable": true
+              }
+            ],
+            "uuid": "create-opp-search-001"
+          },
+          {
+            "number": 3,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "present",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contact\",\"path\":[\"list_size\"]}')}",
+                  "rhs": "",
+                  "uuid": "66a96cc8-a9c2-4836-a946-5cd6e64a36ae"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 4,
+                "provider": "salesforce",
+                "name": "create_custom_object",
+                "as": "create_opportunity",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "sobject_name": "Opportunity"
+                },
+                "toggleCfg": {
+                  "StageName": false,
+                  "Type": false
+                },
+                "input": {
+                  "sobject_name": "Opportunity",
+                  "Name": "='Booking for ' + _dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contact\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"FirstName\"]}') + ' ' + _dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contact\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"LastName\"]}') + ' - ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"close_date\"]}')",
+                  "AccountId": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contact\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"AccountId\"]}')}",
+                  "ContactId": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contact\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"Id\"]}')}",
+                  "CloseDate": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"close_date\"]}')}",
+                  "StageName": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"stage_name\"]}')}",
+                  "Amount": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"amount\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"amount\"]}') : skip",
+                  "Type": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"opportunity_type\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"opportunity_type\"]}') : 'New Business'"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "date",
+                    "custom": false,
+                    "label": "Close Date",
+                    "name": "CloseDate",
+                    "parse_output": "parse_iso8601_date",
+                    "type": "date_time",
+                    "render_input": "render_iso8601_date",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": false,
+                    "label": "Name",
+                    "name": "Name",
+                    "type": "string",
+                    "event_title": true,
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "select",
+                    "custom": false,
+                    "label": "Stage",
+                    "name": "StageName",
+                    "pick_list": "sobject_field_values_list",
+                    "pick_list_params": {
+                      "sobject_name": "\"Opportunity\"",
+                      "field_name": "\"StageName\""
+                    },
+                    "toggle_field": {
+                      "control_type": "text",
+                      "label": "Stage",
+                      "toggle_hint": "Enter custom value",
+                      "custom": false,
+                      "sfdc_createable": true,
+                      "sfdc_updateable": true,
+                      "type": "string",
+                      "name": "StageName"
+                    },
+                    "toggle_hint": "Select from list",
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": false,
+                    "label": "Account ID",
+                    "name": "AccountId",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "number",
+                    "custom": false,
+                    "label": "Amount",
+                    "name": "Amount",
+                    "optional": true,
+                    "parse_output": "float_conversion",
+                    "type": "number",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": false,
+                    "label": "Campaign ID",
+                    "name": "CampaignId",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": false,
+                    "label": "Contact ID",
+                    "name": "ContactId",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": false
+                  },
+                  {
+                    "control_type": "text-area",
+                    "custom": false,
+                    "label": "Description",
+                    "name": "Description",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "select",
+                    "custom": false,
+                    "label": "Forecast Category",
+                    "name": "ForecastCategoryName",
+                    "optional": true,
+                    "pick_list": "sobject_field_values_list",
+                    "pick_list_params": {
+                      "sobject_name": "\"Opportunity\"",
+                      "field_name": "\"ForecastCategoryName\""
+                    },
+                    "toggle_field": {
+                      "control_type": "text",
+                      "label": "Forecast Category",
+                      "toggle_hint": "Enter custom value",
+                      "optional": true,
+                      "custom": false,
+                      "sfdc_createable": true,
+                      "sfdc_updateable": true,
+                      "type": "string",
+                      "name": "ForecastCategoryName"
+                    },
+                    "toggle_hint": "Select from list",
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "select",
+                    "custom": false,
+                    "label": "Lead Source",
+                    "name": "LeadSource",
+                    "optional": true,
+                    "pick_list": "sobject_field_values_list",
+                    "pick_list_params": {
+                      "sobject_name": "\"Opportunity\"",
+                      "field_name": "\"LeadSource\""
+                    },
+                    "toggle_field": {
+                      "control_type": "text",
+                      "label": "Lead Source",
+                      "toggle_hint": "Enter custom value",
+                      "optional": true,
+                      "custom": false,
+                      "sfdc_createable": true,
+                      "sfdc_updateable": true,
+                      "type": "string",
+                      "name": "LeadSource"
+                    },
+                    "toggle_hint": "Select from list",
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": false,
+                    "label": "Next Step",
+                    "name": "NextStep",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "select",
+                    "custom": false,
+                    "label": "Opportunity Type",
+                    "name": "Type",
+                    "optional": true,
+                    "pick_list": "sobject_field_values_list",
+                    "pick_list_params": {
+                      "sobject_name": "\"Opportunity\"",
+                      "field_name": "\"Type\""
+                    },
+                    "toggle_field": {
+                      "control_type": "text",
+                      "label": "Opportunity Type",
+                      "toggle_hint": "Enter custom value",
+                      "optional": true,
+                      "custom": false,
+                      "sfdc_createable": true,
+                      "sfdc_updateable": true,
+                      "type": "string",
+                      "name": "Type"
+                    },
+                    "toggle_hint": "Select from list",
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": false,
+                    "label": "Owner ID",
+                    "name": "OwnerId",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": false,
+                    "label": "Price Book ID",
+                    "name": "Pricebook2Id",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "custom": false,
+                    "label": "Private",
+                    "name": "IsPrivate",
+                    "optional": true,
+                    "toggle_field": {
+                      "label": "Private",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "render_input": null,
+                      "parse_output": null,
+                      "optional": true,
+                      "custom": false,
+                      "sfdc_createable": true,
+                      "sfdc_updateable": true,
+                      "type": "boolean",
+                      "name": "IsPrivate"
+                    },
+                    "toggle_hint": "Select from option list",
+                    "type": "boolean",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": false,
+                    "label": "Probability (%)",
+                    "name": "Probability",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "number",
+                    "custom": false,
+                    "label": "Quantity",
+                    "name": "TotalOpportunityQuantity",
+                    "optional": true,
+                    "parse_output": "float_conversion",
+                    "type": "number",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "date",
+                    "custom": true,
+                    "label": "Arrival Date",
+                    "name": "Arrival_Date__c",
+                    "optional": true,
+                    "parse_output": "parse_iso8601_date",
+                    "type": "date_time",
+                    "render_input": "render_iso8601_date",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": true,
+                    "label": "Current Generator(s)",
+                    "name": "CurrentGenerators__c",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "select",
+                    "custom": true,
+                    "label": "Delivery/Installation Status",
+                    "name": "DeliveryInstallationStatus__c",
+                    "optional": true,
+                    "pick_list": "sobject_field_values_list",
+                    "pick_list_params": {
+                      "sobject_name": "\"Opportunity\"",
+                      "field_name": "\"DeliveryInstallationStatus__c\""
+                    },
+                    "toggle_field": {
+                      "control_type": "text",
+                      "label": "Delivery/Installation Status",
+                      "toggle_hint": "Enter custom value",
+                      "optional": true,
+                      "custom": true,
+                      "sfdc_createable": true,
+                      "sfdc_updateable": true,
+                      "type": "string",
+                      "name": "DeliveryInstallationStatus__c"
+                    },
+                    "toggle_hint": "Select from list",
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "date",
+                    "custom": true,
+                    "label": "Departure Date",
+                    "name": "Departure_Date__c",
+                    "optional": true,
+                    "parse_output": "parse_iso8601_date",
+                    "type": "date_time",
+                    "render_input": "render_iso8601_date",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": true,
+                    "label": "Main Competitor(s)",
+                    "name": "MainCompetitors__c",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": true,
+                    "label": "Order Number",
+                    "name": "OrderNumber__c",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": true,
+                    "label": "Payment ID",
+                    "name": "Payment_ID__c",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  },
+                  {
+                    "control_type": "text",
+                    "custom": true,
+                    "label": "Tracking Number",
+                    "name": "TrackingNumber__c",
+                    "optional": true,
+                    "type": "string",
+                    "sfdc_createable": true,
+                    "sfdc_updateable": true
+                  }
+                ],
+                "uuid": "4bd56c94-465a-4cd3-85c8-feb56eec2c89"
+              },
+              {
+                "number": 5,
+                "provider": "workato_recipe_function",
+                "name": "return_result",
+                "as": "return_success",
+                "keyword": "action",
+                "input": {
+                  "result": {
+                    "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"create_opportunity\",\"path\":[\"id\"]}')}",
+                    "name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contact\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"FirstName\"]}')} #{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contact\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"LastName\"]}')}- #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"close_date\"]}')}",
+                    "stage_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"stage_name\"]}')}",
+                    "close_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"close_date\"]}')}",
+                    "amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"amount\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Opportunity ID",
+                        "name": "opportunity_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Name",
+                        "name": "name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Stage name",
+                        "name": "stage_name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "date",
+                        "label": "Close date",
+                        "render_input": "date_conversion",
+                        "parse_output": "date_conversion",
+                        "name": "close_date",
+                        "type": "date"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Amount",
+                        "parse_output": "float_conversion",
+                        "name": "amount",
+                        "type": "number"
+                      },
+                      {
+                        "control_type": "date_time",
+                        "label": "Created at",
+                        "render_input": "render_iso8601_timestamp",
+                        "parse_output": "parse_iso8601_timestamp",
+                        "name": "created_at",
+                        "type": "date_time",
+                        "optional": true
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Opportunity ID",
+                        "name": "opportunity_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Name",
+                        "name": "name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Stage name",
+                        "name": "stage_name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "date",
+                        "label": "Close date",
+                        "render_input": "date_conversion",
+                        "parse_output": "date_conversion",
+                        "name": "close_date",
+                        "type": "date"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Amount",
+                        "parse_output": "float_conversion",
+                        "name": "amount",
+                        "type": "number"
+                      },
+                      {
+                        "control_type": "date_time",
+                        "label": "Created at",
+                        "render_input": "render_iso8601_timestamp",
+                        "parse_output": "parse_iso8601_timestamp",
+                        "name": "created_at",
+                        "type": "date_time",
+                        "optional": true
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "create-opp-return-001"
+              }
+            ],
+            "uuid": "01785b72-ddcf-44a6-9328-4b23a959b7a0"
+          },
+          {
+            "number": 6,
+            "provider": "workato_recipe_function",
+            "name": "return_result",
+            "as": "41164565",
+            "keyword": "action",
+            "input": {
+              "result": {
+                "opportunity_id": "=null",
+                "name": "=null",
+                "stage_name": "=null",
+                "close_date": "=null",
+                "amount": "=null",
+                "created_at": "=null"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Name",
+                    "name": "name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Stage name",
+                    "name": "stage_name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Close date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "close_date",
+                    "type": "date"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Amount",
+                    "parse_output": "float_conversion",
+                    "name": "amount",
+                    "type": "number"
+                  },
+                  {
+                    "control_type": "date_time",
+                    "label": "Created at",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "name": "created_at",
+                    "type": "date_time"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Name",
+                    "name": "name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Stage name",
+                    "name": "stage_name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Close date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "close_date",
+                    "type": "date"
+                  },
+                  {
+                    "control_type": "number",
+                    "label": "Amount",
+                    "parse_output": "float_conversion",
+                    "name": "amount",
+                    "type": "number"
+                  },
+                  {
+                    "control_type": "date_time",
+                    "label": "Created at",
+                    "render_input": "date_time_conversion",
+                    "parse_output": "date_time_conversion",
+                    "name": "created_at",
+                    "type": "date_time"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "5f4a2bf7-a5e9-4a88-9d39-35edb71c9454"
+          },
+          {
+            "number": 7,
+            "as": "create-opp-catch-001",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 8,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "='Failed to create opportunity for contact ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_email\"]}') + ': ' + _dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-opp-catch-001\",\"path\":[\"message\"]}')",
+                  "user_logs_enabled": "false"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "create-opp-log-001"
+              },
+              {
+                "number": 9,
+                "provider": "workato_recipe_function",
+                "name": "return_result",
+                "as": "return_error",
+                "keyword": "action",
+                "input": {
+                  "result": {
+                    "opportunity_id": "=null",
+                    "name": "=null",
+                    "stage_name": "=null",
+                    "close_date": "=null",
+                    "amount": "=null",
+                    "created_at": "=null"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Opportunity ID",
+                        "name": "opportunity_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Name",
+                        "name": "name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Stage name",
+                        "name": "stage_name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "date",
+                        "label": "Close date",
+                        "render_input": "date_conversion",
+                        "parse_output": "date_conversion",
+                        "name": "close_date",
+                        "type": "date"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Amount",
+                        "parse_output": "float_conversion",
+                        "name": "amount",
+                        "type": "number"
+                      },
+                      {
+                        "control_type": "date_time",
+                        "label": "Created at",
+                        "render_input": "date_time_conversion",
+                        "parse_output": "date_time_conversion",
+                        "name": "created_at",
+                        "type": "date_time",
+                        "optional": true
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Opportunity ID",
+                        "name": "opportunity_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Name",
+                        "name": "name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Stage name",
+                        "name": "stage_name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "date",
+                        "label": "Close date",
+                        "render_input": "date_conversion",
+                        "parse_output": "date_conversion",
+                        "name": "close_date",
+                        "type": "date"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Amount",
+                        "parse_output": "float_conversion",
+                        "name": "amount",
+                        "type": "number"
+                      },
+                      {
+                        "control_type": "date_time",
+                        "label": "Created at",
+                        "render_input": "date_time_conversion",
+                        "parse_output": "date_time_conversion",
+                        "name": "created_at",
+                        "type": "date_time",
+                        "optional": true
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "create-opp-return-error-001"
+              }
+            ],
+            "uuid": "create-opp-catch-001"
+          }
+        ],
+        "uuid": "create-opp-try-001"
+      }
+    ],
+    "uuid": "create-opp-trigger-001",
+    "format_version": 2
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_recipe_function",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "salesforce",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "Workspace Connections/zt_dev_account.connection.json",
+        "name": "ZT Dev account",
+        "folder": "Workspace Connections"
+      }
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}

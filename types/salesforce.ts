@@ -1,0 +1,228 @@
+// Salesforce Integration Type Definitions
+
+// ============================================================================
+// Room Entity Types
+// ============================================================================
+
+export enum RoomType {
+  STANDARD = 'standard',
+  DELUXE = 'deluxe',
+  SUITE = 'suite',
+}
+
+export enum RoomStatus {
+  VACANT = 'vacant',
+  OCCUPIED = 'occupied',
+  CLEANING = 'cleaning',
+  MAINTENANCE = 'maintenance',
+}
+
+export interface Room {
+  id: string;
+  room_number: string;
+  floor: number;
+  type: RoomType;
+  status: RoomStatus;
+  current_guest_id: string | null;
+  assigned_manager_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RoomSearchCriteria {
+  status?: RoomStatus;
+  floor?: number;
+  type?: RoomType;
+  assigned_manager_id?: string;
+  current_guest_id?: string;
+}
+
+export interface RoomCreate {
+  room_number: string;
+  floor: number;
+  type: RoomType;
+  status: RoomStatus;
+  assigned_manager_id?: string;
+}
+
+export interface RoomUpdate {
+  status?: RoomStatus;
+  current_guest_id?: string | null;
+  assigned_manager_id?: string | null;
+}
+
+// ============================================================================
+// Service Request Types
+// ============================================================================
+
+export enum ServiceRequestType {
+  HOUSEKEEPING = 'housekeeping',
+  ROOM_SERVICE = 'room_service',
+  MAINTENANCE = 'maintenance',
+  CONCIERGE = 'concierge',
+}
+
+export enum ServiceRequestPriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+}
+
+export enum ServiceRequestStatus {
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
+
+export interface ServiceRequest {
+  id: string;
+  guest_id: string;
+  room_number: string;
+  type: ServiceRequestType;
+  priority: ServiceRequestPriority;
+  description: string;
+  status: ServiceRequestStatus;
+  salesforce_ticket_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceRequestCreate {
+  idempotency_token?: string;
+  guest_email: string;
+  guest_first_name: string;
+  guest_last_name: string;
+  room_number: string;
+  type: ServiceRequestType;
+  priority: ServiceRequestPriority;
+  description: string;
+}
+
+export interface ServiceRequestSearch {
+  guest_id?: string;
+  room_number?: string;
+  status?: ServiceRequestStatus;
+  type?: ServiceRequestType;
+}
+
+export interface ServiceRequestUpdate {
+  status?: ServiceRequestStatus;
+  priority?: ServiceRequestPriority;
+}
+
+// ============================================================================
+// Maintenance Task Types
+// ============================================================================
+
+export enum MaintenancePriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  URGENT = 'urgent',
+}
+
+export enum MaintenanceStatus {
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
+
+export interface MaintenanceTask {
+  id: string;
+  room_id: string;
+  title: string;
+  description: string;
+  priority: MaintenancePriority;
+  status: MaintenanceStatus;
+  assigned_to: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MaintenanceTaskCreate {
+  idempotency_token?: string;
+  room_id: string;
+  title: string;
+  description: string;
+  priority: MaintenancePriority;
+  created_by: string;
+  assigned_to?: string;
+}
+
+export interface MaintenanceTaskSearch {
+  room_id?: string;
+  status?: MaintenanceStatus;
+  assigned_to?: string;
+  priority?: MaintenancePriority;
+}
+
+export interface MaintenanceTaskUpdate {
+  status?: MaintenanceStatus;
+  assigned_to?: string | null;
+  priority?: MaintenancePriority;
+}
+
+// ============================================================================
+// Charge Entity Types
+// ============================================================================
+
+export enum ChargeType {
+  ROOM = 'room',
+  SERVICE = 'service',
+  FOOD = 'food',
+  OTHER = 'other',
+}
+
+export interface Charge {
+  id: string;
+  guest_id: string;
+  type: ChargeType;
+  description: string;
+  amount: number;
+  date: string;
+  paid: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChargeCreate {
+  guest_id: string;
+  type: ChargeType;
+  description: string;
+  amount: number;
+  date: string;
+}
+
+export interface ChargeSearch {
+  guest_id?: string;
+  type?: ChargeType;
+  paid?: boolean;
+  date_from?: string;
+  date_to?: string;
+}
+
+export interface ChargeUpdate {
+  paid?: boolean;
+  amount?: number;
+}
+
+// ============================================================================
+// API Response Types
+// ============================================================================
+
+export interface ListResponse<T> {
+  items: T[];
+  total: number;
+  page?: number;
+  per_page?: number;
+}
+
+export interface ApiError {
+  message: string;
+  code: string;
+  statusCode: number;
+  correlationId: string;
+}

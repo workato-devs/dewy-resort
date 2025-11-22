@@ -1,0 +1,42 @@
+{
+  "role": "guest",
+  "servers": [
+    {
+      "name": "hotel-db",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "lib/mcp/hotel-db-server.ts"],
+      "tools": [
+        "find_service_request_by_token",
+        "get_guest_service_requests",
+        "find_booking_by_token"
+      ]
+    },
+    {
+      "name": "hotel-services",
+      "type": "http",
+      "url": "${MCP_HOTEL_SERVICES_URL}",
+      "auth": {
+        "type": "bearer",
+        "token": "${MCP_HOTEL_SERVICES_TOKEN}"
+      },
+      "excludeTools": [
+        "Submit_guest_service_request"
+      ]
+    },
+    {
+      "name": "room-controls",
+      "type": "http",
+      "url": "${MCP_ROOM_CONTROLS_URL}",
+      "auth": {
+        "type": "bearer",
+        "token": "${MCP_ROOM_CONTROLS_TOKEN}"
+      },
+      "tools": [
+        "control_lights",
+        "control_thermostat",
+        "control_blinds"
+      ]
+    }
+  ]
+}

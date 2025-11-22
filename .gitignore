@@ -1,0 +1,62 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+.env.bak
+
+# kiro settings with secrets
+.kiro/settings/mcp.json
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# database
+/database/*.db
+/database/*.db-journal
+/database/*.db-shm
+/database/*.db-wal
+
+# vendor CLI tools (workato, salesforce, twilio, stripe, etc.)
+bin/
+./tools/
+.workatoenv
+.env.tools
+**/workato-api-key.txt
+workato/sandbox/**/*.recipe.json
+workato/temp-*/
+
+# salesforce CLI
+.sf/                            # Salesforce CLI configuration
+.sfdx/                          # Salesforce DX configuration (legacy)
+
+# runtime files
+/var/
