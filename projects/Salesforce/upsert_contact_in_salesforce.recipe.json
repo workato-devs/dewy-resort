@@ -1527,8 +1527,8 @@
       "provider": "salesforce",
       "skip_validation": false,
       "account_id": {
-        "zip_name": "Workspace Connections/zt_dev_account.connection.json",
-        "name": "ZT Dev account",
+        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
+        "name": "SF Dev Account",
         "folder": "Workspace Connections"
       }
     }

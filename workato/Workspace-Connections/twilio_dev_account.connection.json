@@ -1,5 +1,5 @@
 {
-  "name": "ZT Dev Twilio account",
+  "name": "Twilio Dev Account",
   "provider": "twilio",
   "root_folder": false
 }

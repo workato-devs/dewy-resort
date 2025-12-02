@@ -738,8 +738,8 @@
       "keyword": "application",
       "provider": "stripe",
       "account_id": {
-        "zip_name": "Workspace Connections/zt_dev_stripe_account.connection.json",
-        "name": "ZT Dev Stripe account",
+        "zip_name": "Workspace Connections/stripe_dev_account.connection.json",
+        "name": "Stripe Dev Account",
         "folder": "Workspace Connections"
       },
       "skip_validation": false

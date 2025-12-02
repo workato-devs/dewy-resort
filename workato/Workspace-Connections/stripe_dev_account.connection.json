@@ -1,5 +1,5 @@
 {
-  "name": "ZT Dev Stripe account",
+  "name": "Stripe Dev Account",
   "provider": "stripe",
   "root_folder": false
 }

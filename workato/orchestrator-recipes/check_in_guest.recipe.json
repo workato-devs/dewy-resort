@@ -2474,7 +2474,7 @@
       "provider": "salesforce",
       "skip_validation": false,
       "account_id": {
-        "name": "ZT Dev account",
+        "name": "SF Dev Account",
         "folder": "Workspace Connections"
       }
     },
