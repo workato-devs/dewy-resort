@@ -212,8 +212,9 @@ Techniques demonstrated:
 
 **Prerequisites:**
 - Node.js 20+, Python 3.8+
-- [Workato account](https://www.workato.com/trial) (free trial)
-- [Salesforce Developer org](https://developer.salesforce.com/signup) (free)
+- [Workato Developer sandbox](https://www.workato.com/sandbox) (free Developer sandbox)
+- [Salesforce Developer org](https://developer.salesforce.com/signup) (free Developer Edition)
+- [Stripe Developer account](https://dashboard.stripe.com/register) (Stripe Developer sign up)
 
 ### 1. Clone and Install
 
@@ -294,7 +295,7 @@ npm run db:seed
 
 **Note:** The local SQLite database stores hotel app-specific data (user sessions, device states). Backend data (bookings, rooms, cases) lives in Salesforce and is accessed via Workato recipes exposed as REST API endpoints.
 
-**About MCP:** The Workato recipes implement the orchestrator and atomic skill patterns that would be exposed as MCP tools. The hotel app currently calls these recipes directly via REST API. For AI agent integration, these same recipes would be wrapped in an MCP server that exposes them as tools to LLMs.
+**About MCP:** The Workato recipes implement the orchestrator and atomic skill patterns that would be exposed as MCP tools. The hotel app currently calls these recipes directly via REST API. For AI agent integration, these same recipes would be exposed via  MCP server, so the recipes appear as tools to LLMs. This is what the hands-on workshop walks through in the initial unit. MCP servers are configured declaratively in Workato. 
 
 ### 5. Start Application
 
