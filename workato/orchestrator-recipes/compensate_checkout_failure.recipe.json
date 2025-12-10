@@ -1,0 +1,1880 @@
+{
+  "name": "Compensate checkout failure",
+  "version": 1,
+  "private": false,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_api_platform",
+    "name": "receive_request",
+    "as": "trigger",
+    "keyword": "trigger",
+    "dynamicPickListSelection": {
+      "response.responses.0.http_status_code": "200 - OK",
+      "response.responses.1.http_status_code": "400 - Bad Request",
+      "response.responses.2.http_status_code": "404 - Not Found",
+      "response.responses.3.http_status_code": "422 - Unprocessable Entity",
+      "response.responses.4.http_status_code": "500 - Internal Server Error"
+    },
+    "toggleCfg": {
+      "response.responses.0.http_status_code": true,
+      "response.responses.1.http_status_code": true,
+      "response.responses.2.http_status_code": true,
+      "response.responses.3.http_status_code": true,
+      "response.responses.4.http_status_code": true
+    },
+    "input": {
+      "request": {
+        "content_type": "json",
+        "schema": "[{\"name\":\"payment_intent_id\",\"label\":\"Payment intent ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe PaymentIntent ID from failed checkout\"},{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest email for Salesforce lookup\"},{\"name\":\"guest_id\",\"label\":\"Guest ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Salesforce Contact ID\"},{\"name\":\"idempotency_token\",\"label\":\"Idempotency token\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Unique token for refund idempotency\"},{\"name\":\"reason\",\"label\":\"Reason\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Compensation reason for audit\"}]"
+      },
+      "response": {
+        "content_type": "json",
+        "responses": [
+          {
+            "name": "Success",
+            "http_status_code": "200",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"compensation_id\",\"label\":\"Compensation ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"payment_intent_id\",\"label\":\"Payment intent ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"refund_id\",\"label\":\"Refund ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"refund_amount\",\"label\":\"Refund amount\",\"type\":\"integer\",\"control_type\":\"integer\"},{\"name\":\"refund_status\",\"label\":\"Refund status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"salesforce_reverted\",\"label\":\"Salesforce reverted\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"message\",\"label\":\"Message\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Validation Error",
+            "http_status_code": "400",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"details\",\"label\":\"Details\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Payment Not Found",
+            "http_status_code": "404",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"details\",\"label\":\"Details\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Payment Not Refundable",
+            "http_status_code": "422",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"details\",\"label\":\"Details\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Server Error",
+            "http_status_code": "500",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"details\",\"label\":\"Details\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          }
+        ]
+      }
+    },
+    "extended_output_schema": [
+      {
+        "label": "Context",
+        "name": "context",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Calling IP address",
+            "optional": true,
+            "type": "string",
+            "name": "calling_ip"
+          }
+        ],
+        "type": "object"
+      },
+      {
+        "label": "Request parameters",
+        "name": "request",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Payment intent ID",
+            "name": "payment_intent_id",
+            "type": "string",
+            "optional": false,
+            "hint": "Stripe PaymentIntent ID from failed checkout"
+          },
+          {
+            "control_type": "text",
+            "label": "Guest email",
+            "name": "guest_email",
+            "type": "string",
+            "optional": false,
+            "hint": "Guest email for Salesforce lookup"
+          },
+          {
+            "control_type": "text",
+            "label": "Guest ID",
+            "name": "guest_id",
+            "type": "string",
+            "optional": false,
+            "hint": "Salesforce Contact ID"
+          },
+          {
+            "control_type": "text",
+            "label": "Idempotency token",
+            "name": "idempotency_token",
+            "type": "string",
+            "optional": false,
+            "hint": "Unique token for refund idempotency"
+          },
+          {
+            "control_type": "text",
+            "label": "Reason",
+            "name": "reason",
+            "type": "string",
+            "optional": true,
+            "hint": "Compensation reason for audit"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "provider": "logger",
+            "name": "log_message",
+            "as": "log_start",
+            "keyword": "action",
+            "input": {
+              "message": "Starting compensation for payment_intent: #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"payment_intent_id\"]}')}"
+            },
+            "extended_input_schema": [
+              {
+                "control_type": "switch",
+                "default": false,
+                "disable_formula": true,
+                "extends_schema": true,
+                "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                "label": "Send to Workato log service",
+                "name": "user_logs_enabled",
+                "optional": true,
+                "type": "string"
+              }
+            ],
+            "uuid": "comp-start-log-001"
+          },
+          {
+            "number": 3,
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
+            "as": "retrieve_payment",
+            "keyword": "action",
+            "dynamicPickListSelection": {
+              "flow_id": "Retrieve Stripe payment status"
+            },
+            "toggleCfg": {
+              "flow_id": true
+            },
+            "input": {
+              "flow_id": {
+                "zip_name": "atomic-stripe-recipes/retrieve_stripe_payment_status.recipe.json",
+                "name": "Retrieve Stripe payment status",
+                "folder": "atomic-stripe-recipes",
+                "folder_full_path": "Home/atomic-stripe-recipes"
+              },
+              "parameters": {
+                "payment_intent_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"payment_intent_id\"]}')}"
+              }
+            },
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Payment intent ID",
+                    "name": "payment_intent_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "integer",
+                    "label": "Amount",
+                    "parse_output": "integer_conversion",
+                    "name": "amount",
+                    "type": "integer"
+                  },
+                  {
+                    "control_type": "integer",
+                    "label": "Amount received",
+                    "parse_output": "integer_conversion",
+                    "name": "amount_received",
+                    "type": "integer"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Currency",
+                    "name": "currency",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Charge ID",
+                    "name": "charge_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Customer ID",
+                    "name": "customer_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Created at",
+                    "name": "created_at",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Error code",
+                    "name": "error_code",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Error message",
+                    "name": "error_message",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Error decline code",
+                    "name": "error_decline_code",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Metadata guest ID",
+                    "name": "metadata_guest_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Metadata booking ID",
+                    "name": "metadata_booking_id",
+                    "type": "string"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Payment intent ID",
+                    "name": "payment_intent_id",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Stripe PaymentIntent ID"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "uuid": "comp-retrieve-pay-003"
+          },
+          {
+            "number": 4,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "equals_to",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"retrieve_payment\",\"path\":[\"result\",\"status\"]}')}",
+                  "rhs": "succeeded",
+                  "uuid": "comp-check-status-cond-001"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 5,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_payment_succeeded",
+                "keyword": "action",
+                "input": {
+                  "message": "Payment succeeded, issuing refund for charge: #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"retrieve_payment\",\"path\":[\"result\",\"charge_id\"]}')}"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "comp-log-success-005"
+              },
+              {
+                "number": 6,
+                "provider": "workato_recipe_function",
+                "name": "call_recipe",
+                "as": "create_refund",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "flow_id": "Create Stripe refund"
+                },
+                "toggleCfg": {
+                  "flow_id": true
+                },
+                "input": {
+                  "flow_id": {
+                    "zip_name": "atomic-stripe-recipes/create_stripe_refund.recipe.json",
+                    "name": "Create Stripe refund",
+                    "folder": "atomic-stripe-recipes",
+                    "folder_full_path": "Home/atomic-stripe-recipes"
+                  },
+                  "parameters": {
+                    "payment_intent_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"payment_intent_id\"]}')}",
+                    "reason": "requested_by_customer",
+                    "metadata_reason": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"reason\"]}')}",
+                    "idempotency_token": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"idempotency_token\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Refund ID",
+                        "name": "refund_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Payment intent ID",
+                        "name": "payment_intent_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "integer",
+                        "label": "Amount",
+                        "parse_output": "integer_conversion",
+                        "name": "amount",
+                        "type": "integer"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Reason",
+                        "name": "reason",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Created",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "created",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Created",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "created",
+                          "type": "boolean"
+                        }
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Parameters",
+                    "name": "parameters",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Payment intent ID",
+                        "name": "payment_intent_id",
+                        "type": "string",
+                        "optional": false,
+                        "hint": "Stripe PaymentIntent ID"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Reason",
+                        "name": "reason",
+                        "type": "string",
+                        "optional": true,
+                        "hint": "Refund reason (duplicate, fraudulent, requested_by_customer)"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Metadata reason",
+                        "name": "metadata_reason",
+                        "type": "string",
+                        "optional": true,
+                        "hint": "Detailed reason for metadata"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Idempotency token",
+                        "name": "idempotency_token",
+                        "type": "string",
+                        "optional": false,
+                        "hint": "Client-generated UUID"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "comp-create-refund-006"
+              },
+              {
+                "number": 7,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_refund_issued",
+                "keyword": "action",
+                "input": {
+                  "message": "Refund issued: #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_refund\",\"path\":[\"result\",\"refund_id\"]}')} - Now checking Salesforce state"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "comp-log-refund-007"
+              },
+              {
+                "number": 8,
+                "provider": "workato_recipe_function",
+                "name": "call_recipe",
+                "as": "search_booking",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "flow_id": "Search booking by contact and date"
+                },
+                "toggleCfg": {
+                  "flow_id": true
+                },
+                "input": {
+                  "flow_id": {
+                    "zip_name": "atomic-salesforce-recipes/search_booking_by_contact_and_date.recipe.json",
+                    "name": "Search booking by contact and date",
+                    "folder": "atomic-salesforce-recipes",
+                    "folder_full_path": "Home/atomic-salesforce-recipes"
+                  },
+                  "parameters": {
+                    "contact_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_id\"]}')}",
+                    "check_in_date": "=now.to_date"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "label": "Bookings",
+                        "name": "bookings",
+                        "type": "array",
+                        "of": "object",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Booking ID",
+                            "name": "booking_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Booking number",
+                            "name": "booking_number",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room ID",
+                            "name": "room_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room number",
+                            "name": "room_number",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room status",
+                            "name": "room_status",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Opportunity ID",
+                            "name": "opportunity_id",
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Parameters",
+                    "name": "parameters",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Contact ID",
+                        "name": "contact_id",
+                        "type": "string",
+                        "optional": false,
+                        "hint": "Salesforce Contact ID"
+                      },
+                      {
+                        "control_type": "date",
+                        "label": "Check-in date",
+                        "render_input": "date_conversion",
+                        "parse_output": "date_conversion",
+                        "name": "check_in_date",
+                        "type": "date",
+                        "optional": false,
+                        "hint": "Check-in date (ISO 8601 format)"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Booking status",
+                        "name": "status",
+                        "type": "string",
+                        "optional": true,
+                        "hint": "Booking status to filter by"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "comp-search-booking-008"
+              },
+              {
+                "number": 9,
+                "keyword": "if",
+                "input": {
+                  "type": "compound",
+                  "operand": "and",
+                  "conditions": [
+                    {
+                      "operand": "present",
+                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}",
+                      "uuid": "comp-booking-found-cond-001"
+                    }
+                  ]
+                },
+                "block": [
+                  {
+                    "number": 10,
+                    "provider": "logger",
+                    "name": "log_message",
+                    "as": "log_booking_found",
+                    "keyword": "action",
+                    "input": {
+                      "message": "Booking found, reverting Salesforce state for booking: #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}"
+                    },
+                    "extended_input_schema": [
+                      {
+                        "control_type": "switch",
+                        "default": false,
+                        "disable_formula": true,
+                        "extends_schema": true,
+                        "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                        "label": "Send to Workato log service",
+                        "name": "user_logs_enabled",
+                        "optional": true,
+                        "type": "string"
+                      }
+                    ],
+                    "uuid": "comp-log-booking-010"
+                  },
+                  {
+                    "number": 11,
+                    "provider": "workato_recipe_function",
+                    "name": "call_recipe",
+                    "as": "update_booking",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "flow_id": "Update booking status"
+                    },
+                    "toggleCfg": {
+                      "flow_id": true
+                    },
+                    "input": {
+                      "flow_id": {
+                        "zip_name": "atomic-salesforce-recipes/update_booking_status.recipe.json",
+                        "name": "Update booking status",
+                        "folder": "atomic-salesforce-recipes",
+                        "folder_full_path": "Home/atomic-salesforce-recipes"
+                      },
+                      "parameters": {
+                        "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}",
+                        "status": "Checked In",
+                        "checkout_date": "=null"
+                      }
+                    },
+                    "extended_output_schema": [
+                      {
+                        "label": "Result",
+                        "name": "result",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Booking ID",
+                            "name": "booking_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Status",
+                            "name": "status",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "checkbox",
+                            "label": "Updated",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "updated",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Updated",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "updated",
+                              "type": "boolean"
+                            }
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "label": "Parameters",
+                        "name": "parameters",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Booking ID",
+                            "name": "booking_id",
+                            "type": "string",
+                            "optional": false,
+                            "hint": "Salesforce Booking ID"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Status",
+                            "name": "status",
+                            "type": "string",
+                            "optional": false,
+                            "hint": "New booking status (e.g., Checked Out)"
+                          },
+                          {
+                            "control_type": "date",
+                            "label": "Checkout date",
+                            "render_input": "date_conversion",
+                            "parse_output": "date_conversion",
+                            "name": "checkout_date",
+                            "type": "date",
+                            "optional": false,
+                            "hint": "Date guest checked out (ISO 8601 format)"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "uuid": "comp-update-booking-011"
+                  },
+                  {
+                    "number": 12,
+                    "provider": "workato_recipe_function",
+                    "name": "call_recipe",
+                    "as": "update_room",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "flow_id": "Update room status"
+                    },
+                    "toggleCfg": {
+                      "flow_id": true
+                    },
+                    "input": {
+                      "flow_id": {
+                        "zip_name": "atomic-salesforce-recipes/update_room_status.recipe.json",
+                        "name": "Update room status",
+                        "folder": "atomic-salesforce-recipes",
+                        "folder_full_path": "Home/atomic-salesforce-recipes"
+                      },
+                      "parameters": {
+                        "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"room_id\"]}')}",
+                        "status": "Occupied",
+                        "current_guest_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_id\"]}')}"
+                      }
+                    },
+                    "extended_output_schema": [
+                      {
+                        "label": "Result",
+                        "name": "result",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Room ID",
+                            "name": "room_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Status",
+                            "name": "status",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Current guest ID",
+                            "name": "current_guest_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "checkbox",
+                            "label": "Updated",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "updated",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Updated",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "updated",
+                              "type": "boolean"
+                            }
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "label": "Parameters",
+                        "name": "parameters",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Room ID",
+                            "name": "room_id",
+                            "type": "string",
+                            "optional": false,
+                            "hint": "Salesforce Hotel_Room__c ID"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Status",
+                            "name": "status",
+                            "type": "string",
+                            "optional": false,
+                            "hint": "New room status (e.g., Cleaning, Occupied, Vacant)"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Current guest ID",
+                            "name": "current_guest_id",
+                            "type": "string",
+                            "optional": true,
+                            "hint": "Contact ID to assign (null to clear guest)"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "uuid": "comp-update-room-012"
+                  },
+                  {
+                    "number": 13,
+                    "provider": "workato_recipe_function",
+                    "name": "call_recipe",
+                    "as": "update_opportunity",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "flow_id": "Update opportunity stage"
+                    },
+                    "toggleCfg": {
+                      "flow_id": true
+                    },
+                    "input": {
+                      "flow_id": {
+                        "zip_name": "atomic-salesforce-recipes/update_opportunity_stage.recipe.json",
+                        "name": "Update opportunity stage",
+                        "folder": "atomic-salesforce-recipes",
+                        "folder_full_path": "Home/atomic-salesforce-recipes"
+                      },
+                      "parameters": {
+                        "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"opportunity_id\"]}')}",
+                        "stage_name": "Negotiation/Review",
+                        "close_date": "=null",
+                        "payment_id": "=null"
+                      }
+                    },
+                    "extended_output_schema": [
+                      {
+                        "label": "Result",
+                        "name": "result",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Opportunity ID",
+                            "name": "opportunity_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Stage name",
+                            "name": "stage_name",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Payment ID",
+                            "name": "payment_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "checkbox",
+                            "label": "Updated",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "updated",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Updated",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "updated",
+                              "type": "boolean"
+                            }
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "label": "Parameters",
+                        "name": "parameters",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Opportunity ID",
+                            "name": "opportunity_id",
+                            "type": "string",
+                            "optional": false,
+                            "hint": "Salesforce Opportunity ID"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Stage name",
+                            "name": "stage_name",
+                            "type": "string",
+                            "optional": false,
+                            "hint": "New opportunity stage (e.g., Closed Won)"
+                          },
+                          {
+                            "control_type": "date",
+                            "label": "Close date",
+                            "render_input": "date_conversion",
+                            "parse_output": "date_conversion",
+                            "name": "close_date",
+                            "type": "date",
+                            "optional": false,
+                            "hint": "Date opportunity closed (ISO 8601 format)"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Payment ID",
+                            "name": "payment_id",
+                            "type": "string",
+                            "optional": false,
+                            "hint": "Stripe charge ID for reconciliation"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "uuid": "comp-update-opp-013"
+                  },
+                  {
+                    "number": 14,
+                    "provider": "workato_api_platform",
+                    "name": "return_response",
+                    "as": "return_success_reverted",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "http_status_code": "200 - OK"
+                    },
+                    "toggleCfg": {
+                      "http_status_code": true
+                    },
+                    "input": {
+                      "http_status_code": "200",
+                      "response": {
+                        "success": "true",
+                        "compensation_id": "='comp_' + now.to_i.to_s",
+                        "payment_intent_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"payment_intent_id\"]}')}",
+                        "refund_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_refund\",\"path\":[\"result\",\"refund_id\"]}')}",
+                        "refund_amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_refund\",\"path\":[\"result\",\"amount\"]}')}",
+                        "refund_status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_refund\",\"path\":[\"result\",\"status\"]}')}",
+                        "salesforce_reverted": "true",
+                        "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}",
+                        "message": "Payment refunded and Salesforce state reverted successfully"
+                      }
+                    },
+                    "extended_output_schema": [
+                      {
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "Success",
+                            "200"
+                          ],
+                          [
+                            "Validation Error",
+                            "400"
+                          ],
+                          [
+                            "Payment Not Found",
+                            "404"
+                          ],
+                          [
+                            "Payment Not Refundable",
+                            "422"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "label": "Response body",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "checkbox",
+                            "label": "Success",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "success",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Success",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "success",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Compensation ID",
+                            "name": "compensation_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Payment intent ID",
+                            "name": "payment_intent_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Refund ID",
+                            "name": "refund_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "integer",
+                            "label": "Refund amount",
+                            "parse_output": "integer_conversion",
+                            "name": "refund_amount",
+                            "type": "integer"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Refund status",
+                            "name": "refund_status",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "checkbox",
+                            "label": "Salesforce reverted",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "salesforce_reverted",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Salesforce reverted",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "salesforce_reverted",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Booking ID",
+                            "name": "booking_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Message",
+                            "name": "message",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "Success",
+                            "200"
+                          ],
+                          [
+                            "Validation Error",
+                            "400"
+                          ],
+                          [
+                            "Payment Not Found",
+                            "404"
+                          ],
+                          [
+                            "Payment Not Refundable",
+                            "422"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "label": "Response body",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "checkbox",
+                            "label": "Success",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "success",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Success",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "success",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Compensation ID",
+                            "name": "compensation_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Payment intent ID",
+                            "name": "payment_intent_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Refund ID",
+                            "name": "refund_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "integer",
+                            "label": "Refund amount",
+                            "parse_output": "integer_conversion",
+                            "name": "refund_amount",
+                            "type": "integer"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Refund status",
+                            "name": "refund_status",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "checkbox",
+                            "label": "Salesforce reverted",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "salesforce_reverted",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Salesforce reverted",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "salesforce_reverted",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Booking ID",
+                            "name": "booking_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Message",
+                            "name": "message",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "uuid": "comp-return-reverted-011"
+                  }
+                ],
+                "uuid": "comp-if-booking-found-009"
+              },
+              {
+                "number": 15,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_success",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "200 - OK"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "200",
+                  "response": {
+                    "success": "true",
+                    "compensation_id": "='comp_' + now.to_i.to_s",
+                    "payment_intent_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"payment_intent_id\"]}')}",
+                    "refund_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_refund\",\"path\":[\"result\",\"refund_id\"]}')}",
+                    "refund_amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_refund\",\"path\":[\"result\",\"amount\"]}')}",
+                    "refund_status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_refund\",\"path\":[\"result\",\"status\"]}')}",
+                    "salesforce_reverted": "false",
+                    "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}",
+                    "message": "Payment refunded successfully - Salesforce state checked but no reversion needed"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Validation Error",
+                        "400"
+                      ],
+                      [
+                        "Payment Not Found",
+                        "404"
+                      ],
+                      [
+                        "Payment Not Refundable",
+                        "422"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Compensation ID",
+                        "name": "compensation_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Payment intent ID",
+                        "name": "payment_intent_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Refund ID",
+                        "name": "refund_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "integer",
+                        "label": "Refund amount",
+                        "parse_output": "integer_conversion",
+                        "name": "refund_amount",
+                        "type": "integer"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Refund status",
+                        "name": "refund_status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Salesforce reverted",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "salesforce_reverted",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Salesforce reverted",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "salesforce_reverted",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Booking ID",
+                        "name": "booking_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Message",
+                        "name": "message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Validation Error",
+                        "400"
+                      ],
+                      [
+                        "Payment Not Found",
+                        "404"
+                      ],
+                      [
+                        "Payment Not Refundable",
+                        "422"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Compensation ID",
+                        "name": "compensation_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Payment intent ID",
+                        "name": "payment_intent_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Refund ID",
+                        "name": "refund_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "integer",
+                        "label": "Refund amount",
+                        "parse_output": "integer_conversion",
+                        "name": "refund_amount",
+                        "type": "integer"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Refund status",
+                        "name": "refund_status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Salesforce reverted",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "salesforce_reverted",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Salesforce reverted",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "salesforce_reverted",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Booking ID",
+                        "name": "booking_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Message",
+                        "name": "message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "comp-return-success-007"
+              }
+            ],
+            "uuid": "comp-if-succeeded-004"
+          },
+          {
+            "number": 16,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "or",
+              "conditions": [
+                {
+                  "operand": "not_equals_to",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"retrieve_payment\",\"path\":[\"result\",\"status\"]}')}",
+                  "rhs": "succeeded",
+                  "uuid": "comp-not-succeeded-cond-001"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 17,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_not_refundable",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "422 - Unprocessable Entity"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "422",
+                  "response": {
+                    "success": "false",
+                    "error_code": "PAYMENT_NOT_REFUNDABLE",
+                    "error_message": "Payment did not succeed, cannot issue refund",
+                    "details": "Payment status: #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"retrieve_payment\",\"path\":[\"result\",\"status\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Validation Error",
+                        "400"
+                      ],
+                      [
+                        "Payment Not Found",
+                        "404"
+                      ],
+                      [
+                        "Payment Not Refundable",
+                        "422"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Validation Error",
+                        "400"
+                      ],
+                      [
+                        "Payment Not Found",
+                        "404"
+                      ],
+                      [
+                        "Payment Not Refundable",
+                        "422"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "comp-return-not-refund-009"
+              }
+            ],
+            "uuid": "comp-else-not-success-008"
+          },
+          {
+            "number": 18,
+            "as": "catch_error",
+            "keyword": "catch",
+            "input": {
+            },
+            "block": [
+              {
+                "number": 19,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "Compensation error: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "comp-log-error-011"
+              },
+              {
+                "number": 20,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_error",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "500 - Internal Server Error"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "500",
+                  "response": {
+                    "success": "false",
+                    "error_code": "INTERNAL_ERROR",
+                    "error_message": "Compensation process failed",
+                    "details": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Validation Error",
+                        "400"
+                      ],
+                      [
+                        "Payment Not Found",
+                        "404"
+                      ],
+                      [
+                        "Payment Not Refundable",
+                        "422"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Validation Error",
+                        "400"
+                      ],
+                      [
+                        "Payment Not Found",
+                        "404"
+                      ],
+                      [
+                        "Payment Not Refundable",
+                        "422"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "comp-return-error-012"
+              }
+            ],
+            "uuid": "comp-catch-010"
+          }
+        ],
+        "uuid": "comp-try-001"
+      }
+    ],
+    "uuid": "comp-trigger-001"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_api_platform",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "workato_recipe_function",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}
