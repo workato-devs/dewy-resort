@@ -14,12 +14,6 @@ import {
 import {
   WorkatoResponse,
   RequestOptions,
-  CreateCaseRequest,
-  CaseResponse,
-  ContactData,
-  ContactResponse,
-  SearchCriteria,
-  SearchCasesRequest,
 } from './types';
 
 /**
@@ -265,83 +259,16 @@ export class WorkatoClient {
     }
   }
 
-  /**
-   * Create a Salesforce Case
-   */
-  async createCase(caseData: CreateCaseRequest): Promise<WorkatoResponse<CaseResponse>> {
-    return this.request<CaseResponse>(
-      'POST',
-      '/salesforce/create-case',
-      caseData,
-      { skipCache: true }
-    );
-  }
-
-  /**
-   * Get a Salesforce Case by ID
-   */
-  async getCase(caseId: string): Promise<WorkatoResponse<CaseResponse>> {
-    return this.request<CaseResponse>(
-      'GET',
-      `/salesforce/get-case-info/${caseId}`
-    );
-  }
-
-  /**
-   * Upsert a Salesforce Contact
-   */
-  async upsertContact(contactData: ContactData): Promise<WorkatoResponse<ContactResponse>> {
-    return this.request<ContactResponse>(
-      'POST',
-      '/salesforce/upsert-contact',
-      contactData,
-      { skipCache: true }
-    );
-  }
-
-  /**
-   * Get a Salesforce Contact by ID
-   */
-  async getContact(contactId: string): Promise<WorkatoResponse<ContactResponse>> {
-    return this.request<ContactResponse>(
-      'GET',
-      `/salesforce/get-contact-info/${contactId}`
-    );
-  }
-
-  /**
-   * Search Salesforce Contacts
-   */
-  async searchContacts(criteria: SearchCriteria): Promise<WorkatoResponse<ContactResponse[]>> {
-    // Enforce maximum limit
-    const searchCriteria = {
-      ...criteria,
-      limit: Math.min(criteria.limit || 50, 50),
-    };
-
-    return this.request<ContactResponse[]>(
-      'POST',
-      '/salesforce/search-contacts',
-      searchCriteria
-    );
-  }
-
-  /**
-   * Search Salesforce Cases
-   */
-  async searchCases(criteria: SearchCasesRequest): Promise<WorkatoResponse<CaseResponse[]>> {
-    // Enforce maximum limit
-    const searchCriteria = {
-      ...criteria,
-      limit: Math.min(criteria.limit || 100, 100),
-    };
-
-    return this.request<CaseResponse[]>(
-      'POST',
-      '/salesforce/search-cases',
-      searchCriteria
-    );
-  }
+  // NOTE: Previously contained methods for legacy Salesforce API endpoints
+  // (createCase, getCase, upsertContact, getContact, searchContacts, searchCases)
+  // These were removed in Dec 2025 when the workato/Salesforce/ API collection was deprecated.
+  //
+  // For Salesforce operations, use SalesforceClient instead:
+  // - import { getSalesforceClient } from '@/lib/workato/config';
+  // - const client = getSalesforceClient();
+  // - await client.createServiceRequest(...), client.searchRooms(...), etc.
+  //
+  // See docs/TESTING.md for future testing plans when MCP server deployment is available.
 
   /**
    * Get logger instance (for testing/debugging)
@@ -383,24 +310,10 @@ export class WorkatoClient {
         let mockData: any;
 
         // Generate mock response based on endpoint
-        if (endpoint.includes('/salesforce/create-case')) {
-          mockData = this.generateMockCaseResponse(data);
-        } else if (endpoint.includes('/salesforce/get-case-info/')) {
-          const caseId = endpoint.split('/').pop();
-          mockData = this.generateMockCaseResponse({ id: caseId });
-        } else if (endpoint.includes('/salesforce/upsert-contact')) {
-          mockData = this.generateMockContactResponse(data);
-        } else if (endpoint.includes('/salesforce/get-contact-info/')) {
-          const contactId = endpoint.split('/').pop();
-          mockData = this.generateMockContactResponse({ id: contactId });
-        } else if (endpoint.includes('/salesforce/search-contacts')) {
-          mockData = this.generateMockContactSearchResponse(data);
-        } else if (endpoint.includes('/salesforce/search-cases')) {
-          mockData = this.generateMockCaseSearchResponse(data);
-        } else {
-          // Generic mock response
-          mockData = { success: true, message: 'Mock response' };
-        }
+        // Note: Mock handlers for legacy Salesforce endpoints (create-case, get-case-info,
+        // upsert-contact, get-contact-info, search-contacts, search-cases) were removed Dec 2025.
+        // Generic mock response
+        mockData = { success: true, message: 'Mock response' };
 
         // Log mock response
         this.logger.logResponse({
@@ -422,94 +335,9 @@ export class WorkatoClient {
     });
   }
 
-  /**
-   * Generate mock Case response
-   */
-  private generateMockCaseResponse(data: any): CaseResponse {
-    const caseId = data?.id || `MOCK-CASE-${Date.now()}`;
-    const caseNumber = `CASE-${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`;
-
-    return {
-      id: caseId,
-      caseNumber,
-      status: data?.status || 'New',
-      priority: data?.priority || 'Medium',
-      subject: data?.subject || `Mock Case: ${data?.type || 'Service Request'}`,
-      description: data?.description || 'Mock case description',
-      type: data?.type || 'Service Request',
-      createdDate: new Date().toISOString(),
-      updatedDate: new Date().toISOString(),
-      contactId: data?.contactId,
-    };
-  }
-
-  /**
-   * Generate mock Contact response
-   */
-  private generateMockContactResponse(data: any): ContactResponse {
-    const contactId = data?.id || `MOCK-CONTACT-${Date.now()}`;
-    const firstName = data?.firstName || 'Mock';
-    const lastName = data?.lastName || 'User';
-
-    return {
-      id: contactId,
-      email: data?.email || `mock.user${Date.now()}@example.com`,
-      name: `${firstName} ${lastName}`,
-      phone: data?.phone || '+1-555-0100',
-    };
-  }
-
-  /**
-   * Generate mock Contact search response
-   */
-  private generateMockContactSearchResponse(data: SearchCriteria): ContactResponse[] {
-    const limit = Math.min(data.limit || 10, 50);
-    const results: ContactResponse[] = [];
-
-    // Generate 3-5 mock contacts
-    const count = Math.min(Math.floor(Math.random() * 3) + 3, limit);
-
-    for (let i = 0; i < count; i++) {
-      results.push({
-        id: `MOCK-CONTACT-${Date.now()}-${i}`,
-        email: `mock.user${i}@example.com`,
-        name: `Mock User ${i + 1}`,
-        phone: `+1-555-010${i}`,
-      });
-    }
-
-    return results;
-  }
-
-  /**
-   * Generate mock Case search response
-   */
-  private generateMockCaseSearchResponse(data: SearchCasesRequest): CaseResponse[] {
-    const limit = Math.min(data.limit || 10, 100);
-    const results: CaseResponse[] = [];
-
-    // Generate 5-10 mock cases
-    const count = Math.min(Math.floor(Math.random() * 6) + 5, limit);
-    const statuses = ['New', 'In Progress', 'Closed'];
-    const priorities = ['Low', 'Medium', 'High'];
-    const types = ['Housekeeping', 'Room Service', 'Maintenance', 'Concierge'];
-
-    for (let i = 0; i < count; i++) {
-      results.push({
-        id: `MOCK-CASE-${Date.now()}-${i}`,
-        caseNumber: `CASE-${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`,
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        priority: priorities[Math.floor(Math.random() * priorities.length)],
-        subject: `Mock ${types[Math.floor(Math.random() * types.length)]} Request`,
-        description: `Mock case description ${i + 1}`,
-        type: types[Math.floor(Math.random() * types.length)],
-        createdDate: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedDate: new Date().toISOString(),
-      });
-    }
-
-    return results;
-  }
+  // NOTE: Mock generator methods for legacy Salesforce endpoints removed Dec 2025
+  // (generateMockCaseResponse, generateMockContactResponse,
+  //  generateMockContactSearchResponse, generateMockCaseSearchResponse)
 
   /**
    * Generate a unique correlation ID

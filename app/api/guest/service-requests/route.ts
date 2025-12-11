@@ -13,7 +13,6 @@ import { mapServiceRequest } from '@/lib/db/mappers';
 import { ServiceRequestRow, UserRow, ServiceRequestType, Priority } from '@/types';
 import { ValidationError, NotFoundError, ExternalServiceError } from '@/lib/errors';
 import { createErrorResponse } from '@/lib/errors/api-response';
-import { WorkatoClient } from '@/lib/workato/client';
 import { generateIdempotencyToken } from '@/lib/utils/idempotency';
 
 /**
@@ -32,42 +31,16 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json({ requests });
     } else {
-      // Use local database (legacy behavior)
+      // Use local database only (no Salesforce enrichment)
       const requestsQuery = `
-        SELECT * FROM service_requests 
-        WHERE guest_id = ? 
+        SELECT * FROM service_requests
+        WHERE guest_id = ?
         ORDER BY created_at DESC
       `;
       const requestRows = executeQuery<ServiceRequestRow>(requestsQuery, [session.userId]);
       const requests = requestRows.map(mapServiceRequest);
-      
-      // Optionally enrich with Salesforce data if Case IDs exist
-      const workatoClient = new WorkatoClient();
-      const enrichedRequests = await Promise.all(
-        requests.map(async (request) => {
-          if (request.salesforceTicketId) {
-            try {
-              const caseResponse = await workatoClient.getCase(request.salesforceTicketId);
-              if (caseResponse.success && caseResponse.data) {
-                return {
-                  ...request,
-                  salesforceData: {
-                    caseNumber: caseResponse.data.caseNumber,
-                    status: caseResponse.data.status,
-                    createdDate: caseResponse.data.createdDate,
-                  },
-                };
-              }
-            } catch (error) {
-              // Continue without Salesforce data if fetch fails
-              console.warn(`Failed to fetch Salesforce Case ${request.salesforceTicketId}:`, error);
-            }
-          }
-          return request;
-        })
-      );
-      
-      return NextResponse.json({ requests: enrichedRequests });
+
+      return NextResponse.json({ requests });
     }
     
   } catch (error) {
@@ -136,78 +109,36 @@ export async function POST(request: NextRequest) {
         request: serviceRequest,
       }, { status: 201 });
     } else {
-      // Use local database (legacy behavior with optional Salesforce Case integration)
-      let salesforceTicketId: string | undefined;
-      let correlationId: string | undefined;
-      
-      try {
-        // Check for existing open cases for this room and type to avoid duplicates
-        const existingRequests = executeQuery<ServiceRequestRow>(
-          `SELECT * FROM service_requests 
-           WHERE room_number = ? 
-           AND type = ? 
-           AND status IN ('pending', 'in_progress')
-           AND description = ?
-           ORDER BY created_at DESC
-           LIMIT 1`,
-          [guest.room_number, type, description]
-        );
-        
-        // If there's an existing open request with the same description, reuse its ticket ID
-        if (existingRequests.length > 0 && existingRequests[0].salesforce_ticket_id) {
-          salesforceTicketId = existingRequests[0].salesforce_ticket_id;
-          console.log(`Reusing existing Salesforce ticket ${salesforceTicketId} for similar request`);
-        } else {
-          // Create new case only if no existing open case found
-          const workatoClient = new WorkatoClient();
-          const caseResponse = await workatoClient.createCase({
-            type,
-            guestName: guest.name,
-            roomNumber: guest.room_number,
-            priority,
-            description,
-          });
-          
-          correlationId = caseResponse.correlationId;
-          
-          if (caseResponse.success && caseResponse.data) {
-            salesforceTicketId = caseResponse.data.id;
-          } else {
-            console.error('Workato API error:', caseResponse.error);
-          }
-        }
-      } catch (workatoError) {
-        // Continue even if Workato fails - graceful degradation
-        console.warn('Failed to call Workato API, continuing without ticket ID:', workatoError);
-      }
-      
-      // Create service request in database
+      // Use local database only (no Salesforce Case integration)
+      // Note: When SALESFORCE_ENABLED=true, Salesforce Case creation
+      // is handled by SalesforceClient.createServiceRequest()
+
       const requestId = generateId();
       const idempotencyToken = generateIdempotencyToken();
       const now = formatDate(new Date());
-      
+
+      // Create service request in local database only
       executeUpdate(
         `INSERT INTO service_requests (
           id, guest_id, room_number, type, priority, description, status, salesforce_ticket_id, idempotency_token, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [requestId, session.userId, guest.room_number, type, priority, description, 'pending', salesforceTicketId || null, idempotencyToken, now]
+        [requestId, session.userId, guest.room_number, type, priority, description, 'pending', null, idempotencyToken, now]
       );
-      
+
       // Fetch the created request
       const createdRequest = executeQueryOne<ServiceRequestRow>(
         `SELECT * FROM service_requests WHERE id = ?`,
         [requestId]
       );
-      
+
       if (!createdRequest) {
         throw new ValidationError('Failed to create service request');
       }
-      
+
       return NextResponse.json({
         success: true,
         request: mapServiceRequest(createdRequest),
-        idempotency_token: idempotencyToken, // Include for tracking
-        correlationId, // Include correlation ID for debugging
+        idempotency_token: idempotencyToken,
       }, { status: 201 });
     }
     
