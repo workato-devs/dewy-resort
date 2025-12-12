@@ -1,6 +1,6 @@
 {
   "name": "Check in guest",
-  "version": 2,
+  "version": 1,
   "private": false,
   "concurrency": 1,
   "code": {
@@ -24,7 +24,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest email address\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":true,\"hint\":\"Check-in date (ISO 8601 format, defaults to today)\"},{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Salesforce Booking ID (optional, for disambiguation)\"}]"
+        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest email address\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":true,\"hint\":\"Check-in date (ISO 8601 format, defaults to today)\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking confirmation number (optional, for disambiguation)\"}]"
       },
       "response": {
         "content_type": "json",
@@ -32,7 +32,7 @@
           {
             "name": "Success",
             "http_status_code": "200",
-            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_type\",\"label\":\"Room type\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"floor\",\"label\":\"Floor\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"check_out_date\",\"label\":\"Check-out date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"total_nights\",\"label\":\"Total nights\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"guest_name\",\"label\":\"Guest name\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"checked_in_at\",\"label\":\"Checked in at\",\"type\":\"date_time\",\"control_type\":\"date_time\"}]"
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_type\",\"label\":\"Room type\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"floor\",\"label\":\"Floor\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"check_out_date\",\"label\":\"Check-out date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"total_nights\",\"label\":\"Total nights\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"guest_name\",\"label\":\"Guest name\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"checked_in_at\",\"label\":\"Checked in at\",\"type\":\"date_time\",\"control_type\":\"date_time\"}]"
           },
           {
             "name": "Not Found",
@@ -263,11 +263,11 @@
           },
           {
             "control_type": "text",
-            "label": "Booking ID",
-            "name": "booking_id",
+            "label": "Booking number",
+            "name": "booking_number",
             "type": "string",
             "optional": true,
-            "hint": "Salesforce Booking ID (optional, for disambiguation)"
+            "hint": "Booking confirmation number (optional, for disambiguation)"
           }
         ],
         "type": "object"
@@ -291,6 +291,7 @@
             },
             "input": {
               "flow_id": {
+                "zip_name": "atomic-salesforce-recipes/upsert_case.recipe.json",
                 "name": "Upsert case",
                 "folder": "atomic-salesforce-recipes",
                 "folder_full_path": "Home/atomic-salesforce-recipes"
@@ -559,6 +560,7 @@
             },
             "input": {
               "flow_id": {
+                "zip_name": "atomic-salesforce-recipes/upsert_case.recipe.json",
                 "name": "Upsert case",
                 "folder": "atomic-salesforce-recipes",
                 "folder_full_path": "Home/atomic-salesforce-recipes"
@@ -893,8 +895,8 @@
                   "response": {
                     "success": "false",
                     "error_code": "MULTIPLE_RESERVATIONS",
-                    "error_message": "Multiple reservations found for guest on check-in date. Please specify booking_id to disambiguate.",
-                    "details": "='guest_email: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}') + ', check_in_date: ' + (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}') : now.to_date.to_s) + ', bookings: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\"]}').to_json + ', action_required: Specify booking_id to disambiguate'"
+                    "error_message": "Multiple reservations found for guest on check-in date. Please specify room_number or booking_number to disambiguate.",
+                    "details": "='guest_email: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}') + ', check_in_date: ' + (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}') : now.to_date.to_s) + ', bookings: ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\"]}').to_json + ', action_required: Specify room_number or booking_number to disambiguate'"
                   }
                 },
                 "extended_output_schema": [
@@ -1977,7 +1979,6 @@
               "http_status_code": "200",
               "response": {
                 "success": true,
-                "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}",
                 "booking_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_number\"]}')}",
                 "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"room_number\"]}')}",
                 "room_type": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"room_type\"]}')}",
@@ -1987,7 +1988,6 @@
                 "total_nights": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"total_nights\"]}')}",
                 "guest_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"first_name\"]}')} + ' ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"last_name\"]}'})",
                 "guest_email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"email\"]}')}",
-                "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"opportunity_id\"]}')}",
                 "checked_in_at": "=now"
               }
             },
@@ -2037,12 +2037,6 @@
                       "name": "success",
                       "type": "boolean"
                     }
-                  },
-                  {
-                    "control_type": "text",
-                    "label": "Booking ID",
-                    "name": "booking_id",
-                    "type": "string"
                   },
                   {
                     "control_type": "text",
@@ -2102,12 +2096,6 @@
                     "control_type": "text",
                     "label": "Guest email",
                     "name": "guest_email",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "text",
-                    "label": "Opportunity ID",
-                    "name": "opportunity_id",
                     "type": "string"
                   },
                   {
@@ -2171,12 +2159,6 @@
                   },
                   {
                     "control_type": "text",
-                    "label": "Booking ID",
-                    "name": "booking_id",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "text",
                     "label": "Booking number",
                     "name": "booking_number",
                     "type": "string"
@@ -2233,12 +2215,6 @@
                     "control_type": "text",
                     "label": "Guest email",
                     "name": "guest_email",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "text",
-                    "label": "Opportunity ID",
-                    "name": "opportunity_id",
                     "type": "string"
                   },
                   {
@@ -2476,7 +2452,7 @@
       "account_id": {
         "name": "SF Dev Account",
         "folder": "Workspace Connections"
-      }
+      }    
     },
     {
       "keyword": "application",

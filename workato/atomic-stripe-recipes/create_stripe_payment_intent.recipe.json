@@ -10,7 +10,7 @@
     "as": "trigger",
     "keyword": "trigger",
     "input": {
-      "parameters_schema_json": "[{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":false,\"hint\":\"Amount in cents (USD)\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Three-letter ISO currency code\"},{\"name\":\"customer_id\",\"label\":\"Customer ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe customer ID\"},{\"name\":\"description\",\"label\":\"Description\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Payment description (user-facing)\"},{\"name\":\"guest_id\",\"label\":\"Guest ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Internal guest/contact ID (metadata)\"},{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Salesforce Booking ID (metadata)\"},{\"name\":\"idempotency_token\",\"label\":\"Idempotency token\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Client-generated UUID\"}]",
+      "parameters_schema_json": "[{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":false,\"hint\":\"Amount in cents (USD)\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Three-letter ISO currency code\"},{\"name\":\"customer_id\",\"label\":\"Customer ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe customer ID\"},{\"name\":\"description\",\"label\":\"Description\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Payment description (user-facing)\"},{\"name\":\"guest_id\",\"label\":\"Guest ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Internal guest/contact ID (metadata)\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking confirmation number (metadata)\"},{\"name\":\"idempotency_token\",\"label\":\"Idempotency token\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Client-generated UUID\"}]",
       "result_schema_json": "[{\"name\":\"payment_intent_id\",\"label\":\"Payment intent ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"client_secret\",\"label\":\"Client secret\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"integer\",\"control_type\":\"integer\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"created\",\"label\":\"Created\",\"type\":\"boolean\",\"control_type\":\"checkbox\"}]"
     },
     "extended_output_schema": [
@@ -61,11 +61,11 @@
           },
           {
             "control_type": "text",
-            "label": "Booking ID",
-            "name": "booking_id",
+            "label": "Booking number",
+            "name": "booking_number",
             "type": "string",
             "optional": true,
-            "hint": "Salesforce Booking ID (metadata)"
+            "hint": "Booking confirmation number (metadata)"
           },
           {
             "control_type": "text",
@@ -98,14 +98,14 @@
               "verb": "post",
               "response_type": "json",
               "input": {
-                "schema": "[{\"name\":\"amount\",\"type\":\"string\",\"optional\":false,\"label\":\"Amount\",\"hint\":\"Amount in cents\",\"details\":{\"real_name\":\"amount\"},\"control_type\":\"text\"},{\"name\":\"currency\",\"type\":\"string\",\"optional\":false,\"label\":\"Currency\",\"hint\":\"Three-letter ISO code\",\"details\":{\"real_name\":\"currency\"},\"control_type\":\"text\"},{\"name\":\"customer\",\"type\":\"string\",\"optional\":false,\"label\":\"Customer\",\"hint\":\"Customer ID\",\"details\":{\"real_name\":\"customer\"},\"control_type\":\"text\"},{\"name\":\"description\",\"type\":\"string\",\"optional\":false,\"label\":\"Description\",\"hint\":\"Payment description\",\"details\":{\"real_name\":\"description\"},\"control_type\":\"text\"},{\"name\":\"metadata[guest_id]\",\"type\":\"string\",\"optional\":false,\"label\":\"Metadata guest ID\",\"hint\":\"Guest ID\",\"details\":{\"real_name\":\"metadata[guest_id]\"},\"control_type\":\"text\"},{\"name\":\"metadata[booking_id]\",\"type\":\"string\",\"optional\":true,\"label\":\"Metadata booking ID\",\"hint\":\"Booking ID\",\"details\":{\"real_name\":\"metadata[booking_id]\"},\"control_type\":\"text\"},{\"name\":\"metadata[source]\",\"type\":\"string\",\"optional\":false,\"label\":\"Metadata source\",\"hint\":\"Source system\",\"details\":{\"real_name\":\"metadata[source]\"},\"control_type\":\"text\"},{\"name\":\"automatic_payment_methods[enabled]\",\"type\":\"string\",\"optional\":false,\"label\":\"Automatic payment methods enabled\",\"hint\":\"Enable automatic payment methods\",\"details\":{\"real_name\":\"automatic_payment_methods[enabled]\"},\"control_type\":\"text\"},{\"name\":\"automatic_payment_methods[allow_redirects]\",\"type\":\"string\",\"optional\":false,\"label\":\"Automatic payment methods allow redirects\",\"hint\":\"Allow redirect payment methods\",\"details\":{\"real_name\":\"automatic_payment_methods[allow_redirects]\"},\"control_type\":\"text\"}]",
+                "schema": "[{\"name\":\"amount\",\"type\":\"string\",\"optional\":false,\"label\":\"Amount\",\"hint\":\"Amount in cents\",\"details\":{\"real_name\":\"amount\"},\"control_type\":\"text\"},{\"name\":\"currency\",\"type\":\"string\",\"optional\":false,\"label\":\"Currency\",\"hint\":\"Three-letter ISO code\",\"details\":{\"real_name\":\"currency\"},\"control_type\":\"text\"},{\"name\":\"customer\",\"type\":\"string\",\"optional\":false,\"label\":\"Customer\",\"hint\":\"Customer ID\",\"details\":{\"real_name\":\"customer\"},\"control_type\":\"text\"},{\"name\":\"description\",\"type\":\"string\",\"optional\":false,\"label\":\"Description\",\"hint\":\"Payment description\",\"details\":{\"real_name\":\"description\"},\"control_type\":\"text\"},{\"name\":\"metadata[guest_id]\",\"type\":\"string\",\"optional\":false,\"label\":\"Metadata guest ID\",\"hint\":\"Guest ID\",\"details\":{\"real_name\":\"metadata[guest_id]\"},\"control_type\":\"text\"},{\"name\":\"metadata[booking_number]\",\"type\":\"string\",\"optional\":true,\"label\":\"Metadata booking number\",\"hint\":\"Booking number\",\"details\":{\"real_name\":\"metadata[booking_number]\"},\"control_type\":\"text\"},{\"name\":\"metadata[source]\",\"type\":\"string\",\"optional\":false,\"label\":\"Metadata source\",\"hint\":\"Source system\",\"details\":{\"real_name\":\"metadata[source]\"},\"control_type\":\"text\"},{\"name\":\"automatic_payment_methods[enabled]\",\"type\":\"string\",\"optional\":false,\"label\":\"Automatic payment methods enabled\",\"hint\":\"Enable automatic payment methods\",\"details\":{\"real_name\":\"automatic_payment_methods[enabled]\"},\"control_type\":\"text\"},{\"name\":\"automatic_payment_methods[allow_redirects]\",\"type\":\"string\",\"optional\":false,\"label\":\"Automatic payment methods allow redirects\",\"hint\":\"Allow redirect payment methods\",\"details\":{\"real_name\":\"automatic_payment_methods[allow_redirects]\"},\"control_type\":\"text\"}]",
                 "data": {
                   "amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"amount\"]}')}",
                   "currency": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"currency\"]}')}",
                   "customer": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"customer_id\"]}')}",
                   "description": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"description\"]}')}",
                   "metadata_guest_id_": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"guest_id\"]}')}",
-                  "metadata_booking_id_": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"booking_id\"]}')}",
+                  "metadata_booking_number_": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"booking_number\"]}')}",
                   "metadata_source_": "hotel_checkout",
                   "automatic_payment_methods_enabled_": "true",
                   "automatic_payment_methods_allow_redirects_": "never"
@@ -316,15 +316,15 @@
                       },
                       {
                         "control_type": "text",
-                        "label": "Metadata booking ID",
+                        "label": "Metadata booking number",
                         "optional": true,
-                        "hint": "Booking ID",
+                        "hint": "Booking number",
                         "details": {
-                          "real_name": "metadata[booking_id]"
+                          "real_name": "metadata[booking_number]"
                         },
                         "sticky": true,
                         "type": "string",
-                        "name": "metadata_booking_id_"
+                        "name": "metadata_booking_number_"
                       },
                       {
                         "control_type": "text",

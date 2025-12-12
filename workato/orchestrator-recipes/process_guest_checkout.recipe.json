@@ -1,6 +1,6 @@
 {
   "name": "Process guest checkout",
-  "version": 1,
+  "version": 2,
   "private": false,
   "concurrency": 1,
   "code": {
@@ -28,7 +28,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest email address (must exist in Salesforce)\"},{\"name\":\"guest_name\",\"label\":\"Guest name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest full name\"},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":false,\"hint\":\"Total amount in cents (USD), minimum 50\"},{\"name\":\"payment_method_id\",\"label\":\"Payment method ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe PaymentMethod ID (tokenized card)\"},{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Salesforce Booking ID (optional)\"},{\"name\":\"idempotency_token\",\"label\":\"Idempotency token\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Client-generated UUID for idempotency\"}]"
+        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest email address (must exist in Salesforce)\"},{\"name\":\"guest_name\",\"label\":\"Guest name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest full name\"},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":false,\"hint\":\"Total amount in cents (USD), minimum 50\"},{\"name\":\"payment_method_id\",\"label\":\"Payment method ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe PaymentMethod ID (tokenized card)\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Guest's room number (optional, for disambiguation)\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking confirmation number (optional, for disambiguation)\"},{\"name\":\"idempotency_token\",\"label\":\"Idempotency token\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Client-generated UUID for idempotency\"}]"
       },
       "response": {
         "content_type": "json",
@@ -36,7 +36,7 @@
           {
             "name": "Success - Payment Completed",
             "http_status_code": "200",
-            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"transaction_id\",\"label\":\"Transaction ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"payment_intent_id\",\"label\":\"Payment intent ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_id\",\"label\":\"Room ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_status\",\"label\":\"Room status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"checkout_date\",\"label\":\"Checkout date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"message\",\"label\":\"Message\",\"type\":\"string\",\"control_type\":\"text\"}]"
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"transaction_id\",\"label\":\"Transaction ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"payment_intent_id\",\"label\":\"Payment intent ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_status\",\"label\":\"Room status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"checkout_date\",\"label\":\"Checkout date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"message\",\"label\":\"Message\",\"type\":\"string\",\"control_type\":\"text\"}]"
           },
           {
             "name": "Requires Action - 3D Secure",
@@ -292,11 +292,19 @@
           },
           {
             "control_type": "text",
-            "label": "Booking ID",
-            "name": "booking_id",
+            "label": "Room number",
+            "name": "room_number",
             "type": "string",
             "optional": true,
-            "hint": "Salesforce Booking ID (optional)"
+            "hint": "Guest's room number (optional, for disambiguation)"
+          },
+          {
+            "control_type": "text",
+            "label": "Booking number",
+            "name": "booking_number",
+            "type": "string",
+            "optional": true,
+            "hint": "Booking confirmation number (optional, for disambiguation)"
           },
           {
             "control_type": "text",
@@ -339,7 +347,7 @@
                 "type": "string"
               }
             ],
-            "uuid": "checkout-log-start-002"
+            "uuid": "log-start-001"
           },
           {
             "number": 3,
@@ -436,7 +444,7 @@
                 "type": "object"
               }
             ],
-            "uuid": "checkout-search-contact-003"
+            "uuid": "search-contact-001"
           },
           {
             "number": 4,
@@ -449,7 +457,7 @@
                   "operand": "equals_to",
                   "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"found\"]}')}",
                   "rhs": "true",
-                  "uuid": "checkout-if-not-found-cond-001"
+                  "uuid": "checkout-if-guest-not-found-cond-001"
                 }
               ]
             },
@@ -476,7 +484,7 @@
                     "type": "string"
                   }
                 ],
-                "uuid": "checkout-log-not-found-005"
+                "uuid": "log-guest-not-found-001"
               },
               {
                 "number": 6,
@@ -653,10 +661,10 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-return-not-found-006"
+                "uuid": "return-guest-not-found-001"
               }
             ],
-            "uuid": "checkout-if-not-found-004"
+            "uuid": "checkout-if-guest-not-found-001"
           },
           {
             "number": 7,
@@ -762,7 +770,7 @@
                 "type": "object"
               }
             ],
-            "uuid": "checkout-create-customer-007"
+            "uuid": "create-customer-001"
           },
           {
             "number": 8,
@@ -907,7 +915,7 @@
                 "type": "object"
               }
             ],
-            "uuid": "checkout-create-payment-008"
+            "uuid": "create-payment-intent-001"
           },
           {
             "number": 9,
@@ -1024,7 +1032,7 @@
                 "type": "object"
               }
             ],
-            "uuid": "checkout-confirm-payment-009"
+            "uuid": "confirm-payment-001"
           },
           {
             "number": 10,
@@ -1037,7 +1045,7 @@
                   "operand": "equals_to",
                   "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"confirm_payment\",\"path\":[\"result\",\"status\"]}')}",
                   "rhs": "succeeded",
-                  "uuid": "checkout-if-succeeded-cond-001"
+                  "uuid": "checkout-if-payment-succeeded-cond-001"
                 }
               ]
             },
@@ -1064,7 +1072,7 @@
                     "type": "string"
                   }
                 ],
-                "uuid": "checkout-log-success-011"
+                "uuid": "log-payment-success-001"
               },
               {
                 "number": 12,
@@ -1207,7 +1215,7 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-search-booking-012"
+                "uuid": "search-booking-001"
               },
               {
                 "number": 13,
@@ -1306,7 +1314,7 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-update-booking-013"
+                "uuid": "update-booking-001"
               },
               {
                 "number": 14,
@@ -1409,7 +1417,7 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-update-room-014"
+                "uuid": "update-room-001"
               },
               {
                 "number": 15,
@@ -1523,7 +1531,7 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-update-opp-015"
+                "uuid": "update-opportunity-001"
               },
               {
                 "number": 16,
@@ -1545,8 +1553,8 @@
                     "payment_intent_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_payment_intent\",\"path\":[\"result\",\"payment_intent_id\"]}')}",
                     "amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"amount\"]}')}",
                     "currency": "usd",
-                    "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}",
-                    "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"room_id\"]}')}",
+                    "booking_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_number\"]}')}",
+                    "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"room_number\"]}')}",
                     "room_status": "Cleaning",
                     "checkout_date": "=now.to_date",
                     "message": "Payment processed successfully. Thank you for your stay!"
@@ -1634,14 +1642,14 @@
                       },
                       {
                         "control_type": "text",
-                        "label": "Booking ID",
-                        "name": "booking_id",
+                        "label": "Booking number",
+                        "name": "booking_number",
                         "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Room ID",
-                        "name": "room_id",
+                        "label": "Room number",
+                        "name": "room_number",
                         "type": "string"
                       },
                       {
@@ -1750,14 +1758,14 @@
                       },
                       {
                         "control_type": "text",
-                        "label": "Booking ID",
-                        "name": "booking_id",
+                        "label": "Booking number",
+                        "name": "booking_number",
                         "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Room ID",
-                        "name": "room_id",
+                        "label": "Room number",
+                        "name": "room_number",
                         "type": "string"
                       },
                       {
@@ -1784,10 +1792,10 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-return-success-016"
+                "uuid": "return-success-001"
               }
             ],
-            "uuid": "checkout-if-succeeded-010"
+            "uuid": "checkout-if-payment-succeeded-001"
           },
           {
             "number": 17,
@@ -2026,10 +2034,10 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-return-requires-action-018"
+                "uuid": "return-requires-action-001"
               }
             ],
-            "uuid": "checkout-if-requires-action-017"
+            "uuid": "checkout-if-requires-action-001"
           },
           {
             "number": 19,
@@ -2235,10 +2243,10 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-return-payment-failed-020"
+                "uuid": "return-payment-failed-001"
               }
             ],
-            "uuid": "checkout-if-payment-failed-019"
+            "uuid": "checkout-if-payment-failed-001"
           },
           {
             "number": 21,
@@ -2269,7 +2277,7 @@
                     "type": "string"
                   }
                 ],
-                "uuid": "checkout-log-error-022"
+                "uuid": "log-error-001"
               },
               {
                 "number": 23,
@@ -2446,16 +2454,16 @@
                     "type": "object"
                   }
                 ],
-                "uuid": "checkout-return-error-024"
+                "uuid": "return-error-001"
               }
             ],
-            "uuid": "checkout-log-error-022"
+            "uuid": "checkout-catch-001"
           }
         ],
         "uuid": "checkout-try-001"
       }
     ],
-    "uuid": "checkout-trigger-000"
+    "uuid": "checkout-trigger-001"
   },
   "config": [
     {
