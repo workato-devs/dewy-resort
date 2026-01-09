@@ -1,0 +1,54 @@
+title: MCP Compositional Architecture Workshop
+description: Learn to build production-ready MCP tools using compositional patterns with the Dewy Resort sample app
+
+# For local development, use theme: (requires gem installed)
+# theme: just-the-docs
+# For GitHub Pages deployment, use remote_theme
+remote_theme: just-the-docs/just-the-docs
+
+# Navigation
+nav_enabled: true
+nav_sort: case_insensitive
+
+# Features
+enable_copy_code_button: true
+back_to_top: true
+back_to_top_text: "Back to top"
+search_enabled: true
+
+# Callouts
+callouts:
+  note:
+    color: purple
+  highlight:
+    color: yellow
+  warning:
+    color: grey-dk
+  facilitator:
+    title: Facilitator
+    color: blue
+
+# Footer
+footer_content: "MCP Compositional Architecture Workshop &copy; 2025. Built with <a href=\"https://github.com/just-the-docs/just-the-docs\">Just the Docs</a>."
+
+# Exclude files from build
+exclude:
+  - LICENSE
+  - README
+  - .gitignore
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - "*.gemspec"
+  - "*.gem"
+  - package.json
+  - package-lock.json
+
+# Note: Front matter is set explicitly in each file rather than using defaults
+# This avoids conflicts where parent pages would inherit the parent field

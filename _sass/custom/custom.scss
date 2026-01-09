@@ -1,0 +1,123 @@
+// Persona Toggle Button
+.persona-toggle-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+}
+
+.persona-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #5c5c5c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background-color: #4a4a4a;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.active {
+    background-color: #2869e6;
+
+    &:hover {
+      background-color: #1d5bd6;
+    }
+  }
+}
+
+.persona-icon {
+  flex-shrink: 0;
+}
+
+.toggle-label {
+  white-space: nowrap;
+}
+
+// Facilitator-only content styling
+.facilitator-only {
+  display: none;
+  border-left: 4px solid #2869e6;
+  background-color: rgba(40, 105, 230, 0.08);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0 6px 6px 0;
+
+  &::before {
+    content: "Facilitator Notes";
+    display: block;
+    font-weight: 600;
+    color: #2869e6;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(40, 105, 230, 0.2);
+  }
+
+  // Nested elements
+  > :first-child:not(::before) {
+    margin-top: 0;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+  // Tables inside facilitator blocks
+  table {
+    font-size: 0.9em;
+  }
+
+  // Code blocks inside facilitator blocks
+  pre, code {
+    background-color: rgba(40, 105, 230, 0.05);
+  }
+}
+
+// Show facilitator content when persona is facilitator
+body[data-persona="facilitator"] .facilitator-only {
+  display: block;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .persona-toggle-container {
+    top: auto;
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .toggle-label {
+    display: none;
+  }
+
+  .persona-toggle-btn {
+    padding: 0.75rem;
+    border-radius: 50%;
+  }
+}
+
+// Print styles - always show facilitator content
+@media print {
+  .facilitator-only {
+    display: block !important;
+  }
+
+  .persona-toggle-container {
+    display: none;
+  }
+}
