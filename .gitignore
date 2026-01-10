@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/app/node_modules
 /.pnp
 .pnp.js
 
@@ -10,6 +11,7 @@
 
 # next.js
 /.next/
+/app/.next/
 /out/
 
 # production
@@ -41,13 +43,18 @@ next-env.d.ts
 
 # database
 /database/*.db
+/app/database/*.db
 /database/*.db-journal
+/app/database/*.db-journal
 /database/*.db-shm
+/app/database/*.db-shm
 /database/*.db-wal
+/app/database/*.db-wal
 
 # vendor CLI tools (workato, salesforce, twilio, stripe, etc.)
 bin/
-./tools/
+tools/workato-cli/
+tools/sf-cli/
 .workatoenv
 .env.tools
 **/workato-api-key.txt
@@ -60,3 +67,4 @@ workato/temp-*/
 
 # runtime files
 /var/
+/app/var/
