@@ -48,11 +48,11 @@ help:
 setup:
 ifeq ($(tool),all)
 	@echo "Setting up all vendor CLIs..."
-	@bash scripts/setup-cli.sh --tool=workato
-	@bash scripts/setup-cli.sh --tool=salesforce
+	@bash app/scripts/setup-cli.sh --tool=workato
+	@bash app/scripts/setup-cli.sh --tool=salesforce
 else
 	@echo "Setting up $(tool) CLI..."
-	@bash scripts/setup-cli.sh --tool=$(tool)
+	@bash app/scripts/setup-cli.sh --tool=$(tool)
 endif
 
 # ============================================================
@@ -101,14 +101,14 @@ endif
 clean:
 ifeq ($(tool),all)
 	@echo "Cleaning up all vendor CLIs..."
-	@bash scripts/tools/workato-cleanup.sh || true
+	@bash app/scripts/tools/workato-cleanup.sh || true
 	@rm -f bin/workato
 	@rm -rf tools/sf-cli/
 	@rm -f bin/sf
 	@echo "✓ Cleaned up all CLIs"
 else ifeq ($(tool),workato)
 	@echo "Cleaning up Workato CLI..."
-	@bash scripts/tools/workato-cleanup.sh || true
+	@bash app/scripts/tools/workato-cleanup.sh || true
 	@rm -f bin/workato
 	@echo "✓ Cleaned up Workato CLI"
 else ifeq ($(tool),salesforce)
@@ -158,11 +158,11 @@ pull:
 
 workato-init:
 	@echo "Initializing Workato projects..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash scripts/tools/create_workato_folders.sh
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash app/scripts/tools/create_workato_folders.sh
 
 start-recipes:
 	@echo "Starting all Workato recipes..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash scripts/tools/start_workato_recipes.sh
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash app/scripts/tools/start_workato_recipes.sh
 
 # ============================================================
 # Salesforce-Specific Commands
@@ -182,7 +182,7 @@ endif
 		exit 1; \
 	fi
 	@echo "Deploying Salesforce metadata to $(org)..."
-	@cd salesforce && bash scripts/deploy.sh $(org)
+	@cd vendor/salesforce && bash scripts/deploy.sh $(org)
 
 # ============================================================
 # Backward-Compatible Aliases
