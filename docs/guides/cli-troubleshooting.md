@@ -17,10 +17,10 @@ Run these to quickly identify issues:
 
 ```bash
 # Check Node.js
-node --version        # Need 18+
+node --version        # Need 20+
 
 # Check Python (Workato CLI dependency)
-python3 --version     # Need 3.9+
+python3 --version     # Need 3.11+
 which python3         # Should show a path
 
 # Check if CLIs installed
@@ -37,14 +37,14 @@ bin/sf --version      # Test Salesforce CLI
 
 **Symptoms:**
 ```
-Error: Python 3.9+ required
+Error: Python 3.11+ required
 ModuleNotFoundError: No module named 'xyz'
 ```
 
 **Diagnosis:**
 ```bash
 python3 --version
-# If shows <3.9 or command not found, Python needs setup
+# If shows <3.11 or command not found, Python needs setup
 ```
 
 **Solutions:**
@@ -63,8 +63,8 @@ eval "$(pyenv init -)"
 source ~/.zshrc
 
 # Install Python 3.11
-pyenv install 3.11.7
-pyenv local 3.11.7
+pyenv install 3.11.14
+pyenv local 3.11.14
 
 # Verify
 python3 --version  # Should show 3.11.x

@@ -59,8 +59,8 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 
 | Issue | Symptoms | Resolution |
 |-------|----------|------------|
-| Python version | `python3 --version` < 3.9 | `pyenv local 3.11` |
-| Node version | `node --version` < 18 | `nvm use 18` |
+| Python version | `python3 --version` < 3.11 | `pyenv local 3.11` |
+| Node version | `node --version` < 20 | `nvm use 20` |
 | Workato CLI fails | Ruby/gem errors | Check Python first, then retry |
 | Permission denied | Can't execute bin/workato | `chmod +x bin/workato bin/sf` |
 

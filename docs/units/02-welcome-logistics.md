@@ -73,7 +73,7 @@ Turn to the person next to you and introduce yourself. Name, what you do, and on
 Your Workato and Salesforce sandboxes are yours to keep. Continue experimenting after today.
 
 ### 2. A Mental Model for Separation of Concerns
-You'll understand what complexity belongs with the LLM and what belongs in the backend -- and why forcing LLMs to handle the wrong complexity is the root of most MCP headaches.
+You'll understand what complexity belongs with the LLM and what belongs in the backend -- and why forcing LLMs to handle the wrong type of complexity is the root of most MCP headaches.
 
 ### 3. Hands-On Composition Experience
 You'll build atomic skills and compose them into orchestrators. Real code, not just theory.

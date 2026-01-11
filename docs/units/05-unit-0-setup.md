@@ -25,9 +25,9 @@ parent: Workshop Units
 **Run these checks before proceeding:**
 
 ```bash
-node --version     # Should be 18+
+node --version     # Should be 20+
 git --version      # Any recent version
-python3 --version  # Should be 3.9+
+python3 --version  # Should be 3.11+
 ```
 
 **If any check fails:** See [Pre-Workshop Setup](01-pre-workshop.html) for installation instructions.
@@ -46,6 +46,7 @@ cd dewy-resort
 ### 1.2 Copy Environment Template
 
 ```bash
+cd app
 cp .env.example .env
 ```
 
@@ -55,16 +56,23 @@ cp .env.example .env
 npm install
 ```
 
-### 1.4 Initialize Local Database
+### 1.4 Initialize and Seed Local Database
 
 ```bash
 npm run db:init
+npm run db:seed
 ```
 
 **Expected Output:**
 ```
 Database initialized successfully
 Tables created: users, conversations, messages, devices...
+```
+
+### 1.5 Return to Parent Directory
+
+```bash
+cd ..
 ```
 
 **CHECKPOINT:** Database initialized message appears
@@ -152,9 +160,36 @@ bin/sf org open --target-org myDevOrg
 
 ---
 
-## Step 4: Configure Workato (10 min)
+## Step 4: Get Salesforce Security Token (5 min)
 
-### 4.1 Get Workato API Token
+### 4.1 Reset Security Token
+
+1. In Salesforce, click on your avatar in the upper right
+2. Click the **Settings** link
+3. Under "My Personal Information" select **Reset My Security Token**
+4. Click the **Reset Security Token** button
+5. The token will be emailed to you
+
+### 4.2 Add Token to Environment
+
+Edit `.env` file in the `app` directory:
+
+```bash
+SALESFORCE_API_HOST=your_api_host_here
+SALESFORCE_SECURITY_TOKEN=your_security_token_here
+SALESFORCE_ENABLED=false
+```
+
+{: .note }
+**Note:** Do NOT enable Salesforce yet.
+
+**CHECKPOINT:** Security token added to `.env` file
+
+---
+
+## Step 5: Configure Workato (10 min)
+
+### 5.1 Get Workato API Token
 
 1. Log in to your Workato Developer Edition
 2. Go to **Settings -> API Keys & Clients**
@@ -166,34 +201,21 @@ bin/sf org open --target-org myDevOrg
    - Admin -> Workspace Details (all)
 5. **Copy the token** (you won't see it again)
 
-### 4.2 Add Token to Environment
+### 5.2 Add Token to Environment
 
 Edit `.env` file:
 
 ```bash
 WORKATO_API_TOKEN=your_token_here
-WORKATO_API_EMAIL=your_email@example.com
 ```
 
-### 4.3 Deploy Recipes
+### 5.3 Deploy Recipes
 
 ```bash
 make workato-init
 ```
 
-### 4.4 Start Recipes
-
-```bash
-make start-recipes
-```
-
-**Expected Output:**
-```
-Started: 29
-Failed: 4 (these need manual activation)
-```
-
-### 4.5 Configure Salesforce Connection
+### 5.4 Configure Salesforce Connection
 
 1. Go to **Projects -> Workspace-Connections**
 2. Click the **Salesforce** connection
@@ -201,16 +223,37 @@ Failed: 4 (these need manual activation)
 4. Authenticate to your Salesforce Developer Edition org
 5. **WARNING: DO NOT rename the connection**
 
-### 4.6 Manual Activation (Required)
+### 5.5 Start Recipes
+
+```bash
+make start-recipes
+```
+
+**Expected Output:**
+```
+========================================
+Summary
+========================================
+Total recipes: 34
+Started: 34
+Already running: 0
+Failed: 12
+
+⚠️  Some recipes failed to start
+```
+
+### 5.6 Manual Activation (Required)
 
 Four recipes need manual activation due to SOQL metadata caching:
 
 1. Open Workato -> **Projects -> atomic-salesforce-recipes**
 2. Find and activate each of these recipes:
-   - `Search bookings by room and dates`
-   - `Search room by number`
-   - `Search on behalf of staff`
-   - `Search on behalf of guest`
+   - `Search cases on behalf of guest`
+   - `Search cases on behalf of staff`
+   - `Search rooms on behalf of guest`
+   - `Search rooms on behalf of staff`
+   - `Check in guest`
+   - `Process guest checkout`
 3. For each recipe:
    - Click the recipe name
    - Click **Edit Recipe**
@@ -219,19 +262,21 @@ Four recipes need manual activation due to SOQL metadata caching:
    - Click **Save**
    - Click **Start Recipe**
 
-**CHECKPOINT:** All 33 recipes showing "Running" status
+**CHECKPOINT:** All 34 Salesforce recipes showing "Running" status
+                Stripe recipes failed to start (OK)
 
 ---
 
-## Step 5: Verify End-to-End (5 min)
+## Step 7: Verify End-to-End (5 min)
 
-### 5.1 Start the Application
+### 7.1 Start the Application
 
 ```bash
+cd app
 npm run dev
 ```
 
-### 5.2 Test the System
+### 7.2 Test the System
 
 1. Open http://localhost:3000
 2. Navigate to **Guest** interface
@@ -240,7 +285,7 @@ npm run dev
 
 **Expected:** Response listing available rooms with data from Salesforce
 
-### 5.3 Verify in Workato
+### 7.3 Verify in Workato
 
 1. Open Workato -> **Tools -> Logs**
 2. Find recent log entry (within last minute)

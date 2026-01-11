@@ -33,9 +33,9 @@ parent: Workshop Units
 
 | Software | Minimum Version | Check Command |
 |----------|-----------------|---------------|
-| Node.js | 18+ | `node --version` |
+| Node.js | 20+ | `node --version` |
 | Git | Any recent | `git --version` |
-| Python | 3.9+ | `python3 --version` |
+| Python | 3.11+ | `python3 --version` |
 
 ### Recommended
 - VS Code or preferred IDE
@@ -79,7 +79,7 @@ git --version 2>/dev/null || echo "NOT INSTALLED"
 
 # Network (can reach Workato)
 echo -n "Network (Workato): "
-curl -s -o /dev/null -w "%{http_code}" https://app.trial.workato.com | grep -q "200" && echo "OK" || echo "BLOCKED"
+curl -s -o /dev/null -w "%{http_code}" https://app.trial.workato.com/users/sign_in_trial | grep -q "200" && echo "OK" || echo "BLOCKED"
 
 # Network (can reach Salesforce)
 echo -n "Network (Salesforce): "
@@ -112,9 +112,9 @@ Please complete these steps before the workshop on [Date]:
    Note: Instant approval, but verify you can log in
 
 3. Verify your local environment:
-   - Node.js 18+: `node --version`
+   - Node.js 20+: `node --version`
    - Git: `git --version`
-   - Python 3.9+: `python3 --version`
+   - Python 3.11+: `python3 --version`
 
 4. Ensure you have an IDE installed:
    - Recommended: VS Code (https://code.visualstudio.com)
@@ -133,7 +133,7 @@ See you there!
 
 ### Python Version Issues
 
-**Problem:** `python3 --version` shows version < 3.9
+**Problem:** `python3 --version` shows version < 3.11
 
 **Solution using pyenv:**
 ```bash
@@ -145,22 +145,22 @@ export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 
 # Restart shell, then install Python 3.11
-pyenv install 3.11.7
-pyenv local 3.11.7
+pyenv install 3.11.14
+pyenv local 3.11.14
 ```
 
 ### Node.js Version Issues
 
-**Problem:** `node --version` shows version < 18
+**Problem:** `node --version` shows version < 20
 
 **Solution using nvm:**
 ```bash
 # Install nvm (if not installed)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 
-# Restart shell, then install Node 18
-nvm install 18
-nvm use 18
+# Restart shell, then install Node 20
+nvm install 20
+nvm use 20
 ```
 
 ### Network/Firewall Issues
@@ -178,8 +178,8 @@ nvm use 18
 
 - [ ] Workato Developer Edition approved and accessible
 - [ ] Salesforce Developer Edition login working
-- [ ] Node.js 18+ installed and verified
-- [ ] Python 3.9+ installed and verified
+- [ ] Node.js 20+ installed and verified
+- [ ] Python 3.11+ installed and verified
 - [ ] Git installed
 - [ ] IDE installed (VS Code recommended)
 - [ ] Laptop charged / power adapter packed
