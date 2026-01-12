@@ -1,0 +1,212 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cognito User Pool for Hotel Management System Authentication'
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Environment name (dev, staging, prod)
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Default: dev
+
+  CallbackURL:
+    Type: String
+    Description: OAuth callback URL for the application
+    Default: http://localhost:3000/api/auth/cognito/callback
+
+  LogoutURL:
+    Type: String
+    Description: OAuth logout URL for the application
+    Default: http://localhost:3000/login
+
+  DomainPrefix:
+    Type: String
+    Description: Cognito domain prefix (must be globally unique)
+    AllowedPattern: ^[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?$
+    ConstraintDescription: Must be lowercase alphanumeric with hyphens, 1-63 characters
+
+Resources:
+  # Cognito User Pool
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub 'hotel-mgmt-${Environment}'
+      
+      # Username Configuration - use email as username
+      UsernameAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      
+      # Auto-verify email addresses
+      AutoVerifiedAttributes:
+        - email
+      
+      # Password Policy
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          TemporaryPasswordValidityDays: 7
+      
+      # MFA Configuration (optional)
+      MfaConfiguration: OPTIONAL
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+      
+      # Account Recovery
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      
+      # Email Configuration
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+      
+      # Custom Attributes
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: role
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+          StringAttributeConstraints:
+            MinLength: 4
+            MaxLength: 10
+      
+      # User Pool Tags
+      UserPoolTags:
+        Environment: !Ref Environment
+        Application: HotelManagementSystem
+        ManagedBy: CloudFormation
+
+  # Cognito User Pool Client (App Client)
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub 'hotel-mgmt-client-${Environment}'
+      UserPoolId: !Ref UserPool
+      
+      # Generate client secret for server-side OAuth flow
+      GenerateSecret: true
+      
+      # OAuth 2.0 Configuration
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - profile
+      
+      # Callback and Logout URLs
+      CallbackURLs:
+        - !Ref CallbackURL
+      LogoutURLs:
+        - !Ref LogoutURL
+      
+      # Supported Identity Providers
+      SupportedIdentityProviders:
+        - COGNITO
+      
+      # Token Validity
+      IdTokenValidity: 60
+      AccessTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        IdToken: minutes
+        AccessToken: minutes
+        RefreshToken: days
+      
+      # Security Settings
+      PreventUserExistenceErrors: ENABLED
+      
+      # Explicit Auth Flows (enable direct username/password authentication)
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      
+      # Read and Write Attributes
+      ReadAttributes:
+        - email
+        - email_verified
+        - name
+        - custom:role
+      WriteAttributes:
+        - email
+        - name
+        - custom:role
+
+  # Cognito User Pool Domain
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref DomainPrefix
+      UserPoolId: !Ref UserPool
+
+Outputs:
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub '${AWS::StackName}-UserPoolId'
+
+  UserPoolArn:
+    Description: Cognito User Pool ARN
+    Value: !GetAtt UserPool.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-UserPoolArn'
+
+  ClientId:
+    Description: Cognito App Client ID
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub '${AWS::StackName}-ClientId'
+
+  CognitoDomain:
+    Description: Cognito Hosted UI Domain
+    Value: !Sub 'https://${DomainPrefix}.auth.${AWS::Region}.amazoncognito.com'
+    Export:
+      Name: !Sub '${AWS::StackName}-CognitoDomain'
+
+  Region:
+    Description: AWS Region
+    Value: !Ref AWS::Region
+    Export:
+      Name: !Sub '${AWS::StackName}-Region'
+
+  IssuerURL:
+    Description: Cognito Issuer URL for OIDC
+    Value: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'
+    Export:
+      Name: !Sub '${AWS::StackName}-IssuerURL'
+
+  AuthorizationEndpoint:
+    Description: OAuth 2.0 Authorization Endpoint
+    Value: !Sub 'https://${DomainPrefix}.auth.${AWS::Region}.amazoncognito.com/oauth2/authorize'
+
+  TokenEndpoint:
+    Description: OAuth 2.0 Token Endpoint
+    Value: !Sub 'https://${DomainPrefix}.auth.${AWS::Region}.amazoncognito.com/oauth2/token'
+
+  UserInfoEndpoint:
+    Description: OIDC UserInfo Endpoint
+    Value: !Sub 'https://${DomainPrefix}.auth.${AWS::Region}.amazoncognito.com/oauth2/userInfo'
+
+  JwksUri:
+    Description: JSON Web Key Set URI
+    Value: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}/.well-known/jwks.json'

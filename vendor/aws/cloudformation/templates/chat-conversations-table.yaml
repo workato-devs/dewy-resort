@@ -1,0 +1,285 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'DynamoDB table for chat conversation storage with private message history and access controls'
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Environment name (dev, staging, prod)
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+  BillingMode:
+    Type: String
+    Description: DynamoDB billing mode
+    Default: PAY_PER_REQUEST
+    AllowedValues:
+      - PAY_PER_REQUEST
+      - PROVISIONED
+
+  ReadCapacityUnits:
+    Type: Number
+    Description: Read capacity units (only used if BillingMode is PROVISIONED)
+    Default: 5
+    MinValue: 1
+
+  WriteCapacityUnits:
+    Type: Number
+    Description: Write capacity units (only used if BillingMode is PROVISIONED)
+    Default: 5
+    MinValue: 1
+
+Conditions:
+  IsProvisioned: !Equals [!Ref BillingMode, PROVISIONED]
+
+Resources:
+  # DynamoDB Table for Chat Conversations
+  ChatConversationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'chat-conversations-${Environment}'
+      BillingMode: !Ref BillingMode
+      
+      # Provisioned capacity (only used if BillingMode is PROVISIONED)
+      ProvisionedThroughput:
+        !If
+          - IsProvisioned
+          - ReadCapacityUnits: !Ref ReadCapacityUnits
+            WriteCapacityUnits: !Ref WriteCapacityUnits
+          - !Ref AWS::NoValue
+
+      # Primary key
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+
+      # Global Secondary Index for user queries
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            !If
+              - IsProvisioned
+              - ReadCapacityUnits: !Ref ReadCapacityUnits
+                WriteCapacityUnits: !Ref WriteCapacityUnits
+              - !Ref AWS::NoValue
+
+      # Enable point-in-time recovery
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      # Enable server-side encryption
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+
+      # Enable TTL for automatic cleanup of old conversations
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+      # Tags
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: hotel-management
+        - Key: Component
+          Value: chat-conversations
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # IAM Role for Lambda/ECS to access the table
+  ChatConversationsAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'chat-conversations-access-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt ChatConversationsTable.Arn
+                  - !Sub '${ChatConversationsTable.Arn}/index/*'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: hotel-management
+
+  # IAM Policy for Cognito Identity Pool authenticated users
+  # This policy enforces row-level security based on user identity
+  ChatConversationsAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub 'ChatConversationsAccess-${Environment}'
+      Description: Allows access to chat conversations DynamoDB table with user-level isolation
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # Allow users to create their own conversations
+          - Sid: AllowCreateOwnConversations
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource:
+              - !GetAtt ChatConversationsTable.Arn
+            Condition:
+              ForAllValues:StringEquals:
+                dynamodb:LeadingKeys:
+                  - CONV#*
+              StringEquals:
+                dynamodb:Attributes:
+                  - userId
+                  - role
+                  - conversationId
+                  - createdAt
+                  - updatedAt
+                  - PK
+                  - SK
+                  - GSI1PK
+                  - GSI1SK
+                  - type
+          
+          # Allow users to read only their own conversations
+          - Sid: AllowReadOwnConversations
+            Effect: Allow
+            Action:
+              - dynamodb:GetItem
+              - dynamodb:Query
+            Resource:
+              - !GetAtt ChatConversationsTable.Arn
+              - !Sub '${ChatConversationsTable.Arn}/index/*'
+            Condition:
+              StringEquals:
+                # User can only query their own data via GSI
+                dynamodb:LeadingKeys:
+                  - !Sub 'USER#${cognito-identity.amazonaws.com:sub}'
+          
+          # Allow users to update only their own conversations
+          - Sid: AllowUpdateOwnConversations
+            Effect: Allow
+            Action:
+              - dynamodb:UpdateItem
+            Resource:
+              - !GetAtt ChatConversationsTable.Arn
+            Condition:
+              ForAllValues:StringEquals:
+                dynamodb:LeadingKeys:
+                  - CONV#*
+          
+          # Allow users to soft-delete only their own conversations
+          - Sid: AllowDeleteOwnConversations
+            Effect: Allow
+            Action:
+              - dynamodb:DeleteItem
+            Resource:
+              - !GetAtt ChatConversationsTable.Arn
+            Condition:
+              ForAllValues:StringEquals:
+                dynamodb:LeadingKeys:
+                  - CONV#*
+          
+          # Deny access to other users' data
+          - Sid: DenyAccessToOtherUsers
+            Effect: Deny
+            Action:
+              - dynamodb:GetItem
+              - dynamodb:Query
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+            Resource:
+              - !GetAtt ChatConversationsTable.Arn
+              - !Sub '${ChatConversationsTable.Arn}/index/*'
+            Condition:
+              StringNotEquals:
+                dynamodb:LeadingKeys:
+                  - !Sub 'USER#${cognito-identity.amazonaws.com:sub}'
+                  - CONV#*
+          
+          # Deny dangerous operations
+          - Sid: DenyDangerousOperations
+            Effect: Deny
+            Action:
+              - dynamodb:Scan
+              - dynamodb:BatchWriteItem
+              - dynamodb:BatchGetItem
+            Resource:
+              - !GetAtt ChatConversationsTable.Arn
+
+Outputs:
+  TableName:
+    Description: Name of the DynamoDB table
+    Value: !Ref ChatConversationsTable
+    Export:
+      Name: !Sub '${AWS::StackName}-TableName'
+
+  TableArn:
+    Description: ARN of the DynamoDB table
+    Value: !GetAtt ChatConversationsTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-TableArn'
+
+  GSI1Name:
+    Description: Name of the GSI for user queries
+    Value: GSI1
+    Export:
+      Name: !Sub '${AWS::StackName}-GSI1Name'
+
+  AccessRoleArn:
+    Description: ARN of the IAM role for accessing the table
+    Value: !GetAtt ChatConversationsAccessRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-AccessRoleArn'
+
+  AccessPolicyArn:
+    Description: ARN of the IAM policy for accessing the table
+    Value: !Ref ChatConversationsAccessPolicy
+    Export:
+      Name: !Sub '${AWS::StackName}-AccessPolicyArn'
+
+  EnvironmentVariables:
+    Description: Environment variables to add to your application
+    Value: !Sub |
+      CHAT_CONVERSATIONS_TABLE=chat-conversations-${Environment}
+      CHAT_STORAGE_MODE=dynamodb
