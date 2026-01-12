@@ -22,7 +22,8 @@ help:
 	@echo "  make validate              - Validate Workato recipes locally"
 	@echo "  make push                  - Push Workato recipes to developer sandbox"
 	@echo "  make pull                  - Pull Workato recipes from developer sandbox"
-	@echo "  make start-recipes         - Start all Workato recipes in ascending order by ID"
+	@echo "  make start-recipes         - Start all Workato recipes (skip failures, default)"
+	@echo "  make start-recipes-stop-on-error - Start recipes (stop on first failure)"
 	@echo ""
 	@echo "Salesforce-Specific Commands:"
 	@echo "  make sf-deploy org=<alias> - Deploy Salesforce metadata to specified org"
@@ -101,14 +102,14 @@ endif
 clean:
 ifeq ($(tool),all)
 	@echo "Cleaning up all vendor CLIs..."
-	@bash app/scripts/tools/workato-cleanup.sh || true
+	@bash workato/scripts/cli/workato-cleanup.sh || true
 	@rm -f bin/workato
 	@rm -rf tools/sf-cli/
 	@rm -f bin/sf
 	@echo "✓ Cleaned up all CLIs"
 else ifeq ($(tool),workato)
 	@echo "Cleaning up Workato CLI..."
-	@bash app/scripts/tools/workato-cleanup.sh || true
+	@bash workato/scripts/cli/workato-cleanup.sh || true
 	@rm -f bin/workato
 	@echo "✓ Cleaned up Workato CLI"
 else ifeq ($(tool),salesforce)
@@ -158,11 +159,15 @@ pull:
 
 workato-init:
 	@echo "Initializing Workato projects..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash app/scripts/tools/create_workato_folders.sh
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/create_workato_folders.sh
 
 start-recipes:
-	@echo "Starting all Workato recipes..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash app/scripts/tools/start_workato_recipes.sh
+	@echo "Starting all Workato recipes (skipping failures)..."
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/start_workato_recipes.sh --skip-failed
+
+start-recipes-stop-on-error:
+	@echo "Starting all Workato recipes (stop on first failure)..."
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/start_workato_recipes.sh
 
 # ============================================================
 # Salesforce-Specific Commands

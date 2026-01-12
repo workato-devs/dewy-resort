@@ -40,22 +40,29 @@ fi
 
 # Get project root directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-TOOL_SCRIPT="$SCRIPT_DIR/tools/${TOOL}-setup.sh"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Map tool names to their setup script locations
+case "$TOOL" in
+    workato)
+        TOOL_SCRIPT="$PROJECT_ROOT/workato/scripts/cli/workato-setup.sh"
+        ;;
+    salesforce)
+        TOOL_SCRIPT="$PROJECT_ROOT/vendor/salesforce/scripts/salesforce-setup.sh"
+        ;;
+    *)
+        TOOL_SCRIPT=""
+        ;;
+esac
 
 # Check if tool-specific setup script exists
-if [ ! -f "$TOOL_SCRIPT" ]; then
+if [ -z "$TOOL_SCRIPT" ] || [ ! -f "$TOOL_SCRIPT" ]; then
     echo -e "${RED}❌ Error: Unknown tool '$TOOL'${NC}"
     echo ""
     echo "Available tools:"
-    for script in "$SCRIPT_DIR/tools/"*-setup.sh; do
-        if [ -f "$script" ]; then
-            tool_name=$(basename "$script" -setup.sh)
-            echo "  - $tool_name"
-        fi
-    done
+    echo "  - workato (workato/scripts/cli/workato-setup.sh)"
+    echo "  - salesforce (vendor/salesforce/scripts/salesforce-setup.sh)"
     echo ""
-    echo "To add a new tool, create: scripts/tools/${TOOL}-setup.sh"
     exit 1
 fi
 
