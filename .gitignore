@@ -68,3 +68,11 @@ workato/temp-*/
 # runtime files
 /var/
 /app/var/
+
+# generated files and directories
+/bin
+/projects
+/exclude
+
+# IDE settings
+.vscode/

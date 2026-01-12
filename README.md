@@ -354,7 +354,7 @@ Open [http://localhost:3000](http://localhost:3000)
 - **[Stripe Integration](./docs/WORKATO_SETUP.md#stripe-recipe-activation-optional)** - Payment processing
 - **[Cognito Authentication](#cognito-authentication-workshop-convenience)** - User auth (workshop convenience)
 - **[Bedrock AI Chat](#bedrock-ai-chat-optional)** - AI assistants (optional)
-- **[Home Assistant Devices](./docs/MOCK_DEVICE_QUICKSTART.md)** - IoT room controls
+- **[Home Assistant Integration](./app/docs/HOME_ASSISTANT_QUICKSTART.md)** - IoT room controls
 
 ### Technical Details
 - **[Salesforce Metadata](./salesforce/README.md)** - Complete object and field documentation

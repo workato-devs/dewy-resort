@@ -15,6 +15,7 @@ import {
   WorkatoResponse,
   RequestOptions,
 } from './types';
+import { secureFetch } from '@/lib/fetch-utils';
 
 /**
  * Workato API Client
@@ -223,7 +224,7 @@ export class WorkatoClient {
         options.body = JSON.stringify(data);
       }
 
-      const response = await fetch(url, options);
+      const response = await secureFetch(url, options);
 
       if (!response.ok) {
         const errorBody = await response.text();
