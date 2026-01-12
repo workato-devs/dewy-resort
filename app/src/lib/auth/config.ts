@@ -7,7 +7,7 @@
  * Provider selection logic:
  * 1. If AUTH_PROVIDER is set, use that value (must be 'mock', 'okta', or 'cognito')
  * 2. If WORKATO_MOCK_MODE is 'true', use 'mock' (backward compatibility)
- * 3. Otherwise, default to 'okta' (backward compatibility)
+ * 3. Otherwise, default to 'mock'
  */
 
 export type AuthProvider = 'mock' | 'okta' | 'cognito';
@@ -43,8 +43,8 @@ export function getAuthProvider(): AuthProvider {
     return 'mock';
   }
   
-  // Default to okta for backward compatibility
-  return 'okta';
+  // Default to mock
+  return 'mock';
 }
 
 /**

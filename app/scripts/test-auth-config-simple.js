@@ -8,14 +8,14 @@ const { getAuthProvider, getAuthConfig, isAuthProviderEnabled } = require('../.t
 
 console.log('Testing Authentication Provider Configuration\n');
 
-// Test 1: Default behavior (should be okta)
+// Test 1: Default behavior (should be mock)
 console.log('Test 1: Default behavior');
 delete process.env.AUTH_PROVIDER;
 delete process.env.WORKATO_MOCK_MODE;
 const config1 = getAuthConfig();
 console.log('  Provider:', config1.provider);
-console.log('  Expected: okta');
-console.log('  Result:', config1.provider === 'okta' ? '✅ PASS' : '❌ FAIL');
+console.log('  Expected: mock');
+console.log('  Result:', config1.provider === 'mock' ? '✅ PASS' : '❌ FAIL');
 
 // Test 2: AUTH_PROVIDER=mock
 console.log('\nTest 2: AUTH_PROVIDER=mock');

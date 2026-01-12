@@ -97,7 +97,7 @@ function validateAuthProvider() {
   const authProvider = process.env.AUTH_PROVIDER;
   
   if (!authProvider) {
-    logWarning('AUTH_PROVIDER not set (defaults to "okta")');
+    logWarning('AUTH_PROVIDER not set (defaults to "mock")');
     logInfo('Set AUTH_PROVIDER=cognito to enable Bedrock integration');
     return false;
   }
