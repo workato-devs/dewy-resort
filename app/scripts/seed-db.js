@@ -186,35 +186,78 @@ async function seedDatabase() {
     let deviceCount = 0;
     
     for (const room of rooms) {
-      // Each room gets: 1 main light, 1 bedside light, 1 thermostat
-      const devices = [
-        {
-          id: generateId(),
-          type: 'light',
-          name: 'Main Light',
-          state: JSON.stringify({ on: true, brightness: 80 }),
-          entityId: `light.room_${room.roomNumber}_main`
-        },
-        {
-          id: generateId(),
-          type: 'light',
-          name: 'Bedside Light',
-          state: JSON.stringify({ on: false, brightness: 50 }),
-          entityId: `light.room_${room.roomNumber}_bedside`
-        },
-        {
-          id: generateId(),
-          type: 'thermostat',
-          name: 'Room Thermostat',
-          state: JSON.stringify({ temperature: 72, mode: 'cool', target: 72 }),
-          entityId: `climate.room_${room.roomNumber}_hvac`
-        }
-      ];
+      // Room 100 has the real Govee Table Lamp 2, others are mock devices
+      const isRoom100 = room.roomNumber === '100';
+      
+      // Each room gets devices based on room number
+      let devices;
+      
+      if (isRoom100) {
+        // Room 100: Real Govee lamp + mock bedside light and thermostat
+        devices = [
+          {
+            id: generateId(),
+            type: 'light',
+            name: 'Govee Table Lamp 2',
+            state: JSON.stringify({ 
+              state: 'on', 
+              on: true, 
+              brightness: 255,
+              supported_color_modes: ['color_temp', 'hs', 'xy'],
+              effect_list: ['Energic', 'Rhythm', 'Spectrum', 'Rolling', 'Separation', 'Hopping', 'PianoKeys', 'Fountain', 'DayAndNight', 'Sprouting', 'Shiny']
+            }),
+            entityId: 'light.h6022',
+            useMock: false  // Real Home Assistant device
+          },
+          {
+            id: generateId(),
+            type: 'light',
+            name: 'Bedside Light',
+            state: JSON.stringify({ state: 'off', on: false, brightness: 50 }),
+            entityId: `light.room_${room.roomNumber}_bedside`,
+            useMock: true  // Mock device
+          },
+          {
+            id: generateId(),
+            type: 'thermostat',
+            name: 'Room Thermostat',
+            state: JSON.stringify({ temperature: 72, mode: 'cool', target: 72, current_temperature: 71 }),
+            entityId: `climate.room_${room.roomNumber}_hvac`,
+            useMock: true  // Mock device
+          }
+        ];
+      } else {
+        // Other rooms: All mock devices
+        devices = [
+          {
+            id: generateId(),
+            type: 'light',
+            name: 'Main Light',
+            state: JSON.stringify({ state: 'on', on: true, brightness: 80 }),
+            entityId: `light.room_${room.roomNumber}_main`,
+            useMock: true
+          },
+          {
+            id: generateId(),
+            type: 'light',
+            name: 'Bedside Light',
+            state: JSON.stringify({ state: 'off', on: false, brightness: 50 }),
+            entityId: `light.room_${room.roomNumber}_bedside`,
+            useMock: true
+          },
+          {
+            id: generateId(),
+            type: 'thermostat',
+            name: 'Room Thermostat',
+            state: JSON.stringify({ temperature: 72, mode: 'cool', target: 72, current_temperature: 71 }),
+            entityId: `climate.room_${room.roomNumber}_hvac`,
+            useMock: true
+          }
+        ];
+      }
 
       for (const device of devices) {
-        // By default, all devices use real Home Assistant (use_mock = 0)
-        // You can set use_mock = 1 for specific devices to force mock mode
-        const useMock = device.useMock || 0;
+        const useMock = device.useMock ? 1 : 0;
         
         db.prepare(`
           INSERT INTO room_devices (id, room_id, type, name, state, home_assistant_entity_id, use_mock)

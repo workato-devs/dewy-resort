@@ -130,10 +130,19 @@ export default function RoomControlsPage() {
         };
       });
 
-      toast({
-        title: 'Success',
-        description: 'Device updated successfully',
-      });
+      // Show warning if fallback was used
+      if (result.usedFallback) {
+        toast({
+          title: 'Using Simulated Mode',
+          description: 'Device control was simulated. Home Assistant connection unavailable.',
+          variant: 'default',
+        });
+      } else {
+        toast({
+          title: 'Success',
+          description: 'Device updated successfully',
+        });
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to control device';
       toast({

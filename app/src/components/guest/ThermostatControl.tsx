@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Thermometer, Plus, Minus, Loader2 } from 'lucide-react';
+import { Thermometer, Plus, Minus, Loader2, Flame, Snowflake } from 'lucide-react';
 import { RoomDevice } from '@/types';
 
 interface ThermostatControlProps {
@@ -32,6 +32,15 @@ export function ThermostatControl({ device, onControl, loading = false }: Thermo
     setLocalLoading(true);
     try {
       await onControl(device.id, 'set_temperature', newTemp);
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
+  const handleModeChange = async (newMode: string) => {
+    setLocalLoading(true);
+    try {
+      await onControl(device.id, 'set_hvac_mode', newMode);
     } finally {
       setLocalLoading(false);
     }
@@ -64,13 +73,14 @@ export function ThermostatControl({ device, onControl, loading = false }: Thermo
             onClick={() => handleTemperatureChange(-1)}
             disabled={isLoading || temperature <= 60}
             className="h-12 w-12"
+            aria-label="Decrease temperature"
           >
             <Minus className="h-5 w-5" />
           </Button>
           
           <div className="flex flex-col items-center min-w-[100px]">
             <Label className="text-sm font-medium mb-1">Set Temperature</Label>
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="Loading" />}
           </div>
           
           <Button
@@ -79,17 +89,35 @@ export function ThermostatControl({ device, onControl, loading = false }: Thermo
             onClick={() => handleTemperatureChange(1)}
             disabled={isLoading || temperature >= 85}
             className="h-12 w-12"
+            aria-label="Increase temperature"
           >
             <Plus className="h-5 w-5" />
           </Button>
         </div>
 
-        {/* Mode Display */}
-        <div className="flex items-center justify-between pt-2 border-t">
+        {/* Mode Toggle */}
+        <div className="space-y-2">
           <Label className="text-sm font-medium">Mode</Label>
-          <span className="text-sm capitalize px-3 py-1 bg-secondary rounded-full">
-            {mode}
-          </span>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant={mode === 'heat' ? 'default' : 'outline'}
+              onClick={() => handleModeChange('heat')}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              <Flame className="h-4 w-4" />
+              Heat
+            </Button>
+            <Button
+              variant={mode === 'cool' ? 'default' : 'outline'}
+              onClick={() => handleModeChange('cool')}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              <Snowflake className="h-4 w-4" />
+              Cool
+            </Button>
+          </div>
         </div>
 
         {/* Status */}

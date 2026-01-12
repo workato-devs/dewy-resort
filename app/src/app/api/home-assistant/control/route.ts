@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { secureFetch } from '@/lib/fetch-utils';
 
 interface ControlRequest {
   entityId: string;
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
       // Determine the domain from entity ID (e.g., "light" from "light.bedroom")
       const domain = entityId.split('.')[0];
       
-      const response = await fetch(`${homeAssistantUrl}/api/services/${domain}/${service}`, {
+      const response = await secureFetch(`${homeAssistantUrl}/api/services/${domain}/${service}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${homeAssistantToken}`,
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Fetch updated state
-      const stateResponse = await fetch(`${homeAssistantUrl}/api/states/${entityId}`, {
+      const stateResponse = await secureFetch(`${homeAssistantUrl}/api/states/${entityId}`, {
         headers: {
           'Authorization': `Bearer ${homeAssistantToken}`,
           'Content-Type': 'application/json',
@@ -136,10 +137,42 @@ function getMockStateAfterControl(
 function getMockLightState(service: string, data?: Record<string, any>): any {
   switch (service) {
     case 'turn_on':
-      return {
+      const state: any = {
         state: 'on',
         brightness: data?.brightness || 255,
       };
+      
+      // Add color if provided
+      if (data?.hs_color) {
+        state.hs_color = data.hs_color;
+        // Convert HS to RGB for display
+        const h = data.hs_color[0];
+        const s = data.hs_color[1] / 100;
+        const v = 1;
+        
+        const c = v * s;
+        const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+        const m = v - c;
+        
+        let r = 0, g = 0, b = 0;
+        if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+        else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+        else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+        else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+        else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+        else { r = c; g = 0; b = x; }
+        
+        state.rgb_color = [
+          Math.round((r + m) * 255),
+          Math.round((g + m) * 255),
+          Math.round((b + m) * 255)
+        ];
+      } else if (data?.rgb_color) {
+        state.rgb_color = data.rgb_color;
+      }
+      
+      return state;
+      
     case 'turn_off':
       return {
         state: 'off',

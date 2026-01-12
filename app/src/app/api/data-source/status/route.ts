@@ -5,6 +5,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { secureFetch } from '@/lib/fetch-utils';
 
 interface IntegrationStatus {
   name: string;
@@ -172,7 +173,7 @@ async function checkHomeAssistant(): Promise<IntegrationStatus> {
   }
 
   try {
-    const response = await fetch(`${homeAssistantUrl}/api/`, {
+    const response = await secureFetch(`${homeAssistantUrl}/api/`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${homeAssistantToken}`,

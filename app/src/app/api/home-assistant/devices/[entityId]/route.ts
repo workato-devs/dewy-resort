@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { secureFetch } from '@/lib/fetch-utils';
 
 export async function GET(
   request: NextRequest,
@@ -37,7 +38,7 @@ export async function GET(
 
     // Call real Home Assistant API
     try {
-      const response = await fetch(`${homeAssistantUrl}/api/states/${entityId}`, {
+      const response = await secureFetch(`${homeAssistantUrl}/api/states/${entityId}`, {
         headers: {
           'Authorization': `Bearer ${homeAssistantToken}`,
           'Content-Type': 'application/json',
