@@ -242,7 +242,27 @@ Failed: 12
 ⚠️  Some recipes failed to start
 ```
 
-### 5.6 Manual Activation (Required)
+### 5.6 Configure Stripe Connection (Optional)
+
+1. Go to **Projects -> Workspace-Connections**
+2. Click the **Stripe** connection
+3. Click **Connect**
+4. Select **API key** as the authentication type
+5. **Get your Stripe Secret API Key:**
+   - Open the [Stripe Dashboard](https://dashboard.stripe.com/) in a new tab
+   - Ensure you're in **Test mode** (toggle in the top-right corner)
+   - Navigate to **Developers -> API keys**
+   - Under "Standard keys", find the **Secret key**
+   - Click **Reveal test key** to show the full key
+   - Copy the key (starts with `sk_test_`)
+6. **Paste the Secret API Key** into Workato's connection field
+7. Click **Connect** to complete authentication
+8. **WARNING: DO NOT rename the connection**
+
+{: .warning }
+> Always use **test mode** keys for workshop environments. Never use live/production keys (`sk_live_`).
+
+### 5.7 Manual Activation (Required)
 
 Four recipes need manual activation due to SOQL metadata caching:
 
