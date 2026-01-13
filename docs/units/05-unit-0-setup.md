@@ -146,9 +146,11 @@ bin/sf org open --target-org myDevOrg
 1. Click App Launcher (9 dots, top left)
 2. Search for "Dewy Hotel Management"
 3. Click **Hotel Rooms** tab
-4. Verify 10 rooms appear
+4. Verify room records appear
 
-**CHECKPOINT:** 10 hotel rooms visible in Salesforce
+> **If the list appears empty:** Don't worry—Salesforce defaults to "Recently Viewed" which only shows records you've opened. The data is there. Use the list view search box or global search and type **"Oceanview"** to confirm hotel room records exist.
+
+**CHECKPOINT:** Hotel room records visible in Salesforce
 
 ---
 

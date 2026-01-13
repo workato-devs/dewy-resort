@@ -264,9 +264,9 @@ Your orchestrator should return these HTTP status codes and response bodies:
 ```
 
 **Verify in Salesforce:**
-- Old room status changed to "Cleaning"
-- New room status changed to "Occupied"
-- Booking record updated with new room
+1. Search for room **"205"** — status should be "Occupied"
+2. Search for the guest's original room — status should be "Cleaning"
+3. Search for the booking record — should show the new room assignment
 
 **CHECKPOINT:** Orchestrator successfully transfers guest between rooms
 
