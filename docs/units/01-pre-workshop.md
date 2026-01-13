@@ -49,6 +49,7 @@ parent: Workshop Units
 - **URL:** [dashboard.stripe.com/register](https://dashboard.stripe.com/register)
 - **Purpose:** Payment processing features in Unit 2
 - **Note:** Workshop works without this; payment features will be mocked
+- **Important:** For new accounts, Stripe's onboarding process asks you to register a new business. Click "Skip for now" (twice), then choose the "Sandbox" option. Do not use a Live Stripe account for the workshop.
 
 ### LLM API Key
 - Anthropic or OpenAI API key
