@@ -306,9 +306,19 @@ After deploying recipes, you must authenticate each connection in the Workato UI
 
 1. Click on the **Stripe** connection
 2. Click **Connect** or **Authenticate**
-3. Log in to your Stripe test account
-4. Authorize Workato to access Stripe
-5. **⚠️ CRITICAL**: Do NOT rename the connection
+3. Select **API key** as the authentication type
+4. **Get your Stripe Secret API Key:**
+   - Open the [Stripe Dashboard](https://dashboard.stripe.com/) in a new tab
+   - Ensure you're in **Test mode** (toggle in the top-right corner)
+   - Navigate to **Developers** → **API keys**
+   - Under "Standard keys", find the **Secret key**
+   - Click **Reveal test key** to show the full key
+   - Copy the key (starts with `sk_test_`)
+5. **Paste the Secret API Key** into Workato's connection field
+6. Click **Connect** to complete authentication
+7. **⚠️ CRITICAL**: Do NOT rename the connection - keep the default name
+
+**Note**: Always use **test mode** keys for workshop environments. Never use live/production keys (`sk_live_`) in development.
 
 #### Twilio Connection (Optional)
 

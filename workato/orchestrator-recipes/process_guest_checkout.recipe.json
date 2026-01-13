@@ -797,7 +797,7 @@
                 "customer_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"create_customer\",\"path\":[\"result\",\"customer_id\"]}')}",
                 "description": "Hotel checkout payment",
                 "guest_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"id\"]}')}",
-                "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"booking_id\"]}')}",
+                "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"booking_number\"]}')}",
                 "idempotency_token": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"idempotency_token\"]}')}"
               }
             },
