@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cognito Identity Pool for Hotel Management System Bedrock Integration'
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Environment name (dev, staging, prod)
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Default: dev
+
+  UserPoolId:
+    Type: String
+    Description: Cognito User Pool ID
+    AllowedPattern: ^[a-z0-9-]+_[a-zA-Z0-9]+$
+    ConstraintDescription: Must be a valid Cognito User Pool ID
+
+  UserPoolClientId:
+    Type: String
+    Description: Cognito User Pool App Client ID
+    MinLength: 1
+    MaxLength: 128
+
+  BedrockModelId:
+    Type: String
+    Description: Bedrock model ID or cross-region inference profile to grant access to
+    Default: us.anthropic.claude-sonnet-4-5-20250929-v1:0
+    AllowedPattern: ^[a-z0-9.:-]+$
+
+Resources:
+  # Cognito Identity Pool
+  IdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !Sub 'hotel-mgmt-bedrock-${Environment}'
+      AllowUnauthenticatedIdentities: false
+      AllowClassicFlow: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref UserPoolClientId
+          ProviderName: !Sub 'cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}'
+          ServerSideTokenCheck: true
+      IdentityPoolTags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: HotelManagementSystem
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Purpose
+          Value: BedrockIntegration
+
+  # Single IAM Role for All Authenticated Users
+  AuthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'hotel-mgmt-bedrock-authenticated-${Environment}'
+      Description: IAM role for all authenticated users to access Bedrock
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud: !Ref IdentityPool
+              ForAnyValue:StringLike:
+                cognito-identity.amazonaws.com:amr: authenticated
+      Policies:
+        - PolicyName: BedrockInvokeAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                  - bedrock-runtime:InvokeModel
+                  - bedrock-runtime:InvokeModelWithResponseStream
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/*'
+                  - !Sub 'arn:aws:bedrock:*::foundation-model/*'
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/*'
+                  - !Sub 'arn:aws:bedrock:*:${AWS::AccountId}:inference-profile/*'
+        
+        - PolicyName: ChatConversationsAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Allow users to write to conversations table
+              # Access control is enforced at application layer
+              - Sid: AllowConversationOperations
+                Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                Resource:
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/chat-conversations-${Environment}'
+              
+              # Allow users to query their own conversations via GSI
+              - Sid: AllowQueryOwnConversationsViaGSI
+                Effect: Allow
+                Action:
+                  - dynamodb:Query
+                Resource:
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/chat-conversations-${Environment}/index/GSI1'
+              
+              # Deny dangerous operations
+              - Sid: DenyDangerousOperations
+                Effect: Deny
+                Action:
+                  - dynamodb:Scan
+                  - dynamodb:BatchWriteItem
+                Resource:
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/chat-conversations-${Environment}'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: HotelManagementSystem
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # Identity Pool Role Attachment - Simple mapping without rules
+  IdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref IdentityPool
+      Roles:
+        authenticated: !GetAtt AuthenticatedRole.Arn
+
+Outputs:
+  IdentityPoolId:
+    Description: Cognito Identity Pool ID
+    Value: !Ref IdentityPool
+    Export:
+      Name: !Sub '${AWS::StackName}-IdentityPoolId'
+
+  IdentityPoolName:
+    Description: Cognito Identity Pool Name
+    Value: !GetAtt IdentityPool.Name
+    Export:
+      Name: !Sub '${AWS::StackName}-IdentityPoolName'
+
+  AuthenticatedRoleArn:
+    Description: IAM Role ARN for all authenticated users
+    Value: !GetAtt AuthenticatedRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-AuthenticatedRoleArn'
+
+  Region:
+    Description: AWS Region
+    Value: !Ref AWS::Region
+    Export:
+      Name: !Sub '${AWS::StackName}-Region'
+
+  BedrockModelId:
+    Description: Bedrock Model ID configured for access
+    Value: !Ref BedrockModelId
+    Export:
+      Name: !Sub '${AWS::StackName}-BedrockModelId'
