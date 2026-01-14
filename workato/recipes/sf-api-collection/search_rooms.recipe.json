@@ -1,0 +1,1515 @@
+{
+  "name": "Search rooms",
+  "version": 4,
+  "private": false,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_api_platform",
+    "name": "receive_request",
+    "as": "trigger",
+    "keyword": "trigger",
+    "dynamicPickListSelection": {
+      "response.responses.0.http_status_code": "200 - OK",
+      "response.responses.1.http_status_code": "400 - Bad Request",
+      "response.responses.2.http_status_code": "500 - Internal Server Error"
+    },
+    "toggleCfg": {
+      "response.responses.0.http_status_code": true,
+      "response.responses.1.http_status_code": true,
+      "response.responses.2.http_status_code": true
+    },
+    "input": {
+      "request": {
+        "content_type": "json",
+        "schema": "[{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Room status filter (Vacant, Occupied, Cleaning, Maintenance, Out of Service)\"},{\"name\":\"floor\",\"label\":\"Floor\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Floor number filter\"},{\"name\":\"type\",\"label\":\"Type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Room type filter\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
+      },
+      "response": {
+        "content_type": "json",
+        "responses": [
+          {
+            "name": "Success",
+            "http_status_code": "200",
+            "body_schema": "[{\"name\":\"rooms\",\"label\":\"Rooms\",\"type\":\"array\",\"of\":\"object\",\"optional\":true,\"properties\":[{\"name\":\"id\",\"type\":\"string\",\"optional\":true},{\"name\":\"room_number\",\"type\":\"string\",\"optional\":true},{\"name\":\"status\",\"type\":\"string\",\"optional\":true},{\"name\":\"room_type\",\"type\":\"string\",\"optional\":true},{\"name\":\"floor\",\"type\":\"number\",\"optional\":true},{\"name\":\"nightly_rate\",\"type\":\"number\",\"optional\":true},{\"name\":\"max_occupancy\",\"type\":\"number\",\"optional\":true},{\"name\":\"current_guest_id\",\"type\":\"string\",\"optional\":true},{\"name\":\"current_guest_name\",\"type\":\"string\",\"optional\":true}]},{\"name\":\"count\",\"label\":\"Count\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true},{\"name\":\"found\",\"label\":\"Found\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"optional\":true}]"
+          },
+          {
+            "name": "Bad Request",
+            "http_status_code": "400",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Server Error",
+            "http_status_code": "500",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          }
+        ]
+      }
+    },
+    "extended_output_schema": [
+      {
+        "label": "Context",
+        "name": "context",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Calling IP address",
+            "optional": true,
+            "type": "string",
+            "name": "calling_ip"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "integer",
+                "label": "Access profile ID",
+                "parse_output": "integer_conversion",
+                "optional": true,
+                "type": "integer",
+                "name": "id"
+              },
+              {
+                "control_type": "text",
+                "label": "Access profile name",
+                "optional": true,
+                "type": "string",
+                "name": "name"
+              },
+              {
+                "control_type": "text",
+                "label": "Access profile authentication type",
+                "optional": true,
+                "type": "string",
+                "name": "type"
+              }
+            ],
+            "label": "Access profile",
+            "type": "object",
+            "name": "access_profile"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "text",
+                "label": "API client ID",
+                "optional": true,
+                "type": "string",
+                "name": "id"
+              },
+              {
+                "control_type": "text",
+                "label": "API client name",
+                "optional": true,
+                "type": "string",
+                "name": "name"
+              }
+            ],
+            "label": "API client",
+            "type": "object",
+            "name": "client"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "integer",
+                "label": "Issued At",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "iat"
+              },
+              {
+                "control_type": "integer",
+                "label": "Not Before",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "nbf"
+              },
+              {
+                "control_type": "integer",
+                "label": "Expiration Time",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "exp"
+              },
+              {
+                "control_type": "text",
+                "label": "Audience",
+                "optional": true,
+                "type": "string",
+                "name": "aud"
+              },
+              {
+                "control_type": "text",
+                "label": "JWT ID",
+                "optional": true,
+                "type": "string",
+                "name": "jti"
+              },
+              {
+                "control_type": "text",
+                "label": "Issuer",
+                "optional": true,
+                "type": "string",
+                "name": "iss"
+              }
+            ],
+            "label": "JWT claims",
+            "type": "object",
+            "name": "jwt_payload"
+          },
+          {
+            "properties": [
+              {
+                "properties": [
+                  {
+                    "control_type": "checkbox",
+                    "label": "Active",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Active",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "optional": true,
+                      "type": "boolean",
+                      "name": "active"
+                    },
+                    "type": "boolean",
+                    "name": "active"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Scope",
+                    "optional": true,
+                    "type": "string",
+                    "name": "scope"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Client ID",
+                    "optional": true,
+                    "type": "string",
+                    "name": "client_id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Username",
+                    "optional": true,
+                    "type": "string",
+                    "name": "username"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Token type",
+                    "optional": true,
+                    "type": "string",
+                    "name": "token_type"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Exp",
+                    "optional": true,
+                    "type": "string",
+                    "name": "exp"
+                  }
+                ],
+                "label": "Response Body",
+                "type": "object",
+                "name": "payload"
+              }
+            ],
+            "label": "Token introspection",
+            "type": "object",
+            "name": "introspect"
+          }
+        ],
+        "type": "object"
+      },
+      {
+        "label": "Request parameters",
+        "name": "request",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Status",
+            "name": "status",
+            "type": "string",
+            "optional": true,
+            "hint": "Room status filter (Vacant, Occupied, Cleaning, Maintenance, Out of Service)"
+          },
+          {
+            "control_type": "number",
+            "label": "Floor",
+            "parse_output": "float_conversion",
+            "name": "floor",
+            "type": "number",
+            "optional": true,
+            "hint": "Floor number filter"
+          },
+          {
+            "control_type": "text",
+            "label": "Type",
+            "name": "type",
+            "type": "string",
+            "optional": true,
+            "hint": "Room type filter"
+          },
+          {
+            "control_type": "number",
+            "label": "Limit",
+            "parse_output": "float_conversion",
+            "name": "limit",
+            "type": "number",
+            "optional": true,
+            "hint": "Maximum results (default 50)"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "as": "validate_filters",
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"status\"]}')}",
+                  "uuid": "condition-val-001"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"floor\"]}')}",
+                  "uuid": "condition-val-002"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"type\"]}')}",
+                  "uuid": "condition-val-003"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 3,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_validation_error",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "400 - Bad Request"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "400",
+                  "response": {
+                    "success": "false",
+                    "error_code": "VALIDATION_ERROR",
+                    "error_message": "At least one filter parameter is required (status, floor, or type)"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-validation-error-001"
+              },
+              {
+                "number": 4,
+                "as": "else_valid",
+                "keyword": "else",
+                "input": {
+                },
+                "block": [
+                  {
+                    "number": 5,
+                    "provider": "salesforce",
+                    "name": "search_sobjects_soql",
+                    "as": "search_rooms",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "sobject_name": "Hotel Room"
+                    },
+                    "input": {
+                      "sobject_name": "Hotel_Room__c",
+                      "limit": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"limit\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"limit\"]}') : 50",
+                      "query": "=[\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"status\"]}').present? ? \"Status__c = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"status\"]}')}'\": nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"floor\"]}').present? ? \"Floor__c = #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"floor\"]}')}\" : nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"type\"]}').present? ? \"Room_Type__c = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"type\"]}')}'\": nil)\n].compact.join(' AND ')"
+                    },
+                    "extended_output_schema": [
+                      {
+                        "label": "Hotel Rooms",
+                        "name": "Hotel_Room__c",
+                        "of": "object",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Record ID",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false,
+                            "type": "string",
+                            "name": "Id"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room Name",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Name"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room Number",
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Room_Number__c"
+                          },
+                          {
+                            "control_type": "select",
+                            "label": "Status",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Status__c"
+                          },
+                          {
+                            "control_type": "select",
+                            "label": "Room Type",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Room_Type__c"
+                          },
+                          {
+                            "control_type": "number",
+                            "label": "Floor",
+                            "parse_output": "float_conversion",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "number",
+                            "name": "Floor__c"
+                          },
+                          {
+                            "control_type": "number",
+                            "label": "Nightly Rate",
+                            "parse_output": "float_conversion",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "number",
+                            "name": "Nightly_Rate__c"
+                          },
+                          {
+                            "control_type": "number",
+                            "label": "Max Occupancy",
+                            "parse_output": "float_conversion",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "number",
+                            "name": "Max_Occupancy__c"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Current Guest",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Current_Guest__c"
+                          },
+                          {
+                            "name": "get_custom_object+Current_Guest__c",
+                            "type": "object",
+                            "label": "Current guest",
+                            "fetch_with": "get_custom_object(Current_Guest__c>id, sobject_name: Contact)",
+                            "join_point": true,
+                            "properties": [
+
+                            ]
+                          }
+                        ],
+                        "type": "array"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "List size",
+                        "name": "list_size",
+                        "parse_output": "integer_conversion",
+                        "type": "integer"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "control_type": "text",
+                        "custom": false,
+                        "label": "Record ID",
+                        "name": "Id",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": false,
+                        "sfdc_updateable": false
+                      },
+                      {
+                        "control_type": "text",
+                        "custom": false,
+                        "label": "Room Name",
+                        "name": "Name",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "text",
+                        "custom": true,
+                        "label": "Room Number",
+                        "name": "Room_Number__c",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "select",
+                        "custom": true,
+                        "label": "Status",
+                        "name": "Status__c",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "select",
+                        "custom": true,
+                        "label": "Room Type",
+                        "name": "Room_Type__c",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "number",
+                        "custom": true,
+                        "label": "Floor",
+                        "name": "Floor__c",
+                        "optional": true,
+                        "parse_output": "float_conversion",
+                        "type": "number",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "number",
+                        "custom": true,
+                        "label": "Nightly Rate",
+                        "name": "Nightly_Rate__c",
+                        "optional": true,
+                        "parse_output": "float_conversion",
+                        "type": "number",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "number",
+                        "custom": true,
+                        "label": "Max Occupancy",
+                        "name": "Max_Occupancy__c",
+                        "optional": true,
+                        "parse_output": "float_conversion",
+                        "type": "number",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "text",
+                        "custom": true,
+                        "label": "Current Guest",
+                        "name": "Current_Guest__c",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      }
+                    ],
+                    "uuid": "search-rooms-001"
+                  },
+                  {
+                    "number": 6,
+                    "as": "check_results",
+                    "keyword": "if",
+                    "input": {
+                      "type": "compound",
+                      "operand": "and",
+                      "conditions": [
+                        {
+                          "operand": "greater_than",
+                          "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"list_size\"]}')}",
+                          "rhs": "0",
+                          "uuid": "condition-results-001"
+                        }
+                      ]
+                    },
+                    "block": [
+                      {
+                        "number": 7,
+                        "provider": "workato_api_platform",
+                        "name": "return_response",
+                        "as": "return_found",
+                        "keyword": "action",
+                        "dynamicPickListSelection": {
+                          "http_status_code": "200 - OK"
+                        },
+                        "toggleCfg": {
+                          "http_status_code": true,
+                          "response.found": true
+                        },
+                        "input": {
+                          "http_status_code": "200",
+                          "response": {
+                            "count": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"list_size\"]}')}",
+                            "found": "true",
+                            "rooms": {
+                              "____source": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\"]}')}",
+                              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},\"Id\"]}')}",
+                              "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},\"Room_Number__c\"]}')}",
+                              "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},\"Status__c\"]}')}",
+                              "room_type": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},\"Room_Type__c\"]}')}",
+                              "floor": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},\"Floor__c\"]}')}",
+                              "nightly_rate": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},\"Nightly_Rate__c\"]}')}",
+                              "max_occupancy": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},\"Max_Occupancy__c\"]}')}",
+                              "current_guest_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},\"Current_Guest__c\"]}')}",
+                              "current_guest_name": "=[\n  _dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Current_Guest__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Contact\"}},\"FirstName\"]}'),\n  _dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_rooms\",\"path\":[\"Hotel_Room__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Current_Guest__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Contact\"}},\"LastName\"]}')\n].compact.join(' ')"
+                            }
+                          }
+                        },
+                        "extended_output_schema": [
+                          {
+                            "change_on_blur": true,
+                            "control_type": "select",
+                            "extends_schema": true,
+                            "label": "Response",
+                            "name": "http_status_code",
+                            "pick_list": [
+                              [
+                                "Success",
+                                "200"
+                              ],
+                              [
+                                "Bad Request",
+                                "400"
+                              ],
+                              [
+                                "Server Error",
+                                "500"
+                              ]
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "label": "Response body",
+                            "name": "response",
+                            "properties": [
+                              {
+                                "label": "Rooms",
+                                "name": "rooms",
+                                "type": "array",
+                                "optional": true,
+                                "of": "object",
+                                "properties": [
+                                  {
+                                    "control_type": "text",
+                                    "label": "ID",
+                                    "name": "id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Room number",
+                                    "name": "room_number",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Status",
+                                    "name": "status",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Room type",
+                                    "name": "room_type",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Floor",
+                                    "parse_output": "float_conversion",
+                                    "name": "floor",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Nightly rate",
+                                    "parse_output": "float_conversion",
+                                    "name": "nightly_rate",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Max occupancy",
+                                    "parse_output": "float_conversion",
+                                    "name": "max_occupancy",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Current guest ID",
+                                    "name": "current_guest_id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Current guest name",
+                                    "name": "current_guest_name",
+                                    "type": "string",
+                                    "optional": true
+                                  }
+                                ]
+                              },
+                              {
+                                "control_type": "number",
+                                "label": "Count",
+                                "parse_output": "float_conversion",
+                                "name": "count",
+                                "type": "number",
+                                "optional": true
+                              },
+                              {
+                                "control_type": "checkbox",
+                                "label": "Found",
+                                "render_input": "boolean_conversion",
+                                "parse_output": "boolean_conversion",
+                                "name": "found",
+                                "type": "boolean",
+                                "optional": true,
+                                "toggle_hint": "Select from option list",
+                                "toggle_field": {
+                                  "label": "Found",
+                                  "control_type": "text",
+                                  "toggle_hint": "Use custom value",
+                                  "name": "found",
+                                  "type": "boolean",
+                                  "optional": true
+                                }
+                              }
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "extended_input_schema": [
+                          {
+                            "change_on_blur": true,
+                            "control_type": "select",
+                            "extends_schema": true,
+                            "label": "Response",
+                            "name": "http_status_code",
+                            "pick_list": [
+                              [
+                                "Success",
+                                "200"
+                              ],
+                              [
+                                "Bad Request",
+                                "400"
+                              ],
+                              [
+                                "Server Error",
+                                "500"
+                              ]
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "label": "Response body",
+                            "name": "response",
+                            "properties": [
+                              {
+                                "label": "Rooms",
+                                "name": "rooms",
+                                "type": "array",
+                                "optional": true,
+                                "of": "object",
+                                "properties": [
+                                  {
+                                    "control_type": "text",
+                                    "label": "ID",
+                                    "name": "id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Room number",
+                                    "name": "room_number",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Status",
+                                    "name": "status",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Room type",
+                                    "name": "room_type",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Floor",
+                                    "parse_output": "float_conversion",
+                                    "name": "floor",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Nightly rate",
+                                    "parse_output": "float_conversion",
+                                    "name": "nightly_rate",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Max occupancy",
+                                    "parse_output": "float_conversion",
+                                    "name": "max_occupancy",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Current guest ID",
+                                    "name": "current_guest_id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Current guest name",
+                                    "name": "current_guest_name",
+                                    "type": "string",
+                                    "optional": true
+                                  }
+                                ]
+                              },
+                              {
+                                "control_type": "number",
+                                "label": "Count",
+                                "parse_output": "float_conversion",
+                                "name": "count",
+                                "type": "number",
+                                "optional": true
+                              },
+                              {
+                                "control_type": "checkbox",
+                                "label": "Found",
+                                "render_input": "boolean_conversion",
+                                "parse_output": "boolean_conversion",
+                                "name": "found",
+                                "type": "boolean",
+                                "optional": true,
+                                "toggle_hint": "Select from option list",
+                                "toggle_field": {
+                                  "label": "Found",
+                                  "control_type": "text",
+                                  "toggle_hint": "Use custom value",
+                                  "name": "found",
+                                  "type": "boolean",
+                                  "optional": true
+                                }
+                              }
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "visible_config_fields": [
+                          "http_status_code",
+                          "response",
+                          "response.count",
+                          "response.found",
+                          "response.rooms.id",
+                          "response.rooms.room_number",
+                          "response.rooms.status",
+                          "response.rooms.room_type",
+                          "response.rooms.floor",
+                          "response.rooms.nightly_rate",
+                          "response.rooms.max_occupancy",
+                          "response.rooms.current_guest_id",
+                          "response.rooms.current_guest_name"
+                        ],
+                        "uuid": "return-found-001"
+                      },
+                      {
+                        "number": 8,
+                        "as": "else_not_found",
+                        "keyword": "else",
+                        "input": {
+                        },
+                        "block": [
+                          {
+                            "number": 9,
+                            "provider": "workato_api_platform",
+                            "name": "return_response",
+                            "as": "return_not_found",
+                            "keyword": "action",
+                            "dynamicPickListSelection": {
+                              "http_status_code": "200 - OK"
+                            },
+                            "toggleCfg": {
+                              "http_status_code": true
+                            },
+                            "input": {
+                              "http_status_code": "200",
+                              "response": {
+                                "count": "0",
+                                "found": "false"
+                              }
+                            },
+                            "extended_output_schema": [
+                              {
+                                "change_on_blur": true,
+                                "control_type": "select",
+                                "extends_schema": true,
+                                "label": "Response",
+                                "name": "http_status_code",
+                                "pick_list": [
+                                  [
+                                    "Success",
+                                    "200"
+                                  ],
+                                  [
+                                    "Bad Request",
+                                    "400"
+                                  ],
+                                  [
+                                    "Server Error",
+                                    "500"
+                                  ]
+                                ],
+                                "type": "string"
+                              },
+                              {
+                                "label": "Response body",
+                                "name": "response",
+                                "properties": [
+                                  {
+                                    "label": "Rooms",
+                                    "name": "rooms",
+                                    "type": "array",
+                                    "optional": true,
+                                    "of": "object",
+                                    "properties": [
+                                      {
+                                        "control_type": "text",
+                                        "label": "ID",
+                                        "name": "id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Room number",
+                                        "name": "room_number",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Status",
+                                        "name": "status",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Room type",
+                                        "name": "room_type",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Floor",
+                                        "parse_output": "float_conversion",
+                                        "name": "floor",
+                                        "type": "number",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Nightly rate",
+                                        "parse_output": "float_conversion",
+                                        "name": "nightly_rate",
+                                        "type": "number",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Max occupancy",
+                                        "parse_output": "float_conversion",
+                                        "name": "max_occupancy",
+                                        "type": "number",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Current guest ID",
+                                        "name": "current_guest_id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Current guest name",
+                                        "name": "current_guest_name",
+                                        "type": "string",
+                                        "optional": true
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "control_type": "number",
+                                    "label": "Count",
+                                    "parse_output": "float_conversion",
+                                    "name": "count",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "checkbox",
+                                    "label": "Found",
+                                    "render_input": "boolean_conversion",
+                                    "parse_output": "boolean_conversion",
+                                    "name": "found",
+                                    "type": "boolean",
+                                    "optional": true,
+                                    "toggle_hint": "Select from option list",
+                                    "toggle_field": {
+                                      "label": "Found",
+                                      "control_type": "text",
+                                      "toggle_hint": "Use custom value",
+                                      "name": "found",
+                                      "type": "boolean",
+                                      "optional": true
+                                    }
+                                  }
+                                ],
+                                "type": "object"
+                              }
+                            ],
+                            "extended_input_schema": [
+                              {
+                                "change_on_blur": true,
+                                "control_type": "select",
+                                "extends_schema": true,
+                                "label": "Response",
+                                "name": "http_status_code",
+                                "pick_list": [
+                                  [
+                                    "Success",
+                                    "200"
+                                  ],
+                                  [
+                                    "Bad Request",
+                                    "400"
+                                  ],
+                                  [
+                                    "Server Error",
+                                    "500"
+                                  ]
+                                ],
+                                "type": "string"
+                              },
+                              {
+                                "label": "Response body",
+                                "name": "response",
+                                "properties": [
+                                  {
+                                    "label": "Rooms",
+                                    "name": "rooms",
+                                    "type": "array",
+                                    "optional": true,
+                                    "of": "object",
+                                    "properties": [
+                                      {
+                                        "control_type": "text",
+                                        "label": "ID",
+                                        "name": "id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Room number",
+                                        "name": "room_number",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Status",
+                                        "name": "status",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Room type",
+                                        "name": "room_type",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Floor",
+                                        "parse_output": "float_conversion",
+                                        "name": "floor",
+                                        "type": "number",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Nightly rate",
+                                        "parse_output": "float_conversion",
+                                        "name": "nightly_rate",
+                                        "type": "number",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Max occupancy",
+                                        "parse_output": "float_conversion",
+                                        "name": "max_occupancy",
+                                        "type": "number",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Current guest ID",
+                                        "name": "current_guest_id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Current guest name",
+                                        "name": "current_guest_name",
+                                        "type": "string",
+                                        "optional": true
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "control_type": "number",
+                                    "label": "Count",
+                                    "parse_output": "float_conversion",
+                                    "name": "count",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "checkbox",
+                                    "label": "Found",
+                                    "render_input": "boolean_conversion",
+                                    "parse_output": "boolean_conversion",
+                                    "name": "found",
+                                    "type": "boolean",
+                                    "optional": true,
+                                    "toggle_hint": "Select from option list",
+                                    "toggle_field": {
+                                      "label": "Found",
+                                      "control_type": "text",
+                                      "toggle_hint": "Use custom value",
+                                      "name": "found",
+                                      "type": "boolean",
+                                      "optional": true
+                                    }
+                                  }
+                                ],
+                                "type": "object"
+                              }
+                            ],
+                            "uuid": "return-not-found-001"
+                          }
+                        ],
+                        "uuid": "else-not-found-001"
+                      }
+                    ],
+                    "uuid": "if-results-001"
+                  }
+                ],
+                "uuid": "else-valid-001"
+              }
+            ],
+            "uuid": "if-validate-001"
+          },
+          {
+            "number": 10,
+            "as": "catch_error",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 11,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "Error in search_rooms: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}",
+                  "user_logs_enabled": "false"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "log-error-001"
+              },
+              {
+                "number": 12,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_error",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "500 - Internal Server Error"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "500",
+                  "response": {
+                    "success": "false",
+                    "error_message": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-error-001"
+              }
+            ],
+            "uuid": "catch-error-001"
+          }
+        ],
+        "uuid": "try-001"
+      }
+    ],
+    "uuid": "trigger-001"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_api_platform",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "salesforce",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
+        "name": "SF Dev Account",
+        "folder": "Workspace Connections"
+      }
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}
