@@ -24,7 +24,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest email address\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":true,\"hint\":\"Check-in date (ISO 8601 format, defaults to today)\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking confirmation number (optional, for disambiguation)\"}]"
+        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Guest email address\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":true,\"hint\":\"Check-in date (ISO 8601 format, defaults to today)\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking confirmation number (optional, for disambiguation)\"},{\"name\":\"payment_id\",\"label\":\"Payment ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Stripe payment/charge ID (optional, defaults to PENDING_CHECKIN)\"}]"
       },
       "response": {
         "content_type": "json",
@@ -268,6 +268,14 @@
             "type": "string",
             "optional": true,
             "hint": "Booking confirmation number (optional, for disambiguation)"
+          },
+          {
+            "control_type": "text",
+            "label": "Payment ID",
+            "name": "payment_id",
+            "type": "string",
+            "optional": true,
+            "hint": "Stripe payment/charge ID (optional, defaults to PENDING_CHECKIN)"
           }
         ],
         "type": "object"
@@ -291,8 +299,8 @@
             },
             "input": {
               "flow_id": {
-                "zip_name": "atomic-salesforce-recipes/upsert_case.recipe.json",
-                "name": "Upsert case",
+                "zip_name": "atomic-salesforce-recipes/search_contact_by_email.recipe.json",
+                "name": "Search contact by email",
                 "folder": "atomic-salesforce-recipes",
                 "folder_full_path": "Home/atomic-salesforce-recipes"
               },
@@ -560,8 +568,8 @@
             },
             "input": {
               "flow_id": {
-                "zip_name": "atomic-salesforce-recipes/upsert_case.recipe.json",
-                "name": "Upsert case",
+                "zip_name": "atomic-salesforce-recipes/search_booking_by_contact_and_date.recipe.json",
+                "name": "Search booking by contact and date",
                 "folder": "atomic-salesforce-recipes",
                 "folder_full_path": "Home/atomic-salesforce-recipes"
               },
@@ -1222,750 +1230,308 @@
           },
           {
             "number": 12,
-            "provider": "salesforce",
-            "name": "update_sobject",
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
             "as": "update_booking",
             "keyword": "action",
             "dynamicPickListSelection": {
-              "sobject_name": "Booking__c"
-            },
-            "toggleCfg": {
-              "Status__c": true
+              "flow_id": "Update booking status"
             },
             "input": {
-              "sobject_name": "Booking__c",
-              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}",
-              "Status__c": "Checked In"
+              "flow_id": {
+                "zip_name": "atomic-salesforce-recipes/update_booking_status.recipe.json",
+                "name": "Update booking status",
+                "folder": "atomic-salesforce-recipes",
+                "folder_full_path": "Home/atomic-salesforce-recipes"
+              },
+              "parameters": {
+                "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"booking_id\"]}')}",
+                "status": "Checked In",
+                "checkout_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"check_out_date\"]}')}"
+              }
             },
-            "extended_input_schema": [
+            "extended_output_schema": [
               {
-                "control_type": "text",
-                "hint": "Salesforce internal ID of Booking to update",
-                "label": "Booking ID",
-                "name": "id",
-                "type": "string",
-                "key_scope": "booking__c"
-              },
-              {
-                "control_type": "date",
-                "custom": true,
-                "label": "Check-In Date",
-                "name": "Check_In_Date__c",
-                "optional": true,
-                "parse_output": "parse_iso8601_date",
-                "type": "date_time",
-                "render_input": "render_iso8601_date",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "date",
-                "custom": true,
-                "label": "Check-Out Date",
-                "name": "Check_Out_Date__c",
-                "optional": true,
-                "parse_output": "parse_iso8601_date",
-                "type": "date_time",
-                "render_input": "render_iso8601_date",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "External ID",
-                "name": "External_ID__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": true,
-                "label": "Number of Guests",
-                "name": "Number_of_Guests__c",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Primary Guest",
-                "name": "Primary_Guest__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Room",
-                "name": "Room__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text-area",
-                "custom": true,
-                "label": "Special Requests",
-                "name": "Special_Requests__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "Status",
-                "name": "Status__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Booking__c\"",
-                  "field_name": "\"Status__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Status",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Status__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Booking ID",
+                    "name": "booking_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Updated",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "updated",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Updated",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "updated",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
               }
             ],
-            "visible_config_fields": [
-              "sobject_name",
-              "id",
-              "Status__c"
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Booking ID",
+                    "name": "booking_id",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Salesforce Booking ID"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "New booking status (e.g., Checked In)"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Checkout date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "checkout_date",
+                    "type": "date",
+                    "optional": false,
+                    "hint": "Guest checkout date"
+                  }
+                ],
+                "type": "object"
+              }
             ],
             "uuid": "update-booking-001"
           },
           {
             "number": 13,
-            "provider": "salesforce",
-            "name": "update_sobject",
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
             "as": "update_room",
             "keyword": "action",
             "dynamicPickListSelection": {
-              "sobject_name": "Hotel_Room__c"
-            },
-            "toggleCfg": {
-              "Status__c": true
+              "flow_id": "Update room status"
             },
             "input": {
-              "sobject_name": "Hotel_Room__c",
-              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"room_id\"]}')}",
-              "Status__c": "Occupied"
+              "flow_id": {
+                "zip_name": "atomic-salesforce-recipes/update_room_status.recipe.json",
+                "name": "Update room status",
+                "folder": "atomic-salesforce-recipes",
+                "folder_full_path": "Home/atomic-salesforce-recipes"
+              },
+              "parameters": {
+                "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"room_id\"]}')}",
+                "status": "Occupied",
+                "current_guest_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"id\"]}')}"
+              }
             },
-            "extended_input_schema": [
+            "extended_output_schema": [
               {
-                "control_type": "text",
-                "hint": "Salesforce internal ID of Hotel Room to update",
-                "label": "Hotel Room ID",
-                "name": "id",
-                "type": "string",
-                "key_scope": "hotel_room__c"
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Owner ID",
-                "name": "OwnerId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Room Name",
-                "name": "Name",
-                "optional": true,
-                "type": "string",
-                "event_title": true,
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "checkbox",
-                "custom": true,
-                "label": "ADA Accessible",
-                "name": "Accessible__c",
-                "optional": true,
-                "toggle_field": {
-                  "label": "ADA Accessible",
-                  "control_type": "text",
-                  "toggle_hint": "Use custom value",
-                  "render_input": null,
-                  "parse_output": null,
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "boolean",
-                  "name": "Accessible__c"
-                },
-                "toggle_hint": "Select from option list",
-                "type": "boolean",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "Bed Configuration",
-                "name": "Bed_Configuration__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Hotel_Room__c\"",
-                  "field_name": "\"Bed_Configuration__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Bed Configuration",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Bed_Configuration__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": true,
-                "label": "Floor",
-                "name": "Floor__c",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": true,
-                "label": "Max Occupancy",
-                "name": "Max_Occupancy__c",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": true,
-                "label": "Nightly Rate",
-                "name": "Nightly_Rate__c",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Room Number",
-                "name": "Room_Number__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "Room Type",
-                "name": "Room_Type__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Hotel_Room__c\"",
-                  "field_name": "\"Room_Type__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Room Type",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Room_Type__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": true,
-                "label": "Square Footage",
-                "name": "Square_Footage__c",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "Status",
-                "name": "Status__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Hotel_Room__c\"",
-                  "field_name": "\"Status__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Status",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Status__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "View Type",
-                "name": "View_Type__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Hotel_Room__c\"",
-                  "field_name": "\"View_Type__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "View Type",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "View_Type__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "room_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Current guest ID",
+                    "name": "current_guest_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Updated",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "updated",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Updated",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "updated",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
               }
             ],
-            "visible_config_fields": [
-              "sobject_name",
-              "id",
-              "Status__c"
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Room ID",
+                    "name": "room_id",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Salesforce Hotel_Room__c ID"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "New room status (e.g., Occupied)"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Current guest ID",
+                    "name": "current_guest_id",
+                    "type": "string",
+                    "optional": true,
+                    "hint": "Contact ID of guest occupying room"
+                  }
+                ],
+                "type": "object"
+              }
             ],
             "uuid": "update-room-001"
           },
           {
             "number": 14,
-            "provider": "salesforce",
-            "name": "update_sobject",
+            "provider": "workato_recipe_function",
+            "name": "call_recipe",
             "as": "update_opportunity",
             "keyword": "action",
             "dynamicPickListSelection": {
-              "sobject_name": "Opportunity"
-            },
-            "toggleCfg": {
-              "StageName": false
+              "flow_id": "Update opportunity stage"
             },
             "input": {
-              "sobject_name": "Opportunity",
-              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"opportunity_id\"]}')}",
-              "StageName": "Checked In"
+              "flow_id": {
+                "zip_name": "atomic-salesforce-recipes/update_opportunity_stage.recipe.json",
+                "name": "Update opportunity stage",
+                "folder": "atomic-salesforce-recipes",
+                "folder_full_path": "Home/atomic-salesforce-recipes"
+              },
+              "parameters": {
+                "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"opportunity_id\"]}')}",
+                "stage_name": "Checked In",
+                "close_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"check_out_date\"]}')}",
+                "payment_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"payment_id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"payment_id\"]}') : 'PENDING_CHECKIN'"
+              }
             },
-            "extended_input_schema": [
+            "extended_output_schema": [
               {
-                "control_type": "text",
-                "hint": "Salesforce internal ID of Opportunity to update",
-                "label": "Opportunity ID",
-                "name": "id",
-                "type": "string",
-                "key_scope": "opportunity"
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Account ID",
-                "name": "AccountId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": false,
-                "label": "Amount",
-                "name": "Amount",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Campaign ID",
-                "name": "CampaignId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "date",
-                "custom": false,
-                "label": "Close Date",
-                "name": "CloseDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_date",
-                "type": "date_time",
-                "render_input": "render_iso8601_date",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text-area",
-                "custom": false,
-                "label": "Description",
-                "name": "Description",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Forecast Category",
-                "name": "ForecastCategoryName",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"ForecastCategoryName\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Forecast Category",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "ForecastCategoryName"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Lead Source",
-                "name": "LeadSource",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"LeadSource\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Lead Source",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "LeadSource"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Name",
-                "name": "Name",
-                "optional": true,
-                "type": "string",
-                "event_title": true,
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Next Step",
-                "name": "NextStep",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Opportunity Type",
-                "name": "Type",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"Type\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Opportunity Type",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Type"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Owner ID",
-                "name": "OwnerId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Price Book ID",
-                "name": "Pricebook2Id",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "checkbox",
-                "custom": false,
-                "label": "Private",
-                "name": "IsPrivate",
-                "optional": true,
-                "toggle_field": {
-                  "label": "Private",
-                  "control_type": "text",
-                  "toggle_hint": "Use custom value",
-                  "render_input": null,
-                  "parse_output": null,
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "boolean",
-                  "name": "IsPrivate"
-                },
-                "toggle_hint": "Select from option list",
-                "type": "boolean",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Probability (%)",
-                "name": "Probability",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": false,
-                "label": "Quantity",
-                "name": "TotalOpportunityQuantity",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Stage",
-                "name": "StageName",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"StageName\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Stage",
-                  "toggle_hint": "Enter custom value",
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "optional": true,
-                  "type": "string",
-                  "name": "StageName"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "date",
-                "custom": true,
-                "label": "Arrival Date",
-                "name": "Arrival_Date__c",
-                "optional": true,
-                "parse_output": "parse_iso8601_date",
-                "type": "date_time",
-                "render_input": "render_iso8601_date",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Current Generator(s)",
-                "name": "CurrentGenerators__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "Delivery/Installation Status",
-                "name": "DeliveryInstallationStatus__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"DeliveryInstallationStatus__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Delivery/Installation Status",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "DeliveryInstallationStatus__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "date",
-                "custom": true,
-                "label": "Departure Date",
-                "name": "Departure_Date__c",
-                "optional": true,
-                "parse_output": "parse_iso8601_date",
-                "type": "date_time",
-                "render_input": "render_iso8601_date",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Main Competitor(s)",
-                "name": "MainCompetitors__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Order Number",
-                "name": "OrderNumber__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Tracking Number",
-                "name": "TrackingNumber__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Stage name",
+                    "name": "stage_name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Payment ID",
+                    "name": "payment_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Updated",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "name": "updated",
+                    "type": "boolean",
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Updated",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "name": "updated",
+                      "type": "boolean"
+                    }
+                  }
+                ],
+                "type": "object"
               }
             ],
-            "visible_config_fields": [
-              "sobject_name",
-              "id",
-              "StageName"
+            "extended_input_schema": [
+              {
+                "label": "Parameters",
+                "name": "parameters",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Salesforce Opportunity ID"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Stage name",
+                    "name": "stage_name",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "New opportunity stage (e.g., Checked In)"
+                  },
+                  {
+                    "control_type": "date",
+                    "label": "Close date",
+                    "render_input": "date_conversion",
+                    "parse_output": "date_conversion",
+                    "name": "close_date",
+                    "type": "date",
+                    "optional": false,
+                    "hint": "Opportunity close date (checkout date)"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Payment ID",
+                    "name": "payment_id",
+                    "type": "string",
+                    "optional": false,
+                    "hint": "Stripe payment/charge ID"
+                  }
+                ],
+                "type": "object"
+              }
             ],
             "uuid": "update-opportunity-001"
           },
@@ -2444,15 +2010,6 @@
       "provider": "workato_recipe_function",
       "skip_validation": false,
       "account_id": null
-    },
-    {
-      "keyword": "application",
-      "provider": "salesforce",
-      "skip_validation": false,
-      "account_id": {
-        "name": "SF Dev Account",
-        "folder": "Workspace Connections"
-      }    
     },
     {
       "keyword": "application",
