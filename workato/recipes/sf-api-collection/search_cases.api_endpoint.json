@@ -1,0 +1,17 @@
+{
+  "name": "Search cases",
+  "recipe_id": {
+    "zip_name": "sf-api-collection/search_cases.recipe.json",
+    "name": "Search cases",
+    "folder": "sf-api-collection"
+  },
+  "api_group_id": {
+    "zip_name": "sf-api-collection/sf_api_collection.api_group.json",
+    "name": "sf-api-collection",
+    "folder": "sf-api-collection"
+  },
+  "method": "POST",
+  "path": "search-cases",
+  "legacy": false,
+  "validate_request": false
+}

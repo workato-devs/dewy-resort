@@ -1,0 +1,7 @@
+{
+  "name": "sf-api-collection",
+  "version": "1.0",
+  "description": "Read-only Salesforce search endpoints for hotel operations. Query rooms and cases using business identifiers. All endpoints require at least one filter.",
+  "handle": "sf-api-collection-v1",
+  "use_prefix": true
+}

@@ -1,0 +1,1904 @@
+{
+  "name": "Search cases",
+  "version": 5,
+  "private": false,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_api_platform",
+    "name": "receive_request",
+    "as": "trigger",
+    "keyword": "trigger",
+    "dynamicPickListSelection": {
+      "response.responses.0.http_status_code": "200 - OK",
+      "response.responses.1.http_status_code": "400 - Bad Request",
+      "response.responses.2.http_status_code": "500 - Internal Server Error"
+    },
+    "toggleCfg": {
+      "response.responses.0.http_status_code": true,
+      "response.responses.1.http_status_code": true,
+      "response.responses.2.http_status_code": true
+    },
+    "input": {
+      "request": {
+        "content_type": "json",
+        "schema": "[{\"name\":\"type\",\"label\":\"Type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Type filter (Maintenance, Service Request)\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Status filter (New, Working, Escalated, Closed)\"},{\"name\":\"priority\",\"label\":\"Priority\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Priority filter (Low, Medium, High, Urgent)\"},{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by guest email (Contact.Email)\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by room number (Room__r.Room_Number__c)\"},{\"name\":\"assigned_to\",\"label\":\"Assigned to\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by owner ID\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
+      },
+      "response": {
+        "content_type": "json",
+        "responses": [
+          {
+            "name": "Success",
+            "http_status_code": "200",
+            "body_schema": "[{\"name\":\"cases\",\"label\":\"Cases\",\"type\":\"array\",\"of\":\"object\",\"optional\":true,\"properties\":[{\"name\":\"id\",\"type\":\"string\",\"optional\":true},{\"name\":\"case_number\",\"type\":\"string\",\"optional\":true},{\"name\":\"type\",\"type\":\"string\",\"optional\":true},{\"name\":\"status\",\"type\":\"string\",\"optional\":true},{\"name\":\"priority\",\"type\":\"string\",\"optional\":true},{\"name\":\"subject\",\"type\":\"string\",\"optional\":true},{\"name\":\"description\",\"type\":\"string\",\"optional\":true},{\"name\":\"room_id\",\"type\":\"string\",\"optional\":true},{\"name\":\"room_number\",\"type\":\"string\",\"optional\":true},{\"name\":\"contact_id\",\"type\":\"string\",\"optional\":true},{\"name\":\"guest_name\",\"type\":\"string\",\"optional\":true},{\"name\":\"guest_email\",\"type\":\"string\",\"optional\":true},{\"name\":\"owner_id\",\"type\":\"string\",\"optional\":true},{\"name\":\"created_date\",\"type\":\"date_time\",\"optional\":true},{\"name\":\"last_modified_date\",\"type\":\"date_time\",\"optional\":true},{\"name\":\"is_closed\",\"type\":\"boolean\",\"optional\":true}]},{\"name\":\"count\",\"label\":\"Count\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true},{\"name\":\"found\",\"label\":\"Found\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"optional\":true}]"
+          },
+          {
+            "name": "Bad Request",
+            "http_status_code": "400",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Server Error",
+            "http_status_code": "500",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          }
+        ]
+      }
+    },
+    "extended_output_schema": [
+      {
+        "label": "Context",
+        "name": "context",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Calling IP address",
+            "optional": true,
+            "type": "string",
+            "name": "calling_ip"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "integer",
+                "label": "Access profile ID",
+                "parse_output": "integer_conversion",
+                "optional": true,
+                "type": "integer",
+                "name": "id"
+              },
+              {
+                "control_type": "text",
+                "label": "Access profile name",
+                "optional": true,
+                "type": "string",
+                "name": "name"
+              },
+              {
+                "control_type": "text",
+                "label": "Access profile authentication type",
+                "optional": true,
+                "type": "string",
+                "name": "type"
+              }
+            ],
+            "label": "Access profile",
+            "type": "object",
+            "name": "access_profile"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "text",
+                "label": "API client ID",
+                "optional": true,
+                "type": "string",
+                "name": "id"
+              },
+              {
+                "control_type": "text",
+                "label": "API client name",
+                "optional": true,
+                "type": "string",
+                "name": "name"
+              }
+            ],
+            "label": "API client",
+            "type": "object",
+            "name": "client"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "integer",
+                "label": "Issued At",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "iat"
+              },
+              {
+                "control_type": "integer",
+                "label": "Not Before",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "nbf"
+              },
+              {
+                "control_type": "integer",
+                "label": "Expiration Time",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "exp"
+              },
+              {
+                "control_type": "text",
+                "label": "Audience",
+                "optional": true,
+                "type": "string",
+                "name": "aud"
+              },
+              {
+                "control_type": "text",
+                "label": "JWT ID",
+                "optional": true,
+                "type": "string",
+                "name": "jti"
+              },
+              {
+                "control_type": "text",
+                "label": "Issuer",
+                "optional": true,
+                "type": "string",
+                "name": "iss"
+              }
+            ],
+            "label": "JWT claims",
+            "type": "object",
+            "name": "jwt_payload"
+          },
+          {
+            "properties": [
+              {
+                "properties": [
+                  {
+                    "control_type": "checkbox",
+                    "label": "Active",
+                    "render_input": "boolean_conversion",
+                    "parse_output": "boolean_conversion",
+                    "optional": true,
+                    "toggle_hint": "Select from option list",
+                    "toggle_field": {
+                      "label": "Active",
+                      "control_type": "text",
+                      "toggle_hint": "Use custom value",
+                      "optional": true,
+                      "type": "boolean",
+                      "name": "active"
+                    },
+                    "type": "boolean",
+                    "name": "active"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Scope",
+                    "optional": true,
+                    "type": "string",
+                    "name": "scope"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Client ID",
+                    "optional": true,
+                    "type": "string",
+                    "name": "client_id"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Username",
+                    "optional": true,
+                    "type": "string",
+                    "name": "username"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Token type",
+                    "optional": true,
+                    "type": "string",
+                    "name": "token_type"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Exp",
+                    "optional": true,
+                    "type": "string",
+                    "name": "exp"
+                  }
+                ],
+                "label": "Response Body",
+                "type": "object",
+                "name": "payload"
+              }
+            ],
+            "label": "Token introspection",
+            "type": "object",
+            "name": "introspect"
+          }
+        ],
+        "type": "object"
+      },
+      {
+        "label": "Request parameters",
+        "name": "request",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Type",
+            "name": "type",
+            "type": "string",
+            "optional": true,
+            "hint": "Case Type filter (Maintenance, Service Request)"
+          },
+          {
+            "control_type": "text",
+            "label": "Status",
+            "name": "status",
+            "type": "string",
+            "optional": true,
+            "hint": "Case Status filter (New, Working, Escalated, Closed)"
+          },
+          {
+            "control_type": "text",
+            "label": "Priority",
+            "name": "priority",
+            "type": "string",
+            "optional": true,
+            "hint": "Priority filter (Low, Medium, High, Urgent)"
+          },
+          {
+            "control_type": "text",
+            "label": "Guest email",
+            "name": "guest_email",
+            "type": "string",
+            "optional": true,
+            "hint": "Filter by guest email (Contact.Email)"
+          },
+          {
+            "control_type": "text",
+            "label": "Room number",
+            "name": "room_number",
+            "type": "string",
+            "optional": true,
+            "hint": "Filter by room number (Room__r.Room_Number__c)"
+          },
+          {
+            "control_type": "text",
+            "label": "Assigned to",
+            "name": "assigned_to",
+            "type": "string",
+            "optional": true,
+            "hint": "Filter by owner ID"
+          },
+          {
+            "control_type": "number",
+            "label": "Limit",
+            "parse_output": "float_conversion",
+            "name": "limit",
+            "type": "number",
+            "optional": true,
+            "hint": "Maximum results (default 50)"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "as": "validate_filters",
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"type\"]}')}",
+                  "uuid": "condition-val-001"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"status\"]}')}",
+                  "uuid": "condition-val-002"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"priority\"]}')}",
+                  "uuid": "condition-val-003"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}",
+                  "uuid": "condition-val-004"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}')}",
+                  "uuid": "condition-val-005"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"assigned_to\"]}')}",
+                  "uuid": "condition-val-006"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 3,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_validation_error",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "400 - Bad Request"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "400",
+                  "response": {
+                    "success": "false",
+                    "error_code": "VALIDATION_ERROR",
+                    "error_message": "At least one filter parameter is required (type, status, priority, guest_email, room_number, or assigned_to)"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-validation-error-001"
+              },
+              {
+                "number": 4,
+                "as": "else_valid",
+                "keyword": "else",
+                "input": {
+                },
+                "block": [
+                  {
+                    "number": 5,
+                    "provider": "salesforce",
+                    "name": "search_sobjects_soql",
+                    "as": "search_cases",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "sobject_name": "Case"
+                    },
+                    "input": {
+                      "sobject_name": "Case",
+                      "limit": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"limit\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"limit\"]}') : 50",
+                      "query": "=[\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"type\"]}').present? ? \"Type = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"type\"]}')}'\": nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"status\"]}').present? ? \"Status = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"status\"]}')}'\": nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"priority\"]}').present? ? \"Priority = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"priority\"]}')}'\": nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}').present? ? \"Contact.Email = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}'\": nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}').present? ? \"Room__r.Room_Number__c = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}')}'\": nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"assigned_to\"]}').present? ? \"OwnerId = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"assigned_to\"]}')}'\": nil)\n].compact.join(' AND ')"
+                    },
+                    "extended_output_schema": [
+                      {
+                        "label": "Cases",
+                        "name": "Case",
+                        "of": "object",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Record ID",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false,
+                            "type": "string",
+                            "name": "Id"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Case Number",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false,
+                            "type": "string",
+                            "name": "CaseNumber"
+                          },
+                          {
+                            "control_type": "select",
+                            "label": "Type",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Type"
+                          },
+                          {
+                            "control_type": "select",
+                            "label": "Status",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Status"
+                          },
+                          {
+                            "control_type": "select",
+                            "label": "Priority",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Priority"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Subject",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Subject"
+                          },
+                          {
+                            "control_type": "text-area",
+                            "label": "Description",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Description"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Room__c"
+                          },
+                          {
+                            "name": "get_custom_object+Room__c",
+                            "type": "object",
+                            "label": "Room",
+                            "fetch_with": "get_custom_object(Room__c>id, sobject_name: Hotel_Room__c)",
+                            "join_point": true,
+                            "properties": [
+
+                            ]
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Contact ID",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "ContactId"
+                          },
+                          {
+                            "name": "get_custom_object+ContactId",
+                            "type": "object",
+                            "label": "Contact",
+                            "fetch_with": "get_custom_object(ContactId>id, sobject_name: Contact)",
+                            "join_point": true,
+                            "properties": [
+
+                            ]
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Owner ID",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "OwnerId"
+                          },
+                          {
+                            "control_type": "date_time",
+                            "label": "Created Date",
+                            "render_input": "render_iso8601_timestamp",
+                            "parse_output": "parse_iso8601_timestamp",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false,
+                            "type": "date_time",
+                            "name": "CreatedDate"
+                          },
+                          {
+                            "control_type": "date_time",
+                            "label": "Last Modified Date",
+                            "render_input": "render_iso8601_timestamp",
+                            "parse_output": "parse_iso8601_timestamp",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false,
+                            "type": "date_time",
+                            "name": "LastModifiedDate"
+                          },
+                          {
+                            "control_type": "checkbox",
+                            "label": "Closed",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false,
+                            "type": "boolean",
+                            "name": "IsClosed"
+                          }
+                        ],
+                        "type": "array"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "List size",
+                        "name": "list_size",
+                        "parse_output": "integer_conversion",
+                        "type": "integer"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "control_type": "text",
+                        "custom": false,
+                        "label": "Record ID",
+                        "name": "Id",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": false,
+                        "sfdc_updateable": false
+                      },
+                      {
+                        "control_type": "text",
+                        "custom": false,
+                        "label": "Case Number",
+                        "name": "CaseNumber",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": false,
+                        "sfdc_updateable": false
+                      },
+                      {
+                        "control_type": "select",
+                        "custom": false,
+                        "label": "Type",
+                        "name": "Type",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "select",
+                        "custom": false,
+                        "label": "Status",
+                        "name": "Status",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "select",
+                        "custom": false,
+                        "label": "Priority",
+                        "name": "Priority",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "text",
+                        "custom": false,
+                        "label": "Subject",
+                        "name": "Subject",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "text-area",
+                        "custom": false,
+                        "label": "Description",
+                        "name": "Description",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "text",
+                        "custom": true,
+                        "label": "Room",
+                        "name": "Room__c",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "text",
+                        "custom": false,
+                        "label": "Contact ID",
+                        "name": "ContactId",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "text",
+                        "custom": false,
+                        "label": "Owner ID",
+                        "name": "OwnerId",
+                        "optional": true,
+                        "type": "string",
+                        "sfdc_createable": true,
+                        "sfdc_updateable": true
+                      },
+                      {
+                        "control_type": "date_time",
+                        "custom": false,
+                        "label": "Created Date",
+                        "name": "CreatedDate",
+                        "optional": true,
+                        "parse_output": "parse_iso8601_timestamp",
+                        "type": "date_time",
+                        "render_input": "render_iso8601_timestamp",
+                        "sfdc_createable": false,
+                        "sfdc_updateable": false
+                      },
+                      {
+                        "control_type": "date_time",
+                        "custom": false,
+                        "label": "Last Modified Date",
+                        "name": "LastModifiedDate",
+                        "optional": true,
+                        "parse_output": "parse_iso8601_timestamp",
+                        "type": "date_time",
+                        "render_input": "render_iso8601_timestamp",
+                        "sfdc_createable": false,
+                        "sfdc_updateable": false
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "custom": false,
+                        "label": "Closed",
+                        "name": "IsClosed",
+                        "optional": true,
+                        "type": "boolean",
+                        "sfdc_createable": false,
+                        "sfdc_updateable": false
+                      }
+                    ],
+                    "uuid": "search-cases-001"
+                  },
+                  {
+                    "number": 6,
+                    "as": "check_results",
+                    "keyword": "if",
+                    "input": {
+                      "type": "compound",
+                      "operand": "and",
+                      "conditions": [
+                        {
+                          "operand": "greater_than",
+                          "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"list_size\"]}')}",
+                          "rhs": "0",
+                          "uuid": "condition-results-001"
+                        }
+                      ]
+                    },
+                    "block": [
+                      {
+                        "number": 7,
+                        "provider": "workato_api_platform",
+                        "name": "return_response",
+                        "as": "return_found",
+                        "keyword": "action",
+                        "dynamicPickListSelection": {
+                          "http_status_code": "200 - OK"
+                        },
+                        "toggleCfg": {
+                          "http_status_code": true,
+                          "response.found": true
+                        },
+                        "input": {
+                          "http_status_code": "200",
+                          "response": {
+                            "count": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"list_size\"]}')}",
+                            "found": "true",
+                            "cases": {
+                              "____source": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\"]}')}",
+                              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Id\"]}')}",
+                              "case_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"CaseNumber\"]}')}",
+                              "type": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Type\"]}')}",
+                              "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Status\"]}')}",
+                              "priority": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Priority\"]}')}",
+                              "subject": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Subject\"]}')}",
+                              "description": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Description\"]}')}",
+                              "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Room__c\"]}')}",
+                              "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Room_Number__c\"]}')}",
+                              "contact_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"ContactId\"]}')}",
+                              "guest_name": "=[\n  _dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"ContactId\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Contact\"}},\"FirstName\"]}'),\n  _dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"ContactId\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Contact\"}},\"LastName\"]}')\n].compact.join(' ')",
+                              "guest_email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"ContactId\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Contact\"}},\"Email\"]}')}",
+                              "owner_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"OwnerId\"]}')}",
+                              "created_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"CreatedDate\"]}')}",
+                              "last_modified_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"LastModifiedDate\"]}')}",
+                              "is_closed": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_cases\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"IsClosed\"]}')}"
+                            }
+                          }
+                        },
+                        "extended_output_schema": [
+                          {
+                            "change_on_blur": true,
+                            "control_type": "select",
+                            "extends_schema": true,
+                            "label": "Response",
+                            "name": "http_status_code",
+                            "pick_list": [
+                              [
+                                "Success",
+                                "200"
+                              ],
+                              [
+                                "Bad Request",
+                                "400"
+                              ],
+                              [
+                                "Server Error",
+                                "500"
+                              ]
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "label": "Response body",
+                            "name": "response",
+                            "properties": [
+                              {
+                                "label": "Cases",
+                                "name": "cases",
+                                "type": "array",
+                                "optional": true,
+                                "of": "object",
+                                "properties": [
+                                  {
+                                    "control_type": "text",
+                                    "label": "ID",
+                                    "name": "id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Case number",
+                                    "name": "case_number",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Type",
+                                    "name": "type",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Status",
+                                    "name": "status",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Priority",
+                                    "name": "priority",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Subject",
+                                    "name": "subject",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Description",
+                                    "name": "description",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Room ID",
+                                    "name": "room_id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Room number",
+                                    "name": "room_number",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Contact ID",
+                                    "name": "contact_id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Guest name",
+                                    "name": "guest_name",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Guest email",
+                                    "name": "guest_email",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Owner ID",
+                                    "name": "owner_id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "date_time",
+                                    "label": "Created date",
+                                    "render_input": "date_time_conversion",
+                                    "parse_output": "date_time_conversion",
+                                    "name": "created_date",
+                                    "type": "date_time",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "date_time",
+                                    "label": "Last modified date",
+                                    "render_input": "date_time_conversion",
+                                    "parse_output": "date_time_conversion",
+                                    "name": "last_modified_date",
+                                    "type": "date_time",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "checkbox",
+                                    "label": "Is closed",
+                                    "render_input": "boolean_conversion",
+                                    "parse_output": "boolean_conversion",
+                                    "name": "is_closed",
+                                    "type": "boolean",
+                                    "optional": true,
+                                    "toggle_hint": "Select from option list",
+                                    "toggle_field": {
+                                      "label": "Is closed",
+                                      "control_type": "text",
+                                      "toggle_hint": "Use custom value",
+                                      "name": "is_closed",
+                                      "type": "boolean",
+                                      "optional": true
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "control_type": "number",
+                                "label": "Count",
+                                "parse_output": "float_conversion",
+                                "name": "count",
+                                "type": "number",
+                                "optional": true
+                              },
+                              {
+                                "control_type": "checkbox",
+                                "label": "Found",
+                                "render_input": "boolean_conversion",
+                                "parse_output": "boolean_conversion",
+                                "name": "found",
+                                "type": "boolean",
+                                "optional": true,
+                                "toggle_hint": "Select from option list",
+                                "toggle_field": {
+                                  "label": "Found",
+                                  "control_type": "text",
+                                  "toggle_hint": "Use custom value",
+                                  "name": "found",
+                                  "type": "boolean",
+                                  "optional": true
+                                }
+                              }
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "extended_input_schema": [
+                          {
+                            "change_on_blur": true,
+                            "control_type": "select",
+                            "extends_schema": true,
+                            "label": "Response",
+                            "name": "http_status_code",
+                            "pick_list": [
+                              [
+                                "Success",
+                                "200"
+                              ],
+                              [
+                                "Bad Request",
+                                "400"
+                              ],
+                              [
+                                "Server Error",
+                                "500"
+                              ]
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "label": "Response body",
+                            "name": "response",
+                            "properties": [
+                              {
+                                "label": "Cases",
+                                "name": "cases",
+                                "type": "array",
+                                "optional": true,
+                                "of": "object",
+                                "properties": [
+                                  {
+                                    "control_type": "text",
+                                    "label": "ID",
+                                    "name": "id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Case number",
+                                    "name": "case_number",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Type",
+                                    "name": "type",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Status",
+                                    "name": "status",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Priority",
+                                    "name": "priority",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Subject",
+                                    "name": "subject",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Description",
+                                    "name": "description",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Room ID",
+                                    "name": "room_id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Room number",
+                                    "name": "room_number",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Contact ID",
+                                    "name": "contact_id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Guest name",
+                                    "name": "guest_name",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Guest email",
+                                    "name": "guest_email",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "text",
+                                    "label": "Owner ID",
+                                    "name": "owner_id",
+                                    "type": "string",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "date_time",
+                                    "label": "Created date",
+                                    "render_input": "date_time_conversion",
+                                    "parse_output": "date_time_conversion",
+                                    "name": "created_date",
+                                    "type": "date_time",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "date_time",
+                                    "label": "Last modified date",
+                                    "render_input": "date_time_conversion",
+                                    "parse_output": "date_time_conversion",
+                                    "name": "last_modified_date",
+                                    "type": "date_time",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "checkbox",
+                                    "label": "Is closed",
+                                    "render_input": "boolean_conversion",
+                                    "parse_output": "boolean_conversion",
+                                    "name": "is_closed",
+                                    "type": "boolean",
+                                    "optional": true,
+                                    "toggle_hint": "Select from option list",
+                                    "toggle_field": {
+                                      "label": "Is closed",
+                                      "control_type": "text",
+                                      "toggle_hint": "Use custom value",
+                                      "name": "is_closed",
+                                      "type": "boolean",
+                                      "optional": true
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "control_type": "number",
+                                "label": "Count",
+                                "parse_output": "float_conversion",
+                                "name": "count",
+                                "type": "number",
+                                "optional": true
+                              },
+                              {
+                                "control_type": "checkbox",
+                                "label": "Found",
+                                "render_input": "boolean_conversion",
+                                "parse_output": "boolean_conversion",
+                                "name": "found",
+                                "type": "boolean",
+                                "optional": true,
+                                "toggle_hint": "Select from option list",
+                                "toggle_field": {
+                                  "label": "Found",
+                                  "control_type": "text",
+                                  "toggle_hint": "Use custom value",
+                                  "name": "found",
+                                  "type": "boolean",
+                                  "optional": true
+                                }
+                              }
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "visible_config_fields": [
+                          "http_status_code",
+                          "response",
+                          "response.count",
+                          "response.found",
+                          "response.cases.id",
+                          "response.cases.case_number",
+                          "response.cases.type",
+                          "response.cases.status",
+                          "response.cases.priority",
+                          "response.cases.subject",
+                          "response.cases.description",
+                          "response.cases.room_id",
+                          "response.cases.room_number",
+                          "response.cases.contact_id",
+                          "response.cases.guest_name",
+                          "response.cases.guest_email",
+                          "response.cases.owner_id",
+                          "response.cases.created_date",
+                          "response.cases.last_modified_date",
+                          "response.cases.is_closed"
+                        ],
+                        "uuid": "return-found-001"
+                      },
+                      {
+                        "number": 8,
+                        "as": "else_not_found",
+                        "keyword": "else",
+                        "input": {
+                        },
+                        "block": [
+                          {
+                            "number": 9,
+                            "provider": "workato_api_platform",
+                            "name": "return_response",
+                            "as": "return_not_found",
+                            "keyword": "action",
+                            "dynamicPickListSelection": {
+                              "http_status_code": "200 - OK"
+                            },
+                            "toggleCfg": {
+                              "http_status_code": true
+                            },
+                            "input": {
+                              "http_status_code": "200",
+                              "response": {
+                                "count": "0",
+                                "found": "false"
+                              }
+                            },
+                            "extended_output_schema": [
+                              {
+                                "change_on_blur": true,
+                                "control_type": "select",
+                                "extends_schema": true,
+                                "label": "Response",
+                                "name": "http_status_code",
+                                "pick_list": [
+                                  [
+                                    "Success",
+                                    "200"
+                                  ],
+                                  [
+                                    "Bad Request",
+                                    "400"
+                                  ],
+                                  [
+                                    "Server Error",
+                                    "500"
+                                  ]
+                                ],
+                                "type": "string"
+                              },
+                              {
+                                "label": "Response body",
+                                "name": "response",
+                                "properties": [
+                                  {
+                                    "label": "Cases",
+                                    "name": "cases",
+                                    "type": "array",
+                                    "optional": true,
+                                    "of": "object",
+                                    "properties": [
+                                      {
+                                        "control_type": "text",
+                                        "label": "ID",
+                                        "name": "id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Case number",
+                                        "name": "case_number",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Type",
+                                        "name": "type",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Status",
+                                        "name": "status",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Priority",
+                                        "name": "priority",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Subject",
+                                        "name": "subject",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Description",
+                                        "name": "description",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Room ID",
+                                        "name": "room_id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Room number",
+                                        "name": "room_number",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Contact ID",
+                                        "name": "contact_id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Guest name",
+                                        "name": "guest_name",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Guest email",
+                                        "name": "guest_email",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Owner ID",
+                                        "name": "owner_id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "date_time",
+                                        "label": "Created date",
+                                        "render_input": "date_time_conversion",
+                                        "parse_output": "date_time_conversion",
+                                        "name": "created_date",
+                                        "type": "date_time",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "date_time",
+                                        "label": "Last modified date",
+                                        "render_input": "date_time_conversion",
+                                        "parse_output": "date_time_conversion",
+                                        "name": "last_modified_date",
+                                        "type": "date_time",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "checkbox",
+                                        "label": "Is closed",
+                                        "render_input": "boolean_conversion",
+                                        "parse_output": "boolean_conversion",
+                                        "name": "is_closed",
+                                        "type": "boolean",
+                                        "optional": true,
+                                        "toggle_hint": "Select from option list",
+                                        "toggle_field": {
+                                          "label": "Is closed",
+                                          "control_type": "text",
+                                          "toggle_hint": "Use custom value",
+                                          "name": "is_closed",
+                                          "type": "boolean",
+                                          "optional": true
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "control_type": "number",
+                                    "label": "Count",
+                                    "parse_output": "float_conversion",
+                                    "name": "count",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "checkbox",
+                                    "label": "Found",
+                                    "render_input": "boolean_conversion",
+                                    "parse_output": "boolean_conversion",
+                                    "name": "found",
+                                    "type": "boolean",
+                                    "optional": true,
+                                    "toggle_hint": "Select from option list",
+                                    "toggle_field": {
+                                      "label": "Found",
+                                      "control_type": "text",
+                                      "toggle_hint": "Use custom value",
+                                      "name": "found",
+                                      "type": "boolean",
+                                      "optional": true
+                                    }
+                                  }
+                                ],
+                                "type": "object"
+                              }
+                            ],
+                            "extended_input_schema": [
+                              {
+                                "change_on_blur": true,
+                                "control_type": "select",
+                                "extends_schema": true,
+                                "label": "Response",
+                                "name": "http_status_code",
+                                "pick_list": [
+                                  [
+                                    "Success",
+                                    "200"
+                                  ],
+                                  [
+                                    "Bad Request",
+                                    "400"
+                                  ],
+                                  [
+                                    "Server Error",
+                                    "500"
+                                  ]
+                                ],
+                                "type": "string"
+                              },
+                              {
+                                "label": "Response body",
+                                "name": "response",
+                                "properties": [
+                                  {
+                                    "label": "Cases",
+                                    "name": "cases",
+                                    "type": "array",
+                                    "optional": true,
+                                    "of": "object",
+                                    "properties": [
+                                      {
+                                        "control_type": "text",
+                                        "label": "ID",
+                                        "name": "id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Case number",
+                                        "name": "case_number",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Type",
+                                        "name": "type",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Status",
+                                        "name": "status",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Priority",
+                                        "name": "priority",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Subject",
+                                        "name": "subject",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Description",
+                                        "name": "description",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Room ID",
+                                        "name": "room_id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Room number",
+                                        "name": "room_number",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Contact ID",
+                                        "name": "contact_id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Guest name",
+                                        "name": "guest_name",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Guest email",
+                                        "name": "guest_email",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "text",
+                                        "label": "Owner ID",
+                                        "name": "owner_id",
+                                        "type": "string",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "date_time",
+                                        "label": "Created date",
+                                        "render_input": "date_time_conversion",
+                                        "parse_output": "date_time_conversion",
+                                        "name": "created_date",
+                                        "type": "date_time",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "date_time",
+                                        "label": "Last modified date",
+                                        "render_input": "date_time_conversion",
+                                        "parse_output": "date_time_conversion",
+                                        "name": "last_modified_date",
+                                        "type": "date_time",
+                                        "optional": true
+                                      },
+                                      {
+                                        "control_type": "checkbox",
+                                        "label": "Is closed",
+                                        "render_input": "boolean_conversion",
+                                        "parse_output": "boolean_conversion",
+                                        "name": "is_closed",
+                                        "type": "boolean",
+                                        "optional": true,
+                                        "toggle_hint": "Select from option list",
+                                        "toggle_field": {
+                                          "label": "Is closed",
+                                          "control_type": "text",
+                                          "toggle_hint": "Use custom value",
+                                          "name": "is_closed",
+                                          "type": "boolean",
+                                          "optional": true
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "control_type": "number",
+                                    "label": "Count",
+                                    "parse_output": "float_conversion",
+                                    "name": "count",
+                                    "type": "number",
+                                    "optional": true
+                                  },
+                                  {
+                                    "control_type": "checkbox",
+                                    "label": "Found",
+                                    "render_input": "boolean_conversion",
+                                    "parse_output": "boolean_conversion",
+                                    "name": "found",
+                                    "type": "boolean",
+                                    "optional": true,
+                                    "toggle_hint": "Select from option list",
+                                    "toggle_field": {
+                                      "label": "Found",
+                                      "control_type": "text",
+                                      "toggle_hint": "Use custom value",
+                                      "name": "found",
+                                      "type": "boolean",
+                                      "optional": true
+                                    }
+                                  }
+                                ],
+                                "type": "object"
+                              }
+                            ],
+                            "uuid": "return-not-found-001"
+                          }
+                        ],
+                        "uuid": "else-not-found-001"
+                      }
+                    ],
+                    "uuid": "if-results-001"
+                  }
+                ],
+                "uuid": "else-valid-001"
+              }
+            ],
+            "uuid": "if-validate-001"
+          },
+          {
+            "number": 10,
+            "as": "catch_error",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 11,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "Error in search_cases: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}",
+                  "user_logs_enabled": "false"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "log-error-001"
+              },
+              {
+                "number": 12,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_error",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "500 - Internal Server Error"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "500",
+                  "response": {
+                    "success": "false",
+                    "error_message": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-error-001"
+              }
+            ],
+            "uuid": "catch-error-001"
+          }
+        ],
+        "uuid": "try-001"
+      }
+    ],
+    "uuid": "trigger-001"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_api_platform",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "salesforce",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
+        "name": "SF Dev Account",
+        "folder": "Workspace Connections"
+      }
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}
