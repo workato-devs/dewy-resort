@@ -30,7 +30,7 @@ if [ -z "$WORKATO_API_TOKEN" ]; then
     exit 1
 fi
 
-folders=("Workspace-Connections" "atomic-salesforce-recipes" "atomic-stripe-recipes" "orchestrator-recipes")
+folders=("Workspace-Connections" "atomic-salesforce-recipes" "atomic-stripe-recipes" "orchestrator-recipes" "sf-api-collection")
 
 for folder in "${folders[@]}"; do
     workato init --profile default --region custom --non-interactive --project-name "$folder" --api-url "$WORKATO_HOST" 2>/dev/null || true
