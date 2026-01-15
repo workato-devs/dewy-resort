@@ -278,8 +278,7 @@
       {
         "number": 1,
         "keyword": "try",
-        "input": {
-        },
+        "input": {},
         "block": [
           {
             "number": 2,
@@ -335,18 +334,9 @@
                     "label": "Response",
                     "name": "http_status_code",
                     "pick_list": [
-                      [
-                        "Success",
-                        "200"
-                      ],
-                      [
-                        "Bad Request",
-                        "400"
-                      ],
-                      [
-                        "Server Error",
-                        "500"
-                      ]
+                      ["Success", "200"],
+                      ["Bad Request", "400"],
+                      ["Server Error", "500"]
                     ],
                     "type": "string"
                   },
@@ -394,18 +384,9 @@
                     "label": "Response",
                     "name": "http_status_code",
                     "pick_list": [
-                      [
-                        "Success",
-                        "200"
-                      ],
-                      [
-                        "Bad Request",
-                        "400"
-                      ],
-                      [
-                        "Server Error",
-                        "500"
-                      ]
+                      ["Success", "200"],
+                      ["Bad Request", "400"],
+                      ["Server Error", "500"]
                     ],
                     "type": "string"
                   },
@@ -451,8 +432,7 @@
                 "number": 4,
                 "as": "else_valid",
                 "keyword": "else",
-                "input": {
-                },
+                "input": {},
                 "block": [
                   {
                     "number": 5,
@@ -572,9 +552,7 @@
                             "label": "Current guest",
                             "fetch_with": "get_custom_object(Current_Guest__c>id, sobject_name: Contact)",
                             "join_point": true,
-                            "properties": [
-
-                            ]
+                            "properties": []
                           }
                         ],
                         "type": "array"
@@ -741,18 +719,9 @@
                             "label": "Response",
                             "name": "http_status_code",
                             "pick_list": [
-                              [
-                                "Success",
-                                "200"
-                              ],
-                              [
-                                "Bad Request",
-                                "400"
-                              ],
-                              [
-                                "Server Error",
-                                "500"
-                              ]
+                              ["Success", "200"],
+                              ["Bad Request", "400"],
+                              ["Server Error", "500"]
                             ],
                             "type": "string"
                           },
@@ -873,18 +842,9 @@
                             "label": "Response",
                             "name": "http_status_code",
                             "pick_list": [
-                              [
-                                "Success",
-                                "200"
-                              ],
-                              [
-                                "Bad Request",
-                                "400"
-                              ],
-                              [
-                                "Server Error",
-                                "500"
-                              ]
+                              ["Success", "200"],
+                              ["Bad Request", "400"],
+                              ["Server Error", "500"]
                             ],
                             "type": "string"
                           },
@@ -1018,8 +978,7 @@
                         "number": 8,
                         "as": "else_not_found",
                         "keyword": "else",
-                        "input": {
-                        },
+                        "input": {},
                         "block": [
                           {
                             "number": 9,
@@ -1048,18 +1007,9 @@
                                 "label": "Response",
                                 "name": "http_status_code",
                                 "pick_list": [
-                                  [
-                                    "Success",
-                                    "200"
-                                  ],
-                                  [
-                                    "Bad Request",
-                                    "400"
-                                  ],
-                                  [
-                                    "Server Error",
-                                    "500"
-                                  ]
+                                  ["Success", "200"],
+                                  ["Bad Request", "400"],
+                                  ["Server Error", "500"]
                                 ],
                                 "type": "string"
                               },
@@ -1180,18 +1130,9 @@
                                 "label": "Response",
                                 "name": "http_status_code",
                                 "pick_list": [
-                                  [
-                                    "Success",
-                                    "200"
-                                  ],
-                                  [
-                                    "Bad Request",
-                                    "400"
-                                  ],
-                                  [
-                                    "Server Error",
-                                    "500"
-                                  ]
+                                  ["Success", "200"],
+                                  ["Bad Request", "400"],
+                                  ["Server Error", "500"]
                                 ],
                                 "type": "string"
                               },
@@ -1379,18 +1320,9 @@
                     "label": "Response",
                     "name": "http_status_code",
                     "pick_list": [
-                      [
-                        "Success",
-                        "200"
-                      ],
-                      [
-                        "Bad Request",
-                        "400"
-                      ],
-                      [
-                        "Server Error",
-                        "500"
-                      ]
+                      ["Success", "200"],
+                      ["Bad Request", "400"],
+                      ["Server Error", "500"]
                     ],
                     "type": "string"
                   },
@@ -1432,18 +1364,9 @@
                     "label": "Response",
                     "name": "http_status_code",
                     "pick_list": [
-                      [
-                        "Success",
-                        "200"
-                      ],
-                      [
-                        "Bad Request",
-                        "400"
-                      ],
-                      [
-                        "Server Error",
-                        "500"
-                      ]
+                      ["Success", "200"],
+                      ["Bad Request", "400"],
+                      ["Server Error", "500"]
                     ],
                     "type": "string"
                   },
