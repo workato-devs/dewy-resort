@@ -123,8 +123,8 @@ async function checkSalesforce(): Promise<IntegrationStatus> {
     const config = getWorkatoSalesforceConfig();
     const salesforceClient = new SalesforceClient(config);
     
-    // Try a simple search to verify connectivity
-    await salesforceClient.searchRooms({});
+    // Try a simple search to verify connectivity (requires at least one filter)
+    await salesforceClient.searchRooms({ status: 'vacant' });
 
     return {
       name: 'Salesforce',

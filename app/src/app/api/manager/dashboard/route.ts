@@ -40,6 +40,8 @@ export async function GET(request: NextRequest) {
     try {
       const salesforceConfig = getWorkatoSalesforceConfig();
       const salesforceClient = new SalesforceClient(salesforceConfig);
+      
+      // MIGRATION: Always pass type='Maintenance' filter (required by new API)
       const salesforceTasks = await salesforceClient.searchMaintenanceTasks({
         status: 'pending' as any, // Will match pending, assigned, in_progress
       });
@@ -116,6 +118,8 @@ export async function GET(request: NextRequest) {
     try {
       const salesforceConfig = getWorkatoSalesforceConfig();
       const salesforceClient = new SalesforceClient(salesforceConfig);
+      
+      // MIGRATION: Always pass type='Service Request' filter (required by new API)
       const salesforceRequests = await salesforceClient.searchServiceRequests({
         status: statusFilter?.[0] as any,
       });
@@ -225,7 +229,23 @@ export async function GET(request: NextRequest) {
     try {
       const salesforceConfig = getWorkatoSalesforceConfig();
       const salesforceClient = new SalesforceClient(salesforceConfig);
-      const salesforceRooms = await salesforceClient.searchRooms({});
+      
+      // MIGRATION: The API requires at least one filter parameter
+      // Since we need all rooms regardless of status, we'll make multiple calls
+      // and combine the results (the API doesn't support OR queries or comma-separated values)
+      const statuses: Array<'vacant' | 'occupied' | 'cleaning' | 'maintenance'> = [
+        'vacant',
+        'occupied', 
+        'cleaning',
+        'maintenance'
+      ];
+      
+      const roomPromises = statuses.map(status => 
+        salesforceClient.searchRooms({ status })
+      );
+      
+      const roomResults = await Promise.all(roomPromises);
+      const salesforceRooms = roomResults.flat();
       
       if (salesforceRooms && salesforceRooms.length > 0) {
         // Fetch local users to enrich with guest names

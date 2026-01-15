@@ -48,8 +48,13 @@ export function RoomStatusGrid({ rooms }: RoomStatusGridProps) {
     }
   };
 
-  const getRoomTypeLabel = (type: string) => {
-    switch (type) {
+  const getRoomTypeLabel = (type: string | undefined | null) => {
+    if (!type) {
+      return 'N/A';
+    }
+    
+    const lowerType = type.toLowerCase();
+    switch (lowerType) {
       case 'standard':
         return 'STD';
       case 'deluxe':

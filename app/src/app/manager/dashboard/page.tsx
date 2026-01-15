@@ -13,6 +13,7 @@ import { RoomStatusGrid } from '@/components/manager/RoomStatusGrid';
 import { RevenueMetrics } from '@/components/manager/RevenueMetrics';
 import { ContactSearchCard } from '@/components/manager/ContactSearchCard';
 import { ManagerDashboardSkeleton } from '@/components/manager/ManagerDashboardSkeleton';
+import { DataSourceIndicator } from '@/components/manager/DataSourceIndicator';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -125,7 +126,10 @@ export default function ManagerDashboardPage() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Manager Dashboard</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Manager Dashboard</h1>
+          <DataSourceIndicator />
+        </div>
         <Button
           onClick={handleRefresh}
           disabled={refreshing}

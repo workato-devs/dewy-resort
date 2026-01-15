@@ -74,6 +74,16 @@ export class SalesforceClient {
         'API-TOKEN': config.apiToken,
       },
     });
+
+    // Log configuration for debugging (without exposing full token)
+    if (process.env.SHOW_API_RESPONSES === 'true') {
+      console.log('[SalesforceClient] Configuration:', {
+        baseURL: config.baseUrl,
+        timeout: config.timeout,
+        apiTokenPrefix: config.apiToken.substring(0, 10) + '...',
+        mockMode: config.mockMode,
+      });
+    }
   }
 
   /**
@@ -172,6 +182,36 @@ export class SalesforceClient {
    */
   public clearCache(): void {
     this.cache.clear();
+  }
+
+  /**
+   * Validates that at least one search criterion is provided
+   * Required by Salesforce API - queries with no filters will fail
+   * 
+   * @param criteria - The search criteria object
+   * @param requiredFields - List of valid filter field names
+   * @param operationName - Name of the operation for error messages
+   * @throws WorkatoSalesforceError if no valid filters are provided
+   */
+  private validateSearchCriteria(
+    criteria: any,
+    requiredFields: string[],
+    operationName: string
+  ): void {
+    const hasAtLeastOne = requiredFields.some(field => {
+      const value = criteria[field];
+      return value !== undefined && value !== null && value !== '';
+    });
+    
+    if (!hasAtLeastOne) {
+      throw new WorkatoSalesforceError(
+        `At least one filter parameter is required for ${operationName}: ${requiredFields.join(', ')}`,
+        400,
+        operationName,
+        randomUUID(),
+        false
+      );
+    }
   }
 
   // ============================================================================
@@ -337,11 +377,12 @@ export class SalesforceClient {
    * Search for rooms based on criteria
    * Implements caching with 60s TTL for search results
    * 
-   * Note: Uses existing Workato endpoint /search-for-rooms-in-salesforce
-   * This endpoint accepts search criteria as request body
+   * MIGRATION NOTE: Updated to use new /search-rooms endpoint
+   * Requires at least one filter parameter (status, floor, or type)
    * 
    * @param criteria - Search criteria for filtering rooms (status, floor, type, etc.)
    * @returns Promise resolving to array of matching rooms
+   * @throws WorkatoSalesforceError if no filters provided
    */
   async searchRooms(criteria: RoomSearchCriteria = {}): Promise<Room[]> {
     // Check cache first
@@ -352,19 +393,43 @@ export class SalesforceClient {
       return cachedResult;
     }
 
-    // Mock mode: use mock data store
+    // Mock mode: use mock data store (no validation required)
     if (this.mockDataStore) {
       const rooms = await this.mockDataStore.getRooms(criteria);
       this.setCachedResponse(cacheKey, rooms, 60000); // 60s TTL
       return rooms;
     }
 
+    // Validate that at least one filter is provided (required by real API)
+    this.validateSearchCriteria(
+      criteria,
+      ['status', 'floor', 'type'],
+      'searchRooms'
+    );
+
     // Real API call with retry logic
-    // Note: Endpoint uses POST method to accept search criteria in request body
-    const rooms = await this.retryWithBackoff(
-      () => this.makeRequest<Room[]>('POST', '/search-for-rooms-in-salesforce', criteria),
+    // Updated endpoint: /search-rooms (API Collection)
+    const response = await this.retryWithBackoff(
+      () => this.makeRequest<{ rooms: any[]; count: number; found: boolean }>(
+        'POST', 
+        '/search-rooms', 
+        criteria
+      ),
       this.config.retryAttempts
     );
+
+    // Transform API response to match Room interface
+    const rooms: Room[] = (response.rooms || []).map((r: any) => ({
+      id: r.id,
+      room_number: r.room_number,
+      floor: r.floor,
+      type: r.room_type?.toLowerCase() || 'standard', // Transform room_type to type and lowercase
+      status: r.status?.toLowerCase() || 'vacant', // Ensure status is lowercase
+      current_guest_id: r.current_guest_id || null,
+      assigned_manager_id: r.assigned_manager_id || null,
+      created_at: r.created_at || new Date().toISOString(),
+      updated_at: r.updated_at || new Date().toISOString(),
+    }));
 
     // Cache the result
     this.setCachedResponse(cacheKey, rooms, 60000); // 60s TTL
@@ -404,8 +469,8 @@ export class SalesforceClient {
     // Mock mode: use mock data store
     if (this.mockDataStore) {
       const serviceRequest = await this.mockDataStore.createServiceRequest(data);
-      // Invalidate all service request cache entries
-      this.invalidateCacheByPrefix('searchServiceRequests:');
+      // Invalidate all service request cache entries (updated for new cache keys)
+      this.invalidateCacheByPrefix('searchCases:ServiceRequest:');
       return serviceRequest;
     }
 
@@ -415,8 +480,8 @@ export class SalesforceClient {
       this.config.retryAttempts
     );
 
-    // Invalidate all service request cache entries
-    this.invalidateCacheByPrefix('searchServiceRequests:');
+    // Invalidate all service request cache entries (updated for new cache keys)
+    this.invalidateCacheByPrefix('searchCases:ServiceRequest:');
     
     return serviceRequest;
   }
@@ -425,65 +490,92 @@ export class SalesforceClient {
    * Search for service requests based on criteria
    * Implements caching with 60s TTL for search results
    * 
-   * Note: Uses unified case search endpoint that returns ALL cases
-   * Filters by type='service_request' in application layer
-   * For guest views, caller should filter by guest_id after receiving results
+   * MIGRATION NOTE: Updated to use new /search-cases endpoint
+   * Always filters by type='Service Request'
+   * Requires at least one additional filter parameter
+   * Uses business identifiers (guest_email, not guest_id)
    * 
    * @param criteria - Search criteria for filtering service requests
    * @returns Promise resolving to array of matching service requests
+   * @throws WorkatoSalesforceError if no filters provided
    */
   async searchServiceRequests(criteria: ServiceRequestSearch = {}): Promise<ServiceRequest[]> {
+    // Build case search criteria with type='Service Request'
+    const caseSearchCriteria: any = {
+      type: 'Service Request',
+      status: criteria.status,
+      room_number: criteria.room_number,
+      guest_email: criteria.guest_email || criteria.guest_id, // Support both for backward compatibility
+      limit: 1000,
+    };
+
     // Check cache first
-    const cacheKey = this.getCacheKey('searchServiceRequests', criteria);
+    const cacheKey = this.getCacheKey('searchCases:ServiceRequest', caseSearchCriteria);
     const cachedResult = this.getCachedResponse<ServiceRequest[]>(cacheKey);
     
     if (cachedResult !== null) {
       return cachedResult;
     }
 
-    // Mock mode: use mock data store
+    // Mock mode: use mock data store (no validation required)
     if (this.mockDataStore) {
       const serviceRequests = await this.mockDataStore.getServiceRequests(criteria);
       this.setCachedResponse(cacheKey, serviceRequests, 60000); // 60s TTL
       return serviceRequests;
     }
 
+    // Validate that at least one filter is provided (type is always present, so this will pass)
+    this.validateSearchCriteria(
+      caseSearchCriteria,
+      ['type', 'status', 'room_number', 'guest_email'],
+      'searchServiceRequests'
+    );
+
     // Real API call with retry logic
-    // Fetch ALL cases from unified endpoint
-    // Note: Workato endpoint requires at least one search field
-    // Using a wildcard search to get all cases
+    // Updated endpoint: /search-cases (API Collection)
     const response = await this.retryWithBackoff(
-      () => this.makeRequest<{ cases: any[]; count: number }>('POST', '/search-cases-in-salesforce', {
-        search_field: '*',  // Wildcard to get all cases
-        limit: 1000  // High limit to get all cases
-      }),
+      () => this.makeRequest<{ cases: any[]; count: number; found: boolean }>(
+        'POST', 
+        '/search-cases', 
+        caseSearchCriteria
+      ),
       this.config.retryAttempts
     );
 
     // Extract cases array from response
-    const allCases = response.cases || [];
+    const cases = response.cases || [];
 
-    // Filter by type='service_request' in application
-    let serviceRequests = allCases.filter((c: any) => c.type === 'service_request');
-
-    // Apply additional filters from criteria
-    if (criteria.guest_id) {
-      serviceRequests = serviceRequests.filter((sr: any) => sr.guest_id === criteria.guest_id);
-    }
-    if (criteria.room_number) {
-      serviceRequests = serviceRequests.filter((sr: any) => sr.room_number === criteria.room_number);
-    }
-    if (criteria.status) {
-      serviceRequests = serviceRequests.filter((sr: any) => sr.status === criteria.status);
-    }
-    if (criteria.type) {
-      serviceRequests = serviceRequests.filter((sr: any) => sr.type === criteria.type);
-    }
+    // Map cases to ServiceRequest format
+    const serviceRequests: ServiceRequest[] = cases.map((c: any) => ({
+      id: c.id,
+      guest_id: c.contact_id || '',
+      room_number: c.room_number || '',
+      type: this.mapServiceRequestType(c.subject),
+      priority: this.mapPriority(c.priority) as any,
+      description: c.description || '',
+      status: this.mapServiceRequestStatus(c.status) as any,
+      salesforce_ticket_id: c.case_number,
+      created_at: c.created_date,
+      updated_at: c.last_modified_date,
+    }));
 
     // Cache the result
-    this.setCachedResponse(cacheKey, serviceRequests as ServiceRequest[], 60000); // 60s TTL
+    this.setCachedResponse(cacheKey, serviceRequests, 60000); // 60s TTL
     
-    return serviceRequests as ServiceRequest[];
+    return serviceRequests;
+  }
+
+  /**
+   * Helper: Map case subject to ServiceRequestType
+   */
+  private mapServiceRequestType(subject: string): any {
+    // Try to extract type from subject
+    const lower = subject.toLowerCase();
+    if (lower.includes('housekeeping')) return 'housekeeping';
+    if (lower.includes('room service')) return 'room_service';
+    if (lower.includes('maintenance')) return 'maintenance';
+    if (lower.includes('concierge')) return 'concierge';
+    return 'concierge'; // Default
   }
 
   /**
@@ -508,8 +600,8 @@ export class SalesforceClient {
           false
         );
       }
-      // Invalidate all service request cache entries
-      this.invalidateCacheByPrefix('searchServiceRequests:');
+      // Invalidate all service request cache entries (updated for new cache keys)
+      this.invalidateCacheByPrefix('searchCases:ServiceRequest:');
       return serviceRequest;
     }
 
@@ -519,8 +611,8 @@ export class SalesforceClient {
       this.config.retryAttempts
     );
 
-    // Invalidate all service request cache entries
-    this.invalidateCacheByPrefix('searchServiceRequests:');
+    // Invalidate all service request cache entries (updated for new cache keys)
+    this.invalidateCacheByPrefix('searchCases:ServiceRequest:');
     
     return serviceRequest;
   }
@@ -557,8 +649,8 @@ export class SalesforceClient {
     // Mock mode: use mock data store
     if (this.mockDataStore) {
       const maintenanceTask = await this.mockDataStore.createMaintenanceTask(data);
-      // Invalidate all maintenance task cache entries
-      this.invalidateCacheByPrefix('searchMaintenanceTasks:');
+      // Invalidate all maintenance task cache entries (updated for new cache keys)
+      this.invalidateCacheByPrefix('searchCases:Maintenance:');
       this.invalidateCacheByPrefix('getMaintenanceTask:');
       return maintenanceTask;
     }
@@ -569,8 +661,8 @@ export class SalesforceClient {
       this.config.retryAttempts
     );
 
-    // Invalidate all maintenance task cache entries
-    this.invalidateCacheByPrefix('searchMaintenanceTasks:');
+    // Invalidate all maintenance task cache entries (updated for new cache keys)
+    this.invalidateCacheByPrefix('searchCases:Maintenance:');
     this.invalidateCacheByPrefix('getMaintenanceTask:');
     
     return maintenanceTask;
@@ -580,65 +672,119 @@ export class SalesforceClient {
    * Search for maintenance tasks based on criteria
    * Implements caching with 60s TTL for search results
    * 
-   * Note: Uses unified case search endpoint that returns ALL cases
-   * Filters by type='maintenance' in application layer
-   * For guest views, caller should filter by guest_id after receiving results
+   * MIGRATION NOTE: Updated to use new /search-cases endpoint
+   * Always filters by type='Maintenance'
+   * Requires at least one additional filter parameter
+   * Uses business identifiers (room_number, not room_id)
    * 
    * @param criteria - Search criteria for filtering maintenance tasks
    * @returns Promise resolving to array of matching maintenance tasks
+   * @throws WorkatoSalesforceError if no filters provided
    */
   async searchMaintenanceTasks(criteria: MaintenanceTaskSearch = {}): Promise<MaintenanceTask[]> {
+    // Build case search criteria with type='Maintenance'
+    const caseSearchCriteria: any = {
+      type: 'Maintenance',
+      status: criteria.status,
+      priority: criteria.priority,
+      assigned_to: criteria.assigned_to,
+      room_number: criteria.room_number || criteria.room_id, // Support both for backward compatibility
+      limit: 1000,
+    };
+
     // Check cache first
-    const cacheKey = this.getCacheKey('searchMaintenanceTasks', criteria);
+    const cacheKey = this.getCacheKey('searchCases:Maintenance', caseSearchCriteria);
     const cachedResult = this.getCachedResponse<MaintenanceTask[]>(cacheKey);
     
     if (cachedResult !== null) {
       return cachedResult;
     }
 
-    // Mock mode: use mock data store
+    // Mock mode: use mock data store (no validation required)
     if (this.mockDataStore) {
       const maintenanceTasks = await this.mockDataStore.getMaintenanceTasks(criteria);
       this.setCachedResponse(cacheKey, maintenanceTasks, 60000); // 60s TTL
       return maintenanceTasks;
     }
 
+    // Validate that at least one filter is provided (type is always present, so this will pass)
+    this.validateSearchCriteria(
+      caseSearchCriteria,
+      ['type', 'status', 'priority', 'room_number', 'assigned_to'],
+      'searchMaintenanceTasks'
+    );
+
     // Real API call with retry logic
-    // Fetch ALL cases from unified endpoint
-    // Note: Workato endpoint requires at least one search field
-    // Using a wildcard search to get all cases
+    // Updated endpoint: /search-cases (API Collection)
     const response = await this.retryWithBackoff(
-      () => this.makeRequest<{ cases: any[]; count: number }>('POST', '/search-cases-in-salesforce', {
-        search_field: '*',  // Wildcard to get all cases
-        limit: 1000  // High limit to get all cases
-      }),
+      () => this.makeRequest<{ cases: any[]; count: number; found: boolean }>(
+        'POST', 
+        '/search-cases', 
+        caseSearchCriteria
+      ),
       this.config.retryAttempts
     );
 
     // Extract cases array from response
-    const allCases = response.cases || [];
+    const cases = response.cases || [];
 
-    // Filter by type='maintenance' in application
-    let maintenanceTasks = allCases.filter((c: any) => c.type === 'maintenance');
-
-    // Apply additional filters from criteria
-    if (criteria.room_id) {
-      maintenanceTasks = maintenanceTasks.filter((mt: any) => mt.room_id === criteria.room_id);
-    }
-    if (criteria.status) {
-      maintenanceTasks = maintenanceTasks.filter((mt: any) => mt.status === criteria.status);
-    }
-    if (criteria.assigned_to) {
-      maintenanceTasks = maintenanceTasks.filter((mt: any) => mt.assigned_to === criteria.assigned_to);
-    }
-    if (criteria.priority) {
-      maintenanceTasks = maintenanceTasks.filter((mt: any) => mt.priority === criteria.priority);
-    }
+    // Map cases to MaintenanceTask format
+    const maintenanceTasks: MaintenanceTask[] = cases.map((c: any) => ({
+      id: c.id,
+      room_id: c.room_id || '',
+      title: c.subject || '',
+      description: c.description || '',
+      priority: this.mapPriority(c.priority),
+      status: this.mapMaintenanceStatus(c.status),
+      assigned_to: c.owner_id || null,
+      created_by: c.owner_id || '',
+      created_at: c.created_date,
+      updated_at: c.last_modified_date,
+    }));
 
     // Cache the result
-    this.setCachedResponse(cacheKey, maintenanceTasks as MaintenanceTask[], 60000); // 60s TTL
+    this.setCachedResponse(cacheKey, maintenanceTasks, 60000); // 60s TTL
     
-    return maintenanceTasks as MaintenanceTask[];
+    return maintenanceTasks;
+  }
+
+  /**
+   * Helper: Map Salesforce priority to MaintenancePriority
+   */
+  private mapPriority(sfPriority: string): any {
+    const mapping: Record<string, string> = {
+      'Low': 'low',
+      'Medium': 'medium',
+      'High': 'high',
+      'Urgent': 'urgent',
+    };
+    return mapping[sfPriority] || 'medium';
+  }
+
+  /**
+   * Helper: Map Salesforce status to MaintenanceStatus
+   */
+  private mapMaintenanceStatus(sfStatus: string): any {
+    const mapping: Record<string, string> = {
+      'New': 'pending',
+      'Working': 'in_progress',
+      'Escalated': 'in_progress',
+      'Closed': 'completed',
+    };
+    return mapping[sfStatus] || 'pending';
+  }
+
+  /**
+   * Helper: Map Salesforce status to ServiceRequestStatus
+   */
+  private mapServiceRequestStatus(sfStatus: string): any {
+    const mapping: Record<string, string> = {
+      'New': 'pending',
+      'Working': 'in_progress',
+      'Escalated': 'in_progress',
+      'Closed': 'completed',
+    };
+    return mapping[sfStatus] || 'pending';
   }
 
   /**
@@ -663,8 +809,8 @@ export class SalesforceClient {
           false
         );
       }
-      // Invalidate all maintenance task cache entries
-      this.invalidateCacheByPrefix('searchMaintenanceTasks:');
+      // Invalidate all maintenance task cache entries (updated for new cache keys)
+      this.invalidateCacheByPrefix('searchCases:Maintenance:');
       this.invalidateCacheByPrefix('getMaintenanceTask:');
       return maintenanceTask;
     }
@@ -675,8 +821,8 @@ export class SalesforceClient {
       this.config.retryAttempts
     );
 
-    // Invalidate all maintenance task cache entries
-    this.invalidateCacheByPrefix('searchMaintenanceTasks:');
+    // Invalidate all maintenance task cache entries (updated for new cache keys)
+    this.invalidateCacheByPrefix('searchCases:Maintenance:');
     this.invalidateCacheByPrefix('getMaintenanceTask:');
     
     return maintenanceTask;
@@ -684,13 +830,21 @@ export class SalesforceClient {
 
   /**
    * Get a specific maintenance task by ID
-   * Implements caching with 120s TTL
+   * 
+   * @deprecated This method is deprecated per Salesforce API migration spec.
+   * Use searchMaintenanceTasks() with contextual filters instead.
+   * The endpoint /retrieve-maintenance-task-info-in-salesforce is deprecated.
    * 
    * @param id - The maintenance task ID to retrieve
    * @returns Promise resolving to the maintenance task
    * @throws WorkatoSalesforceError if maintenance task not found
    */
   async getMaintenanceTask(id: string): Promise<MaintenanceTask> {
+    console.warn(
+      '[DEPRECATED] getMaintenanceTask() is deprecated. ' +
+      'Use searchMaintenanceTasks() with contextual filters instead.'
+    );
+
     // Check cache first
     const cacheKey = this.getCacheKey('getMaintenanceTask', { id });
     const cachedResult = this.getCachedResponse<MaintenanceTask>(cacheKey);
@@ -715,7 +869,7 @@ export class SalesforceClient {
       return maintenanceTask;
     }
 
-    // Real API call with retry logic
+    // Real API call with retry logic (still using old endpoint for backward compatibility)
     const maintenanceTask = await this.retryWithBackoff(
       () => this.makeRequest<MaintenanceTask>('POST', `/retrieve-maintenance-task-info-in-salesforce`, { id }),
       this.config.retryAttempts

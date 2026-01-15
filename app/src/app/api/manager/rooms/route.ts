@@ -23,6 +23,12 @@ export async function GET(request: NextRequest) {
       if (searchParams.get('floor')) criteria.floor = parseInt(searchParams.get('floor')!);
       if (searchParams.get('type')) criteria.type = searchParams.get('type');
       
+      // MIGRATION: Ensure at least one filter is provided
+      // If no filters, default to all statuses
+      if (!criteria.status && !criteria.floor && !criteria.type) {
+        criteria.status = 'vacant,occupied,cleaning,maintenance';
+      }
+      
       const rooms = await client.searchRooms(criteria);
       
       // Note: Salesforce rooms don't include device information

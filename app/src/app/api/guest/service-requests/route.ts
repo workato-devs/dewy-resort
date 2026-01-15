@@ -27,7 +27,19 @@ export async function GET(request: NextRequest) {
     if (isSalesforceEnabled()) {
       // Use Salesforce via Workato
       const client = getSalesforceClient();
-      const requests = await client.searchServiceRequests({ guest_id: session.userId });
+      
+      // MIGRATION: Get guest email for business identifier-based search
+      const guestQuery = `SELECT email FROM users WHERE id = ?`;
+      const guest = executeQueryOne<{ email: string }>(guestQuery, [session.userId]);
+      
+      if (!guest) {
+        throw new NotFoundError('Guest');
+      }
+      
+      // MIGRATION: Use guest_email instead of guest_id (business identifier)
+      const requests = await client.searchServiceRequests({ 
+        guest_email: guest.email 
+      });
       
       return NextResponse.json({ requests });
     } else {

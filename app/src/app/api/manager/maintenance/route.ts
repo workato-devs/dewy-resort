@@ -25,6 +25,12 @@ export async function GET(request: NextRequest) {
       if (searchParams.get('roomId')) criteria.room_id = searchParams.get('roomId');
       if (searchParams.get('assigned_to')) criteria.assigned_to = searchParams.get('assigned_to');
       
+      // MIGRATION: Ensure at least one filter is provided
+      // If no filters, default to all statuses
+      if (!criteria.status && !criteria.priority && !criteria.room_id && !criteria.assigned_to) {
+        criteria.status = 'pending,in_progress';
+      }
+      
       const tasks = await client.searchMaintenanceTasks(criteria);
       
       return NextResponse.json({ tasks });
