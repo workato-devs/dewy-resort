@@ -1,14 +1,12 @@
 {
   "name": "Search rooms",
   "recipe_id": {
-    "zip_name": "sf-api-collection/search_rooms.recipe.json",
-    "name": "Search rooms",
-    "folder": "sf-api-collection"
+    "zip_name": "search_rooms.recipe.json",
+    "name": "Search rooms"
   },
   "api_group_id": {
-    "zip_name": "sf-api-collection/sf_api_collection.api_group.json",
-    "name": "sf-api-collection",
-    "folder": "sf-api-collection"
+    "zip_name": "sf_api_collection.api_group.json",
+    "name": "sf-api-collection"
   },
   "method": "POST",
   "path": "search-rooms",
