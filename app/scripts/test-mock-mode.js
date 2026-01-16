@@ -5,8 +5,8 @@
 
 // Set mock mode environment variable
 process.env.WORKATO_MOCK_MODE = 'true';
-process.env.WORKATO_API_AUTH_TOKEN = 'test-token';
-process.env.WORKATO_API_COLLECTION_URL = 'https://test.workato.com';
+process.env.SALESFORCE_API_AUTH_TOKEN = 'test-token';
+process.env.SALESFORCE_API_COLLECTION_URL = 'https://test.workato.com';
 process.env.WORKATO_LOGGING_ENABLED = 'false';
 
 async function testMockMode() {
@@ -122,8 +122,8 @@ async function testMockMode() {
     // Test 6: Verify no real API calls (test with empty credentials)
     console.log('\nTest 6: Verify no real API calls');
     try {
-      process.env.WORKATO_API_AUTH_TOKEN = '';
-      process.env.WORKATO_API_COLLECTION_URL = '';
+      process.env.SALESFORCE_API_AUTH_TOKEN = '';
+      process.env.SALESFORCE_API_COLLECTION_URL = '';
       
       const { WorkatoClient: TestClient } = await import('../lib/workato/client.js?t=' + Date.now());
       const testClient = new TestClient();

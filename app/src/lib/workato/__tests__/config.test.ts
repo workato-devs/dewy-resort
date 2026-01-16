@@ -20,8 +20,8 @@ describe('getWorkatoSalesforceConfig', () => {
   });
 
   it('should load configuration from environment variables', () => {
-    process.env.WORKATO_API_COLLECTION_URL = 'https://test.workato.com';
-    process.env.WORKATO_API_AUTH_TOKEN = 'test-token-123';
+    process.env.SALESFORCE_API_COLLECTION_URL = 'https://test.workato.com';
+    process.env.SALESFORCE_API_AUTH_TOKEN = 'test-token-123';
     process.env.WORKATO_TIMEOUT = '5000';
     process.env.WORKATO_RETRY_ATTEMPTS = '5';
     process.env.WORKATO_MOCK_MODE = 'true';
@@ -38,8 +38,8 @@ describe('getWorkatoSalesforceConfig', () => {
   });
 
   it('should use default values for optional configuration', () => {
-    process.env.WORKATO_API_COLLECTION_URL = 'https://test.workato.com';
-    process.env.WORKATO_API_AUTH_TOKEN = 'test-token-123';
+    process.env.SALESFORCE_API_COLLECTION_URL = 'https://test.workato.com';
+    process.env.SALESFORCE_API_AUTH_TOKEN = 'test-token-123';
     // Don't set optional values
 
     const config = getWorkatoSalesforceConfig();
@@ -51,32 +51,32 @@ describe('getWorkatoSalesforceConfig', () => {
   });
 
   it('should throw error when baseUrl is missing', () => {
-    process.env.WORKATO_API_AUTH_TOKEN = 'test-token-123';
-    delete process.env.WORKATO_API_COLLECTION_URL;
+    process.env.SALESFORCE_API_AUTH_TOKEN = 'test-token-123';
+    delete process.env.SALESFORCE_API_COLLECTION_URL;
 
     expect(() => getWorkatoSalesforceConfig()).toThrow(
       'Missing required Salesforce configuration'
     );
     expect(() => getWorkatoSalesforceConfig()).toThrow(
-      'WORKATO_API_COLLECTION_URL is required'
+      'SALESFORCE_API_COLLECTION_URL is required'
     );
   });
 
   it('should throw error when apiToken is missing', () => {
-    process.env.WORKATO_API_COLLECTION_URL = 'https://test.workato.com';
-    delete process.env.WORKATO_API_AUTH_TOKEN;
+    process.env.SALESFORCE_API_COLLECTION_URL = 'https://test.workato.com';
+    delete process.env.SALESFORCE_API_AUTH_TOKEN;
 
     expect(() => getWorkatoSalesforceConfig()).toThrow(
       'Missing required Salesforce configuration'
     );
     expect(() => getWorkatoSalesforceConfig()).toThrow(
-      'WORKATO_API_AUTH_TOKEN is required'
+      'SALESFORCE_API_AUTH_TOKEN is required'
     );
   });
 
   it('should throw error when both required values are missing', () => {
-    delete process.env.WORKATO_API_COLLECTION_URL;
-    delete process.env.WORKATO_API_AUTH_TOKEN;
+    delete process.env.SALESFORCE_API_COLLECTION_URL;
+    delete process.env.SALESFORCE_API_AUTH_TOKEN;
 
     expect(() => getWorkatoSalesforceConfig()).toThrow(
       'Missing required Salesforce configuration'
@@ -84,8 +84,8 @@ describe('getWorkatoSalesforceConfig', () => {
   });
 
   it('should throw error when timeout is invalid', () => {
-    process.env.WORKATO_API_COLLECTION_URL = 'https://test.workato.com';
-    process.env.WORKATO_API_AUTH_TOKEN = 'test-token-123';
+    process.env.SALESFORCE_API_COLLECTION_URL = 'https://test.workato.com';
+    process.env.SALESFORCE_API_AUTH_TOKEN = 'test-token-123';
     process.env.WORKATO_TIMEOUT = '0';
 
     expect(() => getWorkatoSalesforceConfig()).toThrow(
@@ -94,8 +94,8 @@ describe('getWorkatoSalesforceConfig', () => {
   });
 
   it('should throw error when retryAttempts is invalid', () => {
-    process.env.WORKATO_API_COLLECTION_URL = 'https://test.workato.com';
-    process.env.WORKATO_API_AUTH_TOKEN = 'test-token-123';
+    process.env.SALESFORCE_API_COLLECTION_URL = 'https://test.workato.com';
+    process.env.SALESFORCE_API_AUTH_TOKEN = 'test-token-123';
     process.env.WORKATO_RETRY_ATTEMPTS = '-1';
 
     expect(() => getWorkatoSalesforceConfig()).toThrow(
@@ -104,8 +104,8 @@ describe('getWorkatoSalesforceConfig', () => {
   });
 
   it('should handle empty string values as missing', () => {
-    process.env.WORKATO_API_COLLECTION_URL = '   ';
-    process.env.WORKATO_API_AUTH_TOKEN = '   ';
+    process.env.SALESFORCE_API_COLLECTION_URL = '   ';
+    process.env.SALESFORCE_API_AUTH_TOKEN = '   ';
 
     expect(() => getWorkatoSalesforceConfig()).toThrow(
       'Missing required Salesforce configuration'
@@ -113,8 +113,8 @@ describe('getWorkatoSalesforceConfig', () => {
   });
 
   it('should parse mockMode correctly', () => {
-    process.env.WORKATO_API_COLLECTION_URL = 'https://test.workato.com';
-    process.env.WORKATO_API_AUTH_TOKEN = 'test-token-123';
+    process.env.SALESFORCE_API_COLLECTION_URL = 'https://test.workato.com';
+    process.env.SALESFORCE_API_AUTH_TOKEN = 'test-token-123';
 
     // Test true
     process.env.WORKATO_MOCK_MODE = 'true';
@@ -133,8 +133,8 @@ describe('getWorkatoSalesforceConfig', () => {
   });
 
   it('should parse cacheEnabled correctly', () => {
-    process.env.WORKATO_API_COLLECTION_URL = 'https://test.workato.com';
-    process.env.WORKATO_API_AUTH_TOKEN = 'test-token-123';
+    process.env.SALESFORCE_API_COLLECTION_URL = 'https://test.workato.com';
+    process.env.SALESFORCE_API_AUTH_TOKEN = 'test-token-123';
 
     // Test false
     process.env.WORKATO_CACHE_ENABLED = 'false';

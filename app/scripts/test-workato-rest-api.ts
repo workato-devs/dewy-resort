@@ -105,14 +105,14 @@ async function makeRestRequest(
   // MCP URL: https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1
   // REST URL: https://apim.trial.workato.com/zaynet2/dewy-hotel-apis-v1
   const mcpUrl = process.env.MCP_OPERATIONS_URL;
-  const apiToken = process.env.WORKATO_API_AUTH_TOKEN;
+  const apiToken = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!mcpUrl) {
     throw new Error('MCP_OPERATIONS_URL not set in .env');
   }
   
   if (!apiToken) {
-    throw new Error('WORKATO_API_AUTH_TOKEN not set in .env');
+    throw new Error('SALESFORCE_API_AUTH_TOKEN not set in .env');
   }
   
   // Remove the MCP subdomain to get the REST API URL
@@ -319,7 +319,7 @@ async function main() {
   // Check environment variables
   const mcpUrl = process.env.MCP_OPERATIONS_URL;
   const mcpToken = process.env.MCP_OPERATIONS_TOKEN;
-  const workatoToken = process.env.WORKATO_API_AUTH_TOKEN;
+  const workatoToken = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!mcpUrl) {
     logError('MCP_OPERATIONS_URL not set in .env');
@@ -340,10 +340,10 @@ async function main() {
   
   logSuccess(`MCP Token: ${mcpToken.substring(0, 10)}...`);
   if (workatoToken) {
-    logSuccess(`Workato Token: ${workatoToken.substring(0, 10)}...`);
+    logSuccess(`Salesforce Token: ${workatoToken.substring(0, 10)}...`);
   }
   
-  // Run tests with WORKATO_API_AUTH_TOKEN
+  // Run tests with SALESFORCE_API_AUTH_TOKEN
   await runTest('Test 1: Search cases for staff (room_number=101)', testSearchCasesForStaff);
   await runTest('Test 2: Search cases for guest', testSearchCasesForGuest);
   await runTest('Test 3: Search rooms for staff', testSearchRoomsForStaff);

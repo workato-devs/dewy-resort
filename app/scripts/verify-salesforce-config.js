@@ -28,16 +28,16 @@ try {
 
 // Test 2: Verify required field validation
 console.log('Test 2: Testing required field validation...');
-const originalBaseUrl = process.env.WORKATO_API_COLLECTION_URL;
-const originalToken = process.env.WORKATO_API_AUTH_TOKEN;
+const originalBaseUrl = process.env.SALESFORCE_API_COLLECTION_URL;
+const originalToken = process.env.SALESFORCE_API_AUTH_TOKEN;
 
 try {
-  delete process.env.WORKATO_API_COLLECTION_URL;
+  delete process.env.SALESFORCE_API_COLLECTION_URL;
   resetSalesforceClient();
   getWorkatoSalesforceConfig();
   console.error('❌ Should have thrown error for missing baseUrl');
 } catch (error) {
-  if (error.message.includes('WORKATO_API_COLLECTION_URL is required')) {
+  if (error.message.includes('SALESFORCE_API_COLLECTION_URL is required')) {
     console.log('✅ Correctly validates missing baseUrl');
   } else {
     console.error('❌ Wrong error message:', error.message);
@@ -45,14 +45,14 @@ try {
 }
 
 // Restore and test token validation
-process.env.WORKATO_API_COLLECTION_URL = originalBaseUrl;
+process.env.SALESFORCE_API_COLLECTION_URL = originalBaseUrl;
 try {
-  delete process.env.WORKATO_API_AUTH_TOKEN;
+  delete process.env.SALESFORCE_API_AUTH_TOKEN;
   resetSalesforceClient();
   getWorkatoSalesforceConfig();
   console.error('❌ Should have thrown error for missing apiToken');
 } catch (error) {
-  if (error.message.includes('WORKATO_API_AUTH_TOKEN is required')) {
+  if (error.message.includes('SALESFORCE_API_AUTH_TOKEN is required')) {
     console.log('✅ Correctly validates missing apiToken');
   } else {
     console.error('❌ Wrong error message:', error.message);
@@ -61,7 +61,7 @@ try {
 console.log('');
 
 // Restore environment
-process.env.WORKATO_API_AUTH_TOKEN = originalToken;
+process.env.SALESFORCE_API_AUTH_TOKEN = originalToken;
 
 // Test 3: Verify default values
 console.log('Test 3: Testing default values...');
