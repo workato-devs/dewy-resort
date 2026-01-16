@@ -99,16 +99,16 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 | Unit | What to Cut | What to Keep |
 |------|-------------|--------------|
 | Unit 0 | Skip Stripe setup | SF + Workato connection |
-| Unit 1 | Shorten recipe tour | Trace exercise + bonus activities |
-| Unit 2 | Provide partial workflow outline | Room transfer orchestrator design |
+| Unit 1 | Skip optional endpoint configurations | Core API Collection + MCP Server setup |
+| Unit 2 | Shorten recipe tour | Trace exercise + bonus activities |
 | Unit 3 | Skip implementation, design only | Solution discussion |
 
 ### If Ahead of Schedule
 
 | Opportunity | How to Fill |
 |-------------|-------------|
-| Unit 1 | Let attendees explore bonus activities (error triggering, LLM coaching) |
-| Unit 2 | Allow time for bonus challenge (booking cancellation) |
+| Unit 1 | Allow time for additional endpoint customization |
+| Unit 2 | Let attendees explore bonus activities (error triggering, LLM coaching) |
 | Unit 3 | Allow full implementation time for both options |
 | Any | Open Q&A, deeper dive on specific topics |
 
@@ -116,7 +116,23 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 
 ## Facilitator Talking Points
 
-### Unit 1: Architecture
+### Unit 1: Configuring MCP Servers
+
+**"Why not just build one big recipe?"**
+
+> "You could. But then you can't reuse any of it. Next month when you need a slightly different workflow, you're starting from scratch. Atomics give you building blocks. The investment in testing one atomic pays off every time you reuse it."
+
+**"When do I need a new atomic vs reusing existing?"**
+
+> "If you find yourself wanting to add parameters to an atomic that only apply to one use case, that's a sign you need a new atomic or the logic belongs in the orchestrator. Atomics should stay single-purpose."
+
+**Explaining Datapill Flow:**
+
+> "Each step's output becomes available as datapills for later steps. The key is knowing what each atomic returns -- that's why we document the return fields. If you're not sure what a step returns, check the atomic's result schema or run a test."
+
+---
+
+### Unit 2: Exploring the Architecture
 
 **Explaining the Core Problem:**
 
@@ -133,22 +149,6 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 **Explaining Atomics vs Orchestrators:**
 
 > "Think of atomics like LEGO bricks -- small, tested, predictable. An orchestrator is the instruction manual that says 'connect these bricks in this order.' The LLM picks which manual to use; the backend follows the steps."
-
----
-
-### Unit 2: Building
-
-**"Why not just build one big recipe?"**
-
-> "You could. But then you can't reuse any of it. Next month when you need a slightly different workflow, you're starting from scratch. Atomics give you building blocks. The investment in testing one atomic pays off every time you reuse it."
-
-**"When do I need a new atomic vs reusing existing?"**
-
-> "If you find yourself wanting to add parameters to an atomic that only apply to one use case, that's a sign you need a new atomic or the logic belongs in the orchestrator. Atomics should stay single-purpose."
-
-**Explaining Datapill Flow:**
-
-> "Each step's output becomes available as datapills for later steps. The key is knowing what each atomic returns -- that's why we document the return fields. If you're not sure what a step returns, check the atomic's result schema or run a test."
 
 ---
 
