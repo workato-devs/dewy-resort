@@ -450,178 +450,6 @@
               "operand": "and",
               "conditions": [
                 {
-                  "operand": "is_not_true",
-                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_case\",\"path\":[\"result\",\"found\"]}')}",
-                  "uuid": "cond-notfound-001"
-                }
-              ]
-            },
-            "block": [
-              {
-                "number": 4,
-                "provider": "workato_api_platform",
-                "name": "return_response",
-                "as": "return_notfound",
-                "keyword": "action",
-                "dynamicPickListSelection": {
-                  "http_status_code": "400 - Bad Request"
-                },
-                "toggleCfg": {
-                  "http_status_code": true,
-                  "response.success": true
-                },
-                "input": {
-                  "http_status_code": "400",
-                  "response": {
-                    "success": "false",
-                    "error_code": "CASE_NOT_FOUND",
-                    "error_message": "Case with idempotency_token #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"idempotency_token\"]}')} does not exist. Use submit_guest_service_request or submit_maintenance_request to create new cases.",
-                    "details": "idempotency_token: #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"idempotency_token\"]}')}"
-                  }
-                },
-                "extended_output_schema": [
-                  {
-                    "change_on_blur": true,
-                    "control_type": "select",
-                    "extends_schema": true,
-                    "label": "Response",
-                    "name": "http_status_code",
-                    "pick_list": [
-                      [
-                        "Success",
-                        "200"
-                      ],
-                      [
-                        "Bad Request",
-                        "400"
-                      ],
-                      [
-                        "Server Error",
-                        "500"
-                      ]
-                    ],
-                    "type": "string"
-                  },
-                  {
-                    "label": "Response body",
-                    "name": "response",
-                    "properties": [
-                      {
-                        "control_type": "checkbox",
-                        "label": "Success",
-                        "render_input": "boolean_conversion",
-                        "parse_output": "boolean_conversion",
-                        "name": "success",
-                        "type": "boolean",
-                        "toggle_hint": "Select from option list",
-                        "toggle_field": {
-                          "label": "Success",
-                          "control_type": "text",
-                          "toggle_hint": "Use custom value",
-                          "name": "success",
-                          "type": "boolean"
-                        }
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Error code",
-                        "name": "error_code",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Error message",
-                        "name": "error_message",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Details",
-                        "name": "details",
-                        "type": "string"
-                      }
-                    ],
-                    "type": "object"
-                  }
-                ],
-                "extended_input_schema": [
-                  {
-                    "change_on_blur": true,
-                    "control_type": "select",
-                    "extends_schema": true,
-                    "label": "Response",
-                    "name": "http_status_code",
-                    "pick_list": [
-                      [
-                        "Success",
-                        "200"
-                      ],
-                      [
-                        "Bad Request",
-                        "400"
-                      ],
-                      [
-                        "Server Error",
-                        "500"
-                      ]
-                    ],
-                    "type": "string"
-                  },
-                  {
-                    "label": "Response body",
-                    "name": "response",
-                    "properties": [
-                      {
-                        "control_type": "checkbox",
-                        "label": "Success",
-                        "render_input": "boolean_conversion",
-                        "parse_output": "boolean_conversion",
-                        "name": "success",
-                        "type": "boolean",
-                        "toggle_hint": "Select from option list",
-                        "toggle_field": {
-                          "label": "Success",
-                          "control_type": "text",
-                          "toggle_hint": "Use custom value",
-                          "name": "success",
-                          "type": "boolean"
-                        }
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Error code",
-                        "name": "error_code",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Error message",
-                        "name": "error_message",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Details",
-                        "name": "details",
-                        "type": "string"
-                      }
-                    ],
-                    "type": "object"
-                  }
-                ],
-                "uuid": "return-notfound-001"
-              }
-            ],
-            "uuid": "if-notfound-001"
-          },
-          {
-            "number": 5,
-            "keyword": "if",
-            "input": {
-              "type": "compound",
-              "operand": "and",
-              "conditions": [
-                {
                   "operand": "present",
                   "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}",
                   "uuid": "cond-guestemail-001"
@@ -630,7 +458,7 @@
             },
             "block": [
               {
-                "number": 6,
+                "number": 4,
                 "provider": "workato_recipe_function",
                 "name": "call_recipe",
                 "as": "call_search_contact",
@@ -723,7 +551,7 @@
                 "uuid": "search-contact-001"
               },
               {
-                "number": 7,
+                "number": 5,
                 "keyword": "if",
                 "input": {
                   "type": "compound",
@@ -738,7 +566,7 @@
                 },
                 "block": [
                   {
-                    "number": 8,
+                    "number": 6,
                     "provider": "workato_api_platform",
                     "name": "return_response",
                     "as": "return_contact_notfound",
@@ -898,7 +726,7 @@
             "uuid": "if-guestemail-001"
           },
           {
-            "number": 9,
+            "number": 7,
             "keyword": "if",
             "input": {
               "type": "compound",
@@ -913,7 +741,7 @@
             },
             "block": [
               {
-                "number": 10,
+                "number": 8,
                 "provider": "workato_recipe_function",
                 "name": "call_recipe",
                 "as": "call_search_room",
@@ -1007,7 +835,7 @@
                 "uuid": "search-room-001"
               },
               {
-                "number": 11,
+                "number": 9,
                 "keyword": "if",
                 "input": {
                   "type": "compound",
@@ -1022,7 +850,7 @@
                 },
                 "block": [
                   {
-                    "number": 12,
+                    "number": 10,
                     "provider": "workato_api_platform",
                     "name": "return_response",
                     "as": "return_room_notfound",
@@ -1182,7 +1010,7 @@
             "uuid": "if-roomnumber-001"
           },
           {
-            "number": 13,
+            "number": 11,
             "provider": "workato_recipe_function",
             "name": "call_recipe",
             "as": "call_upsert_case",
@@ -1333,6 +1161,178 @@
               }
             ],
             "uuid": "upsert-case-001"
+          },
+          {
+            "number": 12,
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_case\",\"path\":[\"result\",\"status\"]}')}",
+                  "uuid": "cond-upsert-failed-001"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 13,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_upsert_failed",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "400 - Bad Request"
+                },
+                "toggleCfg": {
+                  "http_status_code": true,
+                  "response.success": true
+                },
+                "input": {
+                  "http_status_code": "400",
+                  "response": {
+                    "success": "false",
+                    "error_code": "UPSERT_FAILED",
+                    "error_message": "Failed to create or update case with idempotency_token #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"idempotency_token\"]}')}",
+                    "details": "idempotency_token: #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"idempotency_token\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      [
+                        "Success",
+                        "200"
+                      ],
+                      [
+                        "Bad Request",
+                        "400"
+                      ],
+                      [
+                        "Server Error",
+                        "500"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Success",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "success",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Details",
+                        "name": "details",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-upsert-failed-001"
+              }
+            ],
+            "uuid": "if-upsert-failed-001"
           },
           {
             "number": 14,
