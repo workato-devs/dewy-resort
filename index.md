@@ -62,3 +62,4 @@ Use the toggle button in the top-right to switch between Facilitator and Attende
 - **MCP Documentation:** [modelcontextprotocol.io](https://modelcontextprotocol.io)
 - **Workato Developer Edition:** [workato.com/sandbox](https://workato.com/sandbox)
 - **Salesforce Developer Edition:** [developer.salesforce.com/signup](https://developer.salesforce.com/signup)
+- **Stripe Developer Account:** [dashboard.stripe.com/register](https://dashboard.stripe.com/register)
