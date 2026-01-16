@@ -1,0 +1,756 @@
+{
+  "name": "Search contacts",
+  "version": 1,
+  "private": false,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_api_platform",
+    "name": "receive_request",
+    "as": "trigger",
+    "keyword": "trigger",
+    "dynamicPickListSelection": {
+      "response.responses.0.http_status_code": "200 - OK",
+      "response.responses.1.http_status_code": "400 - Bad Request",
+      "response.responses.2.http_status_code": "500 - Internal Server Error"
+    },
+    "toggleCfg": {
+      "response.responses.0.http_status_code": true,
+      "response.responses.1.http_status_code": true,
+      "response.responses.2.http_status_code": true
+    },
+    "input": {
+      "request": {
+        "content_type": "json",
+        "schema": "[{\"name\":\"query\",\"label\":\"Query\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Fuzzy search on FirstName, LastName, Email (uses LIKE)\"},{\"name\":\"email\",\"label\":\"Email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact.Email (exact match)\"},{\"name\":\"contact_type\",\"label\":\"Contact type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact_Type__c filter (Guest, Manager, Vendor)\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
+      },
+      "response": {
+        "content_type": "json",
+        "responses": [
+          {
+            "name": "Success",
+            "http_status_code": "200",
+            "body_schema": "[{\"name\":\"contacts\",\"label\":\"Contacts\",\"type\":\"array\",\"of\":\"object\",\"optional\":true,\"properties\":[{\"name\":\"id\",\"type\":\"string\",\"optional\":true},{\"name\":\"first_name\",\"type\":\"string\",\"optional\":true},{\"name\":\"last_name\",\"type\":\"string\",\"optional\":true},{\"name\":\"email\",\"type\":\"string\",\"optional\":true},{\"name\":\"phone\",\"type\":\"string\",\"optional\":true},{\"name\":\"contact_type\",\"type\":\"string\",\"optional\":true},{\"name\":\"loyalty_number\",\"type\":\"string\",\"optional\":true},{\"name\":\"account_id\",\"type\":\"string\",\"optional\":true},{\"name\":\"account_name\",\"type\":\"string\",\"optional\":true},{\"name\":\"created_date\",\"type\":\"date_time\",\"optional\":true},{\"name\":\"last_modified_date\",\"type\":\"date_time\",\"optional\":true}]},{\"name\":\"count\",\"label\":\"Count\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true},{\"name\":\"found\",\"label\":\"Found\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"optional\":true}]"
+          },
+          {
+            "name": "Bad Request",
+            "http_status_code": "400",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_code\",\"label\":\"Error code\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          },
+          {
+            "name": "Server Error",
+            "http_status_code": "500",
+            "body_schema": "[{\"name\":\"success\",\"label\":\"Success\",\"type\":\"boolean\",\"control_type\":\"checkbox\"},{\"name\":\"error_message\",\"label\":\"Error message\",\"type\":\"string\",\"control_type\":\"text\"}]"
+          }
+        ]
+      }
+    },
+    "extended_output_schema": [
+      {
+        "label": "Context",
+        "name": "context",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Calling IP address",
+            "optional": true,
+            "type": "string",
+            "name": "calling_ip"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "integer",
+                "label": "Access profile ID",
+                "parse_output": "integer_conversion",
+                "optional": true,
+                "type": "integer",
+                "name": "id"
+              },
+              {
+                "control_type": "text",
+                "label": "Access profile name",
+                "optional": true,
+                "type": "string",
+                "name": "name"
+              },
+              {
+                "control_type": "text",
+                "label": "Access profile authentication type",
+                "optional": true,
+                "type": "string",
+                "name": "type"
+              }
+            ],
+            "label": "Access profile",
+            "type": "object",
+            "name": "access_profile"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "text",
+                "label": "API client ID",
+                "optional": true,
+                "type": "string",
+                "name": "id"
+              },
+              {
+                "control_type": "text",
+                "label": "API client name",
+                "optional": true,
+                "type": "string",
+                "name": "name"
+              }
+            ],
+            "label": "API client",
+            "type": "object",
+            "name": "client"
+          },
+          {
+            "properties": [
+              {
+                "control_type": "integer",
+                "label": "Issued At",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "iat"
+              },
+              {
+                "control_type": "integer",
+                "label": "Not Before",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "nbf"
+              },
+              {
+                "control_type": "integer",
+                "label": "Expiration Time",
+                "render_input": "date_time_conversion",
+                "parse_output": "date_time_conversion",
+                "optional": true,
+                "type": "date_time",
+                "name": "exp"
+              },
+              {
+                "control_type": "text",
+                "label": "Audience",
+                "optional": true,
+                "type": "string",
+                "name": "aud"
+              },
+              {
+                "control_type": "text",
+                "label": "JWT ID",
+                "optional": true,
+                "type": "string",
+                "name": "jti"
+              },
+              {
+                "control_type": "text",
+                "label": "Issuer",
+                "optional": true,
+                "type": "string",
+                "name": "iss"
+              }
+            ],
+            "label": "JWT claims",
+            "type": "object",
+            "name": "jwt_payload"
+          }
+        ],
+        "type": "object"
+      },
+      {
+        "label": "Request parameters",
+        "name": "request",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Query",
+            "type": "string",
+            "name": "query",
+            "optional": true
+          },
+          {
+            "control_type": "text",
+            "label": "Email",
+            "type": "string",
+            "name": "email",
+            "optional": true
+          },
+          {
+            "control_type": "text",
+            "label": "Contact type",
+            "type": "string",
+            "name": "contact_type",
+            "optional": true
+          },
+          {
+            "control_type": "number",
+            "label": "Limit",
+            "parse_output": "float_conversion",
+            "type": "number",
+            "name": "limit",
+            "optional": true
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "block": [
+      {
+        "number": 1,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 2,
+            "as": "validate_filters",
+            "keyword": "if",
+            "input": {
+              "type": "compound",
+              "operand": "and",
+              "conditions": [
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"query\"]}')}",
+                  "uuid": "condition-val-001"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"email\"]}')}",
+                  "uuid": "condition-val-002"
+                },
+                {
+                  "operand": "blank",
+                  "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"contact_type\"]}')}",
+                  "uuid": "condition-val-003"
+                }
+              ]
+            },
+            "block": [
+              {
+                "number": 3,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_validation_error",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "400 - Bad Request"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "400",
+                  "response": {
+                    "success": "false",
+                    "error_code": "VALIDATION_ERROR",
+                    "error_message": "At least one filter parameter is required (query, email, or contact_type)"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      ["Success", "200"],
+                      ["Bad Request", "400"],
+                      ["Server Error", "500"]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {
+                        "control_type": "checkbox",
+                        "label": "Success",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "success",
+                        "type": "boolean"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error code",
+                        "name": "error_code",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error message",
+                        "name": "error_message",
+                        "type": "string"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-validation-error-001"
+              },
+              {
+                "number": 4,
+                "as": "else_valid",
+                "keyword": "else",
+                "input": {
+                },
+                "block": [
+                  {
+                    "number": 5,
+                    "provider": "salesforce",
+                    "name": "search_sobjects_soql",
+                    "as": "search_contacts",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "sobject_name": "Contact"
+                    },
+                    "input": {
+                      "sobject_name": "Contact",
+                      "limit": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"limit\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"limit\"]}') : 50",
+                      "query": "=[\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"query\"]}').present? ? \"(FirstName LIKE '%#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"query\"]}')}%' OR LastName LIKE '%#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"query\"]}')}%' OR Email LIKE '%#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"query\"]}')}%')\": nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"email\"]}').present? ? \"Email = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"email\"]}')}'\": nil),\n  (_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"contact_type\"]}').present? ? \"Contact_Type__c = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"contact_type\"]}')}'\": nil)\n].compact.join(' AND ')"
+                    },
+                    "extended_output_schema": [
+                      {
+                        "label": "Contacts",
+                        "name": "Contact",
+                        "of": "object",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Record ID",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false,
+                            "type": "string",
+                            "name": "Id"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "First Name",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "FirstName"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Last Name",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "LastName"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Email",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Email"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Phone",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Phone"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Contact Type",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Contact_Type__c"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Loyalty Number",
+                            "optional": true,
+                            "custom": true,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "Loyalty_Number__c"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Account ID",
+                            "optional": true,
+                            "custom": false,
+                            "sfdc_createable": true,
+                            "sfdc_updateable": true,
+                            "type": "string",
+                            "name": "AccountId"
+                          },
+                          {
+                            "name": "get_custom_object+AccountId",
+                            "type": "object",
+                            "label": "Account",
+                            "fetch_with": "get_custom_object(AccountId>id, sobject_name: Account)",
+                            "join_point": true,
+                            "properties": [
+                              {
+                                "control_type": "text",
+                                "label": "Account Name",
+                                "optional": true,
+                                "custom": false,
+                                "type": "string",
+                                "name": "Name"
+                              }
+                            ]
+                          },
+                          {
+                            "control_type": "date_time",
+                            "custom": false,
+                            "label": "Created Date",
+                            "name": "CreatedDate",
+                            "optional": true,
+                            "parse_output": "parse_iso8601_timestamp",
+                            "type": "date_time",
+                            "render_input": "render_iso8601_timestamp",
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false
+                          },
+                          {
+                            "control_type": "date_time",
+                            "custom": false,
+                            "label": "Last Modified Date",
+                            "name": "LastModifiedDate",
+                            "optional": true,
+                            "parse_output": "parse_iso8601_timestamp",
+                            "type": "date_time",
+                            "render_input": "render_iso8601_timestamp",
+                            "sfdc_createable": false,
+                            "sfdc_updateable": false
+                          }
+                        ],
+                        "type": "array"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "List size",
+                        "parse_output": "float_conversion",
+                        "type": "number",
+                        "name": "list_size"
+                      }
+                    ],
+                    "uuid": "search-contacts-001"
+                  },
+                  {
+                    "number": 6,
+                    "as": "check_results",
+                    "keyword": "if",
+                    "input": {
+                      "type": "compound",
+                      "operand": "and",
+                      "conditions": [
+                        {
+                          "operand": "greater_than",
+                          "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"list_size\"]}')}",
+                          "rhs": "0",
+                          "uuid": "condition-results-001"
+                        }
+                      ]
+                    },
+                    "block": [
+                      {
+                        "number": 7,
+                        "provider": "workato_api_platform",
+                        "name": "return_response",
+                        "as": "return_found",
+                        "keyword": "action",
+                        "dynamicPickListSelection": {
+                          "http_status_code": "200 - OK"
+                        },
+                        "toggleCfg": {
+                          "http_status_code": true,
+                          "response.found": true
+                        },
+                        "input": {
+                          "http_status_code": "200",
+                          "response": {
+                            "count": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"list_size\"]}')}",
+                            "found": "true",
+                            "contacts": {
+                              "____source": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\"]}')}",
+                              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"Id\"]}')}",
+                              "first_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"FirstName\"]}')}",
+                              "last_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"LastName\"]}')}",
+                              "email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"Email\"]}')}",
+                              "phone": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"Phone\"]}')}",
+                              "contact_type": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"Contact_Type__c\"]}')}",
+                              "loyalty_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"Loyalty_Number__c\"]}')}",
+                              "account_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"AccountId\"]}')}",
+                              "account_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"AccountId\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Account\"}},\"Name\"]}')}",
+                              "created_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"CreatedDate\"]}')}",
+                              "last_modified_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_contacts\",\"path\":[\"Contact\",{\"path_element_type\":\"current_item\"},\"LastModifiedDate\"]}')}"
+                            }
+                          }
+                        },
+                        "extended_output_schema": [
+                          {
+                            "change_on_blur": true,
+                            "control_type": "select",
+                            "extends_schema": true,
+                            "label": "Response",
+                            "name": "http_status_code",
+                            "pick_list": [
+                              ["Success", "200"],
+                              ["Bad Request", "400"],
+                              ["Server Error", "500"]
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "label": "Response body",
+                            "name": "response",
+                            "properties": [
+                              {
+                                "label": "Contacts",
+                                "name": "contacts",
+                                "type": "array",
+                                "optional": true,
+                                "of": "object",
+                                "properties": [
+                                  {"control_type": "text", "label": "ID", "name": "id", "type": "string", "optional": true},
+                                  {"control_type": "text", "label": "First name", "name": "first_name", "type": "string", "optional": true},
+                                  {"control_type": "text", "label": "Last name", "name": "last_name", "type": "string", "optional": true},
+                                  {"control_type": "text", "label": "Email", "name": "email", "type": "string", "optional": true},
+                                  {"control_type": "text", "label": "Phone", "name": "phone", "type": "string", "optional": true},
+                                  {"control_type": "text", "label": "Contact type", "name": "contact_type", "type": "string", "optional": true},
+                                  {"control_type": "text", "label": "Loyalty number", "name": "loyalty_number", "type": "string", "optional": true},
+                                  {"control_type": "text", "label": "Account ID", "name": "account_id", "type": "string", "optional": true},
+                                  {"control_type": "text", "label": "Account name", "name": "account_name", "type": "string", "optional": true},
+                                  {"control_type": "date_time", "label": "Created date", "render_input": "date_time_conversion", "parse_output": "date_time_conversion", "name": "created_date", "type": "date_time", "optional": true},
+                                  {"control_type": "date_time", "label": "Last modified date", "render_input": "date_time_conversion", "parse_output": "date_time_conversion", "name": "last_modified_date", "type": "date_time", "optional": true}
+                                ]
+                              },
+                              {"control_type": "number", "label": "Count", "parse_output": "float_conversion", "name": "count", "type": "number", "optional": true},
+                              {"control_type": "checkbox", "label": "Found", "render_input": "boolean_conversion", "parse_output": "boolean_conversion", "name": "found", "type": "boolean", "optional": true}
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "uuid": "return-found-001"
+                      },
+                      {
+                        "number": 8,
+                        "as": "else_not_found",
+                        "keyword": "else",
+                        "input": {
+                        },
+                        "block": [
+                          {
+                            "number": 9,
+                            "provider": "workato_api_platform",
+                            "name": "return_response",
+                            "as": "return_not_found",
+                            "keyword": "action",
+                            "dynamicPickListSelection": {
+                              "http_status_code": "200 - OK"
+                            },
+                            "toggleCfg": {
+                              "http_status_code": true
+                            },
+                            "input": {
+                              "http_status_code": "200",
+                              "response": {
+                                "count": "0",
+                                "found": "false"
+                              }
+                            },
+                            "extended_output_schema": [
+                              {
+                                "change_on_blur": true,
+                                "control_type": "select",
+                                "extends_schema": true,
+                                "label": "Response",
+                                "name": "http_status_code",
+                                "pick_list": [
+                                  ["Success", "200"],
+                                  ["Bad Request", "400"],
+                                  ["Server Error", "500"]
+                                ],
+                                "type": "string"
+                              },
+                              {
+                                "label": "Response body",
+                                "name": "response",
+                                "properties": [
+                                  {
+                                    "label": "Contacts",
+                                    "name": "contacts",
+                                    "type": "array",
+                                    "optional": true,
+                                    "of": "object",
+                                    "properties": [
+                                      {"control_type": "text", "label": "ID", "name": "id", "type": "string", "optional": true},
+                                      {"control_type": "text", "label": "First name", "name": "first_name", "type": "string", "optional": true},
+                                      {"control_type": "text", "label": "Last name", "name": "last_name", "type": "string", "optional": true},
+                                      {"control_type": "text", "label": "Email", "name": "email", "type": "string", "optional": true},
+                                      {"control_type": "text", "label": "Phone", "name": "phone", "type": "string", "optional": true},
+                                      {"control_type": "text", "label": "Contact type", "name": "contact_type", "type": "string", "optional": true},
+                                      {"control_type": "text", "label": "Loyalty number", "name": "loyalty_number", "type": "string", "optional": true},
+                                      {"control_type": "text", "label": "Account ID", "name": "account_id", "type": "string", "optional": true},
+                                      {"control_type": "text", "label": "Account name", "name": "account_name", "type": "string", "optional": true},
+                                      {"control_type": "date_time", "label": "Created date", "render_input": "date_time_conversion", "parse_output": "date_time_conversion", "name": "created_date", "type": "date_time", "optional": true},
+                                      {"control_type": "date_time", "label": "Last modified date", "render_input": "date_time_conversion", "parse_output": "date_time_conversion", "name": "last_modified_date", "type": "date_time", "optional": true}
+                                    ]
+                                  },
+                                  {"control_type": "number", "label": "Count", "parse_output": "float_conversion", "name": "count", "type": "number", "optional": true},
+                                  {"control_type": "checkbox", "label": "Found", "render_input": "boolean_conversion", "parse_output": "boolean_conversion", "name": "found", "type": "boolean", "optional": true}
+                                ],
+                                "type": "object"
+                              }
+                            ],
+                            "uuid": "return-not-found-001"
+                          }
+                        ],
+                        "uuid": "else-not-found-001"
+                      }
+                    ],
+                    "uuid": "if-results-001"
+                  }
+                ],
+                "uuid": "else-valid-001"
+              }
+            ],
+            "uuid": "if-validate-001"
+          },
+          {
+            "number": 10,
+            "as": "catch_error",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 11,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log_error",
+                "keyword": "action",
+                "input": {
+                  "message": "Error in search_contacts: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}",
+                  "user_logs_enabled": "false"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "Send a copy of the message to Workato logs.",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "log-error-001"
+              },
+              {
+                "number": 12,
+                "provider": "workato_api_platform",
+                "name": "return_response",
+                "as": "return_error",
+                "keyword": "action",
+                "dynamicPickListSelection": {
+                  "http_status_code": "500 - Internal Server Error"
+                },
+                "toggleCfg": {
+                  "http_status_code": true
+                },
+                "input": {
+                  "http_status_code": "500",
+                  "response": {
+                    "success": "false",
+                    "error_message": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "change_on_blur": true,
+                    "control_type": "select",
+                    "extends_schema": true,
+                    "label": "Response",
+                    "name": "http_status_code",
+                    "pick_list": [
+                      ["Success", "200"],
+                      ["Bad Request", "400"],
+                      ["Server Error", "500"]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "label": "Response body",
+                    "name": "response",
+                    "properties": [
+                      {"control_type": "checkbox", "label": "Success", "render_input": "boolean_conversion", "parse_output": "boolean_conversion", "name": "success", "type": "boolean"},
+                      {"control_type": "text", "label": "Error message", "name": "error_message", "type": "string"}
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "return-error-001"
+              }
+            ],
+            "uuid": "catch-error-001"
+          }
+        ],
+        "uuid": "try-001"
+      }
+    ],
+    "uuid": "trigger-001"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_api_platform",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "salesforce",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
+        "name": "SF Dev Account",
+        "folder": "Workspace Connections"
+      }
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    }
+  ]
+}
