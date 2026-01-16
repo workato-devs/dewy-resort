@@ -14,8 +14,10 @@ export async function GET() {
     return NextResponse.json({
       environment: {
         WORKATO_MOCK_MODE: process.env.WORKATO_MOCK_MODE,
-        WORKATO_API_AUTH_TOKEN: process.env.WORKATO_API_AUTH_TOKEN ? '***' + process.env.WORKATO_API_AUTH_TOKEN.slice(-4) : 'NOT SET',
-        WORKATO_API_COLLECTION_URL: process.env.WORKATO_API_COLLECTION_URL || 'NOT SET',
+        SALESFORCE_API_AUTH_TOKEN: process.env.SALESFORCE_API_AUTH_TOKEN ? '***' + process.env.SALESFORCE_API_AUTH_TOKEN.slice(-4) : 'NOT SET',
+        SALESFORCE_API_COLLECTION_URL: process.env.SALESFORCE_API_COLLECTION_URL || 'NOT SET',
+        STRIPE_API_AUTH_TOKEN: process.env.STRIPE_API_AUTH_TOKEN ? '***' + process.env.STRIPE_API_AUTH_TOKEN.slice(-4) : 'NOT SET',
+        STRIPE_API_COLLECTION_URL: process.env.STRIPE_API_COLLECTION_URL || 'NOT SET',
         NODE_ENV: process.env.NODE_ENV,
       },
       loadedConfig: {

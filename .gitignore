@@ -34,6 +34,10 @@ yarn-error.log*
 # kiro settings with secrets
 .kiro/settings/mcp.json
 
+# Workato
+**/.workato-ignore
+**/.workatoenv
+
 # vercel
 .vercel
 

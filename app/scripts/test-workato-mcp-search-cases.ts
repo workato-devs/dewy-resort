@@ -235,11 +235,11 @@ async function testSearchCasesMultipleFilters() {
 
 async function testAlternativeEndpoint() {
   // This is the endpoint that works in SalesforceClient
-  const baseUrl = process.env.WORKATO_API_COLLECTION_URL;
-  const token = process.env.WORKATO_API_AUTH_TOKEN;
+  const baseUrl = process.env.SALESFORCE_API_COLLECTION_URL;
+  const token = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!baseUrl || !token) {
-    logWarning('WORKATO_API_COLLECTION_URL or WORKATO_API_AUTH_TOKEN not set');
+    logWarning('SALESFORCE_API_COLLECTION_URL or SALESFORCE_API_AUTH_TOKEN not set');
     return;
   }
   
@@ -379,15 +379,15 @@ async function testMCPToolCall() {
 }
 
 // ============================================================================
-// Test 9: Call MCP tool with WORKATO_API_AUTH_TOKEN instead
+// Test 9: Call MCP tool with SALESFORCE_API_AUTH_TOKEN instead
 // ============================================================================
 
 async function testMCPToolCallWithWorkatoToken() {
   const baseUrl = process.env.MCP_OPERATIONS_URL;
-  const token = process.env.WORKATO_API_AUTH_TOKEN;
+  const token = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!baseUrl || !token) {
-    throw new Error('MCP_OPERATIONS_URL or WORKATO_API_AUTH_TOKEN not set');
+    throw new Error('MCP_OPERATIONS_URL or SALESFORCE_API_AUTH_TOKEN not set');
   }
   
   const url = `${baseUrl}/tools/call`;
@@ -431,7 +431,7 @@ async function testMCPToolCallWithWorkatoToken() {
     throw new Error(`MCP tool returned error: ${errorText}`);
   }
   
-  logSuccess('MCP tool call succeeded with WORKATO_API_AUTH_TOKEN');
+  logSuccess('MCP tool call succeeded with SALESFORCE_API_AUTH_TOKEN');
   logInfo(`Result: ${JSON.stringify(data.result, null, 2)}`);
 }
 
@@ -441,10 +441,10 @@ async function testMCPToolCallWithWorkatoToken() {
 
 async function testMCPToolCallWithAPITokenHeader() {
   const baseUrl = process.env.MCP_OPERATIONS_URL;
-  const token = process.env.WORKATO_API_AUTH_TOKEN;
+  const token = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!baseUrl || !token) {
-    throw new Error('MCP_OPERATIONS_URL or WORKATO_API_AUTH_TOKEN not set');
+    throw new Error('MCP_OPERATIONS_URL or SALESFORCE_API_AUTH_TOKEN not set');
   }
   
   const url = `${baseUrl}/tools/call`;
@@ -529,7 +529,7 @@ async function main() {
   await runTest('Test 6: Try alternative endpoint (search-cases-in-salesforce)', testAlternativeEndpoint);
   await runTest('Test 7: Check MCP tools/list endpoint', testMCPToolsList);
   await runTest('Test 8: Call MCP tool directly via tools/call (MCP_OPERATIONS_TOKEN)', testMCPToolCall);
-  await runTest('Test 9: Call MCP tool with WORKATO_API_AUTH_TOKEN', testMCPToolCallWithWorkatoToken);
+  await runTest('Test 9: Call MCP tool with SALESFORCE_API_AUTH_TOKEN', testMCPToolCallWithWorkatoToken);
   await runTest('Test 10: Call MCP tool with API-TOKEN header', testMCPToolCallWithAPITokenHeader);
   
   // Print summary

@@ -1,6 +1,39 @@
 // Salesforce Integration Type Definitions
 
 // ============================================================================
+// Unified Case Types (Salesforce-aligned)
+// ============================================================================
+
+export interface Case {
+  id: string;
+  case_number: string;
+  type: 'Maintenance' | 'Service Request';
+  status: 'New' | 'Working' | 'Escalated' | 'Closed';
+  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
+  subject: string;
+  description: string;
+  room_id: string | null;
+  room_number: string | null;
+  contact_id: string | null;
+  guest_name: string | null;
+  guest_email: string | null;
+  owner_id: string | null;
+  created_date: string;
+  last_modified_date: string;
+  is_closed: boolean;
+}
+
+export interface CaseSearchCriteria {
+  type?: 'Maintenance' | 'Service Request';
+  status?: string;
+  priority?: string;
+  guest_email?: string;
+  room_number?: string;
+  assigned_to?: string;
+  limit?: number;
+}
+
+// ============================================================================
 // Room Entity Types
 // ============================================================================
 
@@ -30,7 +63,7 @@ export interface Room {
 }
 
 export interface RoomSearchCriteria {
-  status?: RoomStatus;
+  status?: RoomStatus | string; // Allow string for comma-separated values
   floor?: number;
   type?: RoomType;
   assigned_manager_id?: string;
@@ -100,7 +133,8 @@ export interface ServiceRequestCreate {
 }
 
 export interface ServiceRequestSearch {
-  guest_id?: string;
+  guest_id?: string; // Deprecated: use guest_email instead
+  guest_email?: string; // Business identifier (preferred)
   room_number?: string;
   status?: ServiceRequestStatus;
   type?: ServiceRequestType;
@@ -153,7 +187,8 @@ export interface MaintenanceTaskCreate {
 }
 
 export interface MaintenanceTaskSearch {
-  room_id?: string;
+  room_id?: string; // Deprecated: use room_number instead
+  room_number?: string; // Business identifier (preferred)
   status?: MaintenanceStatus;
   assigned_to?: string;
   priority?: MaintenancePriority;
@@ -163,6 +198,31 @@ export interface MaintenanceTaskUpdate {
   status?: MaintenanceStatus;
   assigned_to?: string | null;
   priority?: MaintenancePriority;
+}
+
+// ============================================================================
+// Contact Types
+// ============================================================================
+
+export interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  contact_type?: 'Guest' | 'Manager' | 'Vendor';
+  loyalty_number?: string;
+  account_id?: string;
+  account_name?: string;
+  created_date: string;
+  last_modified_date: string;
+}
+
+export interface ContactSearchCriteria {
+  query?: string; // Search term for name or email
+  email?: string; // Exact email match
+  contact_type?: 'Guest' | 'Manager' | 'Vendor';
+  limit?: number;
 }
 
 // ============================================================================

@@ -54,13 +54,6 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    if (!config.clientSecret) {
-      return NextResponse.json({
-        success: false,
-        error: 'Cognito client secret is not configured',
-      }, { status: 500 });
-    }
-
     // Parse request body
     const body = await request.json() as LoginRequest;
     const { email, password } = body;

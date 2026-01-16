@@ -21,6 +21,11 @@ describe('Mock Mode', () => {
         baseUrl: 'https://mock-stripe.workato.com',
         enabled: false,
       },
+      twilio: {
+        apiToken: 'mock-twilio-token',
+        baseUrl: 'https://mock-twilio.workato.com',
+        enabled: false,
+      },
       cache: {
         enabled: true,
         ttl: 30000,

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isSalesforceEnabled } from '@/lib/workato/feature-flags';
 import { getSalesforceClient } from '@/lib/workato/config';
 import { getDatabase } from '@/lib/db/client';
-import { mapMaintenanceTask } from '@/lib/db/mappers';
+import { mapMaintenanceTask, mapSalesforceMaintenanceTask } from '@/lib/db/mappers';
 import { MaintenanceTaskRow } from '@/types';
 import { generateIdempotencyToken } from '@/lib/utils/idempotency';
 
@@ -25,9 +25,22 @@ export async function GET(request: NextRequest) {
       if (searchParams.get('roomId')) criteria.room_id = searchParams.get('roomId');
       if (searchParams.get('assigned_to')) criteria.assigned_to = searchParams.get('assigned_to');
       
+      // MIGRATION: Ensure at least one filter is provided
+      // If no filters, default to all statuses to show all tasks
+      if (!criteria.status && !criteria.priority && !criteria.room_id && !criteria.assigned_to) {
+        criteria.status = 'pending,in_progress,assigned,completed';
+      }
+      
+      console.log('[Maintenance API] Searching with criteria:', criteria);
+      
       const tasks = await client.searchMaintenanceTasks(criteria);
       
-      return NextResponse.json({ tasks });
+      console.log('[Maintenance API] Found tasks:', tasks.length);
+      
+      // Map Salesforce tasks to application format
+      const mappedTasks = tasks.map(mapSalesforceMaintenanceTask);
+      
+      return NextResponse.json({ tasks: mappedTasks });
     } else {
       // Use local database (legacy behavior)
       const status = searchParams.get('status');
@@ -68,8 +81,19 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error fetching maintenance tasks:', error);
+    
+    // Provide more detailed error information
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch maintenance tasks';
+    const errorDetails = error instanceof Error ? error.stack : undefined;
+    
+    console.error('Error details:', errorDetails);
+    
     return NextResponse.json(
-      { error: 'Failed to fetch maintenance tasks' },
+      { 
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? errorDetails : undefined,
+        tasks: [] // Return empty array so UI doesn't break
+      },
       { status: 500 }
     );
   }
@@ -118,6 +142,9 @@ export async function POST(request: NextRequest) {
         assigned_to: assignedTo,
       });
 
+      // Map Salesforce task to application format
+      const mappedTask = mapSalesforceMaintenanceTask(task);
+
       // Send notification if task is assigned
       if (assignedTo) {
         try {
@@ -141,7 +168,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return NextResponse.json({ task }, { status: 201 });
+      return NextResponse.json({ task: mappedTask }, { status: 201 });
     } else {
       // Use local database (legacy behavior)
       const db = getDatabase();

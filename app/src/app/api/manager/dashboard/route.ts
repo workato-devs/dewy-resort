@@ -35,51 +35,53 @@ export async function GET(request: NextRequest) {
 
     // Get pending maintenance tasks - fetch from Salesforce if available
     let pendingTasks: Array<MaintenanceTaskRow & { room_number: string }> = [];
+    let salesforceTasksFailed = false;
     
     // Try to fetch from Salesforce via SalesforceClient
     try {
       const salesforceConfig = getWorkatoSalesforceConfig();
       const salesforceClient = new SalesforceClient(salesforceConfig);
+      
+      // MIGRATION: Always pass type='Maintenance' filter (required by new API)
       const salesforceTasks = await salesforceClient.searchMaintenanceTasks({
         status: 'pending' as any, // Will match pending, assigned, in_progress
       });
       
-      if (salesforceTasks && salesforceTasks.length > 0) {
-        // Fetch room numbers from local database
-        const roomIds = salesforceTasks.map(t => t.room_id);
-        let localRooms: Array<{ id: string; room_number: string }> = [];
-        
-        if (roomIds.length > 0) {
-          const placeholders = roomIds.map(() => '?').join(',');
-          localRooms = executeQuery<{ id: string; room_number: string }>(`
-            SELECT id, room_number FROM rooms WHERE id IN (${placeholders})
-          `, roomIds);
-        }
-        
-        // Map Salesforce tasks to dashboard format
-        pendingTasks = salesforceTasks
-          .filter(t => ['pending', 'in_progress'].includes(t.status))
-          .slice(0, 10)
-          .map(sfTask => {
-            const localRoom = localRooms.find(r => r.id === sfTask.room_id);
-            return {
-              id: sfTask.id,
-              room_id: sfTask.room_id,
-              room_number: localRoom?.room_number || 'Unknown',
-              title: sfTask.title,
-              description: sfTask.description,
-              priority: sfTask.priority,
-              status: sfTask.status,
-              assigned_to: sfTask.assigned_to,
-              created_by: sfTask.created_by,
-              idempotency_token: null,
-              created_at: sfTask.created_at,
-              updated_at: sfTask.updated_at,
-              completed_at: null,
-            };
-          });
+      // Fetch room numbers from local database
+      const roomIds = salesforceTasks.map(t => t.room_id);
+      let localRooms: Array<{ id: string; room_number: string }> = [];
+      
+      if (roomIds.length > 0) {
+        const placeholders = roomIds.map(() => '?').join(',');
+        localRooms = executeQuery<{ id: string; room_number: string }>(`
+          SELECT id, room_number FROM rooms WHERE id IN (${placeholders})
+        `, roomIds);
       }
+      
+      // Map Salesforce tasks to dashboard format
+      pendingTasks = salesforceTasks
+        .filter(t => ['pending', 'in_progress'].includes(t.status))
+        .slice(0, 10)
+        .map(sfTask => {
+          const localRoom = localRooms.find(r => r.id === sfTask.room_id);
+          return {
+            id: sfTask.id,
+            room_id: sfTask.room_id,
+            room_number: localRoom?.room_number || 'Unknown',
+            title: sfTask.title,
+            description: sfTask.description,
+            priority: sfTask.priority,
+            status: sfTask.status,
+            assigned_to: sfTask.assigned_to,
+            created_by: sfTask.created_by,
+            idempotency_token: null,
+            created_at: sfTask.created_at,
+            updated_at: sfTask.updated_at,
+            completed_at: null,
+          };
+        });
     } catch (error) {
+      salesforceTasksFailed = true;
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.warn('Failed to fetch maintenance tasks from Salesforce, falling back to local data:', error);
       apiFailures.push({
@@ -88,8 +90,8 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // Fallback to local database if Salesforce fetch failed or returned no data
-    if (pendingTasks.length === 0) {
+    // Fallback to local database ONLY if Salesforce API failed (not if it returned empty results)
+    if (salesforceTasksFailed) {
       pendingTasks = executeQuery<MaintenanceTaskRow & { room_number: string }>(`
         SELECT 
           mt.*,
@@ -111,52 +113,54 @@ export async function GET(request: NextRequest) {
 
     // Get active service requests - fetch from Salesforce if available
     let serviceRequests: Array<ServiceRequestRow & { guest_name: string }> = [];
+    let salesforceRequestsFailed = false;
     
     // Try to fetch from Salesforce via SalesforceClient
     try {
       const salesforceConfig = getWorkatoSalesforceConfig();
       const salesforceClient = new SalesforceClient(salesforceConfig);
+      
+      // MIGRATION: Always pass type='Service Request' filter (required by new API)
       const salesforceRequests = await salesforceClient.searchServiceRequests({
         status: statusFilter?.[0] as any,
       });
       
-      if (salesforceRequests && salesforceRequests.length > 0) {
-        // Fetch local users to enrich with guest names
-        const guestIds = salesforceRequests.map(sr => sr.guest_id);
-        let localUsers: Array<{ id: string; name: string }> = [];
-        
-        if (guestIds.length > 0) {
-          const placeholders = guestIds.map(() => '?').join(',');
-          localUsers = executeQuery<{ id: string; name: string }>(`
-            SELECT id, name FROM users WHERE id IN (${placeholders})
-          `, guestIds);
-        }
-        
-        // Map Salesforce service requests to dashboard format
-        serviceRequests = salesforceRequests
-          .filter(sr => !statusFilter || statusFilter.includes(sr.status))
-          .filter(sr => !priorityFilter || priorityFilter.includes(sr.priority))
-          .slice(offset, offset + limit)
-          .map(sfRequest => {
-            const localUser = localUsers.find(u => u.id === sfRequest.guest_id);
-            return {
-              id: sfRequest.id,
-              guest_id: sfRequest.guest_id,
-              guest_name: localUser?.name || 'Unknown',
-              room_number: sfRequest.room_number,
-              type: sfRequest.type,
-              priority: sfRequest.priority,
-              description: sfRequest.description,
-              status: sfRequest.status,
-              salesforce_ticket_id: sfRequest.salesforce_ticket_id,
-              idempotency_token: null,
-              created_at: sfRequest.created_at,
-              updated_at: sfRequest.updated_at,
-              completed_at: null,
-            };
-          });
+      // Fetch local users to enrich with guest names
+      const guestIds = salesforceRequests.map(sr => sr.guest_id);
+      let localUsers: Array<{ id: string; name: string }> = [];
+      
+      if (guestIds.length > 0) {
+        const placeholders = guestIds.map(() => '?').join(',');
+        localUsers = executeQuery<{ id: string; name: string }>(`
+          SELECT id, name FROM users WHERE id IN (${placeholders})
+        `, guestIds);
       }
+      
+      // Map Salesforce service requests to dashboard format
+      serviceRequests = salesforceRequests
+        .filter(sr => !statusFilter || statusFilter.includes(sr.status))
+        .filter(sr => !priorityFilter || priorityFilter.includes(sr.priority))
+        .slice(offset, offset + limit)
+        .map(sfRequest => {
+          const localUser = localUsers.find(u => u.id === sfRequest.guest_id);
+          return {
+            id: sfRequest.id,
+            guest_id: sfRequest.guest_id,
+            guest_name: localUser?.name || 'Unknown',
+            room_number: sfRequest.room_number,
+            type: sfRequest.type,
+            priority: sfRequest.priority,
+            description: sfRequest.description,
+            status: sfRequest.status,
+            salesforce_ticket_id: sfRequest.salesforce_ticket_id,
+            idempotency_token: null,
+            created_at: sfRequest.created_at,
+            updated_at: sfRequest.updated_at,
+            completed_at: null,
+          };
+        });
     } catch (error) {
+      salesforceRequestsFailed = true;
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.warn('Failed to fetch service requests from Salesforce, falling back to local data:', error);
       apiFailures.push({
@@ -165,8 +169,8 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // Fallback to local database if Salesforce fetch failed or returned no data
-    if (serviceRequests.length === 0) {
+    // Fallback to local database ONLY if Salesforce API failed (not if it returned empty results)
+    if (salesforceRequestsFailed) {
       let query = `
         SELECT 
           sr.*,
@@ -220,45 +224,61 @@ export async function GET(request: NextRequest) {
 
     // Get room statuses for grid - fetch from Salesforce if available
     let roomStatuses: Array<RoomRow & { guest_name: string | null }> = [];
+    let salesforceRoomsFailed = false;
     
     // Try to fetch from Salesforce via SalesforceClient
     try {
       const salesforceConfig = getWorkatoSalesforceConfig();
       const salesforceClient = new SalesforceClient(salesforceConfig);
-      const salesforceRooms = await salesforceClient.searchRooms({});
       
-      if (salesforceRooms && salesforceRooms.length > 0) {
-        // Fetch local users to enrich with guest names
-        const guestIds = salesforceRooms
-          .map(r => r.current_guest_id)
-          .filter((id): id is string => id !== null);
-        
-        let localUsers: Array<{ id: string; name: string }> = [];
-        if (guestIds.length > 0) {
-          const placeholders = guestIds.map(() => '?').join(',');
-          localUsers = executeQuery<{ id: string; name: string }>(`
-            SELECT id, name FROM users WHERE id IN (${placeholders})
-          `, guestIds);
-        }
-        
-        // Map Salesforce rooms to dashboard format
-        roomStatuses = salesforceRooms.map(sfRoom => {
-          const localUser = localUsers.find(u => u.id === sfRoom.current_guest_id);
-          return {
-            id: sfRoom.id,
-            room_number: sfRoom.room_number,
-            floor: sfRoom.floor,
-            type: sfRoom.type,
-            status: sfRoom.status,
-            current_guest_id: sfRoom.current_guest_id,
-            assigned_manager_id: sfRoom.assigned_manager_id,
-            guest_name: localUser?.name || null,
-            created_at: sfRoom.created_at,
-            updated_at: sfRoom.updated_at,
-          };
-        });
+      // MIGRATION: The API requires at least one filter parameter
+      // Since we need all rooms regardless of status, we'll make multiple calls
+      // and combine the results (the API doesn't support OR queries or comma-separated values)
+      const statuses: Array<'vacant' | 'occupied' | 'cleaning' | 'maintenance'> = [
+        'vacant',
+        'occupied', 
+        'cleaning',
+        'maintenance'
+      ];
+      
+      const roomPromises = statuses.map(status => 
+        salesforceClient.searchRooms({ status })
+      );
+      
+      const roomResults = await Promise.all(roomPromises);
+      const salesforceRooms = roomResults.flat();
+      
+      // Fetch local users to enrich with guest names
+      const guestIds = salesforceRooms
+        .map(r => r.current_guest_id)
+        .filter((id): id is string => id !== null);
+      
+      let localUsers: Array<{ id: string; name: string }> = [];
+      if (guestIds.length > 0) {
+        const placeholders = guestIds.map(() => '?').join(',');
+        localUsers = executeQuery<{ id: string; name: string }>(`
+          SELECT id, name FROM users WHERE id IN (${placeholders})
+        `, guestIds);
       }
+      
+      // Map Salesforce rooms to dashboard format
+      roomStatuses = salesforceRooms.map(sfRoom => {
+        const localUser = localUsers.find(u => u.id === sfRoom.current_guest_id);
+        return {
+          id: sfRoom.id,
+          room_number: sfRoom.room_number,
+          floor: sfRoom.floor,
+          type: sfRoom.type,
+          status: sfRoom.status,
+          current_guest_id: sfRoom.current_guest_id,
+          assigned_manager_id: sfRoom.assigned_manager_id,
+          guest_name: localUser?.name || null,
+          created_at: sfRoom.created_at,
+          updated_at: sfRoom.updated_at,
+        };
+      });
     } catch (error) {
+      salesforceRoomsFailed = true;
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.warn('Failed to fetch rooms from Salesforce, falling back to local data:', error);
       apiFailures.push({
@@ -267,8 +287,8 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    // Fallback to local database if Salesforce fetch failed or returned no data
-    if (roomStatuses.length === 0) {
+    // Fallback to local database ONLY if Salesforce API failed (not if it returned empty results)
+    if (salesforceRoomsFailed) {
       roomStatuses = executeQuery<RoomRow & { guest_name: string | null }>(`
         SELECT 
           r.*,

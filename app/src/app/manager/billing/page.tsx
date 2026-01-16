@@ -54,6 +54,7 @@ interface DailyRevenue {
 }
 
 interface BillingData {
+  apiFailures?: Array<{ source: string; error: string }>;
   guestAccounts: GuestAccount[];
   revenueMetrics: RevenueMetrics;
   recentTransactions: Transaction[];
@@ -265,6 +266,27 @@ export default function ManagerBillingPage() {
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
       </div>
+
+      {/* API Failure Banner */}
+      {data.apiFailures && data.apiFailures.length > 0 && (
+        <div className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <div className="flex items-start">
+            <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 mt-0.5 mr-3 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                API Integration Issues - Using Fallback Data
+              </h3>
+              <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+                {data.apiFailures.map((failure, index) => (
+                  <li key={index}>
+                    <span className="font-medium">{failure.source}:</span> {failure.error}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Billing Grid */}
       <div className="space-y-6">

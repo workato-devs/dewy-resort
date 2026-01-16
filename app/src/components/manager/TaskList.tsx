@@ -87,7 +87,7 @@ export function TaskList({ tasks, onTaskClick, onStatusChange }: TaskListProps) 
                 <div className="flex-1">
                   <CardTitle className="text-lg">{task.title}</CardTitle>
                   <p className="text-sm text-gray-500 mt-1">
-                    Room {task.roomId}
+                    Room {task.roomId || (task as any).room_id}
                   </p>
                 </div>
                 <Badge className={getPriorityColor(task.priority)}>

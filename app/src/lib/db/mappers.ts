@@ -100,6 +100,25 @@ export function mapMaintenanceTask(row: MaintenanceTaskRow): MaintenanceTask {
 }
 
 /**
+ * Map Salesforce MaintenanceTask to application MaintenanceTask
+ * Handles the difference between Salesforce API (room_id) and app format (roomId)
+ */
+export function mapSalesforceMaintenanceTask(sfTask: any): MaintenanceTask {
+  return {
+    id: sfTask.id,
+    roomId: sfTask.room_id,
+    title: sfTask.title,
+    description: sfTask.description,
+    priority: sfTask.priority as TaskPriority,
+    status: sfTask.status as MaintenanceTaskStatus,
+    assignedTo: sfTask.assigned_to || undefined,
+    createdBy: sfTask.created_by,
+    createdAt: parseDate(sfTask.created_at) || new Date(),
+    completedAt: parseDate(sfTask.completed_at),
+  };
+}
+
+/**
  * Map ChargeRow to Charge
  */
 export function mapCharge(row: ChargeRow): Charge {

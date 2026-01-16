@@ -44,8 +44,8 @@ export async function GET() {
     const homeAssistantStatus = await checkHomeAssistant();
     integrations.push(homeAssistantStatus);
 
-    // Check Stripe (currently mock-only)
-    const stripeStatus = checkStripe();
+    // Check Stripe
+    const stripeStatus = await checkStripe();
     integrations.push(stripeStatus);
 
     // Check Twilio (currently mock-only)
@@ -123,8 +123,8 @@ async function checkSalesforce(): Promise<IntegrationStatus> {
     const config = getWorkatoSalesforceConfig();
     const salesforceClient = new SalesforceClient(config);
     
-    // Try a simple search to verify connectivity
-    await salesforceClient.searchRooms({});
+    // Try a simple search to verify connectivity (requires at least one filter)
+    await salesforceClient.searchRooms({ status: 'vacant' });
 
     return {
       name: 'Salesforce',
@@ -211,10 +211,10 @@ async function checkHomeAssistant(): Promise<IntegrationStatus> {
 
 /**
  * Check Stripe integration status
- * Currently mock-only implementation
  */
-function checkStripe(): IntegrationStatus {
+async function checkStripe(): Promise<IntegrationStatus> {
   const enabled = process.env.STRIPE_ENABLED !== 'false';
+  const mockMode = process.env.WORKATO_MOCK_MODE === 'true';
   
   if (!enabled) {
     return {
@@ -226,14 +226,44 @@ function checkStripe(): IntegrationStatus {
     };
   }
 
-  // Stripe is currently always mock/fallback when enabled
-  return {
-    name: 'Stripe',
-    enabled: true,
-    working: false,
-    usingFallback: true,
-    reason: 'Mock implementation only (no real Stripe integration)',
-  };
+  // If in mock mode, report as using fallback
+  if (mockMode) {
+    return {
+      name: 'Stripe',
+      enabled: true,
+      working: false,
+      usingFallback: true,
+      reason: 'Mock mode enabled (WORKATO_MOCK_MODE=true)',
+    };
+  }
+
+  // Try to call the actual Workato API using StripeClient
+  try {
+    const { StripeClient } = await import('@/lib/stripe/stripe-client');
+    const { getWorkatoStripeConfig } = await import('@/lib/workato/config');
+    
+    const config = getWorkatoStripeConfig();
+    const stripeClient = new StripeClient(config);
+    
+    // Try a simple operation to verify connectivity
+    await stripeClient.getPaymentStatus('pi_test_connection');
+
+    return {
+      name: 'Stripe',
+      enabled: true,
+      working: true,
+      usingFallback: false,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      name: 'Stripe',
+      enabled: true,
+      working: false,
+      usingFallback: true,
+      reason: `Stripe API error: ${errorMessage} - using mock data fallback`,
+    };
+  }
 }
 
 /**

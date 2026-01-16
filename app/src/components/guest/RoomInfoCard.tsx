@@ -11,20 +11,20 @@ interface RoomInfoCardProps {
 }
 
 export function RoomInfoCard({ room }: RoomInfoCardProps) {
-  const roomTypeLabels = {
+  const roomTypeLabels: Record<string, string> = {
     standard: 'Standard Room',
     deluxe: 'Deluxe Room',
     suite: 'Suite',
   };
 
-  const statusLabels = {
+  const statusLabels: Record<string, string> = {
     vacant: 'Vacant',
     occupied: 'Occupied',
     cleaning: 'Being Cleaned',
     maintenance: 'Under Maintenance',
   };
 
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     vacant: 'text-gray-600',
     occupied: 'text-green-600',
     cleaning: 'text-yellow-600',
@@ -40,7 +40,7 @@ export function RoomInfoCard({ room }: RoomInfoCardProps) {
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Room Type</span>
-            <span className="font-medium">{roomTypeLabels[room.type]}</span>
+            <span className="font-medium">{roomTypeLabels[room.type] || room.type || 'Unknown'}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Floor</span>
@@ -48,8 +48,8 @@ export function RoomInfoCard({ room }: RoomInfoCardProps) {
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Status</span>
-            <span className={`font-medium ${statusColors[room.status]}`}>
-              {statusLabels[room.status]}
+            <span className={`font-medium ${statusColors[room.status] || 'text-gray-600'}`}>
+              {statusLabels[room.status] || room.status || 'Unknown'}
             </span>
           </div>
         </div>

@@ -1,6 +1,6 @@
 # Unified CLI Management for Multi-Vendor Tools
 # Supports: workato, salesforce, and future vendor CLIs
-.PHONY: setup status validate push pull clean help workato-setup workato-status sf-setup sf-status sf-deploy start-recipes
+.PHONY: setup status validate push pull clean help workato-setup workato-status sf-setup sf-status sf-deploy start-recipes stop-recipes enable-api-endpoints create-api-client
 
 # Default tool is workato for backward compatibility
 tool ?= all
@@ -24,6 +24,10 @@ help:
 	@echo "  make pull                  - Pull Workato recipes from developer sandbox"
 	@echo "  make start-recipes         - Start all Workato recipes (skip failures, default)"
 	@echo "  make start-recipes-stop-on-error - Start recipes (stop on first failure)"
+	@echo "  make stop-recipes          - Stop all Workato recipes (skip failures, default)"
+	@echo "  make stop-recipes-stop-on-error - Stop recipes (stop on first failure)"
+	@echo "  make enable-api-endpoints  - Enable all API endpoints in all collections"
+	@echo "  make create-api-client     - Create API client for sf-api-collection (auto-updates .env)"
 	@echo ""
 	@echo "Salesforce-Specific Commands:"
 	@echo "  make sf-deploy org=<alias> - Deploy Salesforce metadata to specified org"
@@ -168,6 +172,25 @@ start-recipes:
 start-recipes-stop-on-error:
 	@echo "Starting all Workato recipes (stop on first failure)..."
 	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/start_workato_recipes.sh
+
+stop-recipes:
+	@echo "Stopping all Workato recipes (skipping failures)..."
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/stop_workato_recipes.sh --skip-failed
+
+stop-recipes-stop-on-error:
+	@echo "Stopping all Workato recipes (stop on first failure)..."
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/stop_workato_recipes.sh
+
+enable-api-endpoints:
+	@echo "Enabling all API endpoints..."
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/enable_api_endpoints.sh
+
+create-api-client:
+	@echo "Creating API Platform client for sf-api-collection..."
+	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/create_api_collection_client.sh \
+		--collection-name "$(if $(collection),$(collection),sf-api-collection)" \
+		--client-name "$(if $(client),$(client),SF API Client)" \
+		--client-description "$(if $(description),$(description),API client for Salesforce search endpoints)"
 
 # ============================================================
 # Salesforce-Specific Commands
