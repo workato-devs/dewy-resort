@@ -128,7 +128,7 @@ export function TaskDetailView({ task, open, onClose, onUpdate }: TaskDetailView
             </Badge>
           </DialogTitle>
           <DialogDescription>
-            Room {task.roomId} • Created {new Date(task.createdAt).toLocaleDateString()}
+            Room {task.roomId || (task as any).room_id} • Created {new Date(task.createdAt).toLocaleDateString()}
           </DialogDescription>
         </DialogHeader>
 

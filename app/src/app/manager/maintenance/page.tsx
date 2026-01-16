@@ -24,18 +24,34 @@ export default function MaintenancePage() {
   const fetchTasks = useCallback(async () => {
     try {
       const response = await fetch('/api/manager/maintenance');
-      if (!response.ok) throw new Error('Failed to fetch tasks');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch tasks');
+      }
       
       const data = await response.json();
-      setTasks(data.tasks);
-      setFilteredTasks(data.tasks);
+      console.log('[Maintenance Page] Fetched tasks:', data.tasks?.length || 0);
+      
+      setTasks(data.tasks || []);
+      setFilteredTasks(data.tasks || []);
+      
+      // Show info if no tasks found
+      if (!data.tasks || data.tasks.length === 0) {
+        toast({
+          title: 'No Tasks Found',
+          description: 'No maintenance tasks found. Create a new task to get started.',
+        });
+      }
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load maintenance tasks',
+        description: error instanceof Error ? error.message : 'Failed to load maintenance tasks',
         variant: 'destructive',
       });
+      // Set empty arrays so UI doesn't break
+      setTasks([]);
+      setFilteredTasks([]);
     }
   }, [toast]);
 
