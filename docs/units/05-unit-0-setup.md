@@ -39,7 +39,7 @@ python3 --version  # Should be 3.11+
 ### 1.1 Clone the Repository
 
 ```bash
-git clone https://github.com/workato-devs/dewy-resort.git
+git clone https://github.com/workato-devs/dewy-resort
 cd dewy-resort
 ```
 
@@ -246,16 +246,33 @@ make start-recipes
 ========================================
 Summary
 ========================================
-Total recipes: 34
-Started: 34
+Total recipes: 36
+Started: 36
 Already running: 0
 Failed: 0
 ```
 
 **NOTE** If you did not setup or activate Stripe, some recipes will fail to start
 
-**CHECKPOINT:** All 34 Salesforce recipes showing "Running" status
+**CHECKPOINT:** All Salesforce recipes showing "Running" status
 
+### 4.8 Enable API Endpoints
+
+```bash
+make enable-api-endpoints
+```
+
+This enables the endpoints on all API collections in your Workato account.
+
+### 4.9 Create API Client
+
+```bash
+make create-api-client
+```
+
+This creates an API Client for the Salesforce API Collection.
+
+**CHECKPOINT:** API endpoints enabled and client created
 
 ---
 
@@ -264,8 +281,7 @@ Failed: 0
 ### 5.1 Start the Application
 
 ```bash
-cd app
-npm run dev
+app/scripts/dev-tools/server.sh start
 ```
 
 ### 5.2 Test the System
@@ -291,7 +307,7 @@ npm run dev
 
 You now have:
 - Salesforce org with hotel data model
-- Workato workspace with 34 recipes
+- Workato workspace with 36 recipes
 - Local application connected to both
 
 ---

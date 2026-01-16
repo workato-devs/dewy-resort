@@ -11,34 +11,59 @@ parent: Workshop Units
 
 ---
 
-## Objectives
+## What You'll See
 
-- Show compositional MCP in action
-- Demonstrate natural conversation flow
-- Highlight observability and debugging capabilities
-- Build excitement for hands-on work
+During this live demonstration, your facilitator will show the Dewy Resort application in action. Watch for these key concepts:
+
+### Compositional MCP Tools in Action
+
+Instead of calling many small API wrappers, you'll see how a single compositional tool handles entire workflows:
+
+| Scenario | What Happens |
+|----------|--------------|
+| **Guest Check-In** | One tool call updates booking status, room status, and opportunity stage atomically |
+| **Checkout + Maintenance** | Two intents in one message handled by independent tools |
+| **Edge Case Handling** | Structured errors enable graceful recovery without hallucination |
+
+### Key Takeaways to Watch For
+
+- **Single tool calls** instead of 6+ API wrappers
+- **Fast execution** (3-4 seconds vs 8-12 seconds)
+- **Higher reliability** (~94% vs ~73% success rate)
+- **Natural conversation** - no complex prompt engineering required
+- **Observability** - every step traceable in Workato logs
+
+---
+
+## Demo Scenarios
+
+Your facilitator will demonstrate three scenarios:
+
+1. **Guest Check-In** - A guest arrives and checks in using their email
+2. **Checkout with Maintenance Request** - A guest checks out while reporting an issue
+3. **Edge Case** - Requesting service for a non-existent room
+
+After each scenario, pay attention to how the LLM selects tools and how errors are handled gracefully.
 
 ---
 
 <div class="facilitator-only" markdown="1">
 
-## Pre-Demo Checklist
+## Facilitator Demo Script
+
+### Pre-Demo Checklist
 
 - [ ] Dewy Resort app running locally or on demo server
 - [ ] Workato workspace open in separate tab
 - [ ] Salesforce org open in separate tab
 - [ ] Fresh test data (or reset seed data)
 
-</div>
-
 ---
 
-## Scenario 1: Guest Check-In (5 min)
+### Scenario 1: Guest Check-In (5 min)
 
-### User Input
+**User Input:**
 > "I'm Sarah Johnson, checking in. My email is sarah@example.com."
-
-### Expected Behavior
 
 **Tool Called:** `check_in_guest`
 
@@ -50,10 +75,7 @@ parent: Workshop Units
   - Room: Vacant -> Occupied
   - Opportunity: Confirmed -> Checked In
 
-<div class="facilitator-only" markdown="1">
-
-### Show in Workato
-
+**Show in Workato:**
 1. Open Job History
 2. Find the `check_in_guest` execution
 3. Expand to show:
@@ -64,39 +86,28 @@ parent: Workshop Units
    - Steps 4-6: Update operations (500ms each)
 4. Highlight transaction-level tracing
 
-### Show in Salesforce
-
+**Show in Salesforce:**
 1. Open the Contact record
 2. Show Booking record status change
 3. Show Room status change
 
-</div>
-
 ---
 
-## Scenario 2: Checkout with Maintenance Request (5 min)
+### Scenario 2: Checkout with Maintenance Request (5 min)
 
-### User Input
+**User Input:**
 > "Beth Gibbs is checking out, and she mentioned the toilet in room 302 is broken."
-
-### Expected Behavior
 
 **Tools Called:**
 1. `process_guest_checkout`
 2. `submit_maintenance_request`
 
-<div class="facilitator-only" markdown="1">
-
-### Contrast with Naive Approach
-
-**Show slide or whiteboard:**
+**Contrast with Naive Approach (show slide or whiteboard):**
 
 | Approach | Tool Calls | Latency | Success Rate |
 |----------|------------|---------|--------------|
 | Naive | 11+ | 8-12 sec | ~73% |
 | Compositional | 2 | 3-4 sec | ~94% |
-
-</div>
 
 **What to highlight:**
 - LLM correctly identified TWO intents in one message
@@ -106,14 +117,12 @@ parent: Workshop Units
 
 ---
 
-## Scenario 3: Edge Case Handling (3 min)
+### Scenario 3: Edge Case Handling (3 min)
 
-### User Input
+**User Input:**
 > "I need extra towels in room 404."
 
 *(Room 404 doesn't exist in the system)*
-
-### Expected Behavior
 
 **Tool Called:** `submit_guest_service_request`
 
@@ -130,10 +139,9 @@ parent: Workshop Units
 
 ---
 
-## Behind the Scenes: Observability (2 min)
+### Behind the Scenes: Observability (2 min)
 
-### Show Logs
-
+**Show Logs:**
 1. In Workato, navigate to Tools > Logs
 2. Click on the most recent logs (displayed in descending order by default)
 3. Show:
@@ -142,8 +150,7 @@ parent: Workshop Units
    - Input/output for each step
    - Execution duration breakdown
 
-### Demonstrate Idempotency
-
+**Demonstrate Idempotency:**
 1. Copy the idempotency token from a successful check-in
 2. Attempt to re-run the same check-in
 3. Show: Returns success without duplicate operations
@@ -151,9 +158,7 @@ parent: Workshop Units
 
 ---
 
-## Q&A Transition
-
-<div class="facilitator-only" markdown="1">
+### Q&A Transition
 
 > "Any questions about what you just saw? We're about to take a break, and then you'll set up your own environment to build these patterns yourselves."
 

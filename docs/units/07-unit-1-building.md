@@ -1,11 +1,11 @@
 ---
 layout: default
-title: "Unit 2: Configuring MCP Servers"
-nav_order: 6
+title: "Unit 1: Configuring MCP Servers"
+nav_order: 5
 parent: Workshop Units
 ---
 
-# Unit 2: Configuring MCP Servers
+# Unit 1: Configuring MCP Servers
 
 **Hands-On Configuration (45 minutes)**
 

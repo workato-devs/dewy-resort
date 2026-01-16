@@ -1,11 +1,11 @@
 ---
 layout: default
-title: "Unit 1: Exploring the Architecture"
-nav_order: 5
+title: "Unit 2: Exploring the Architecture"
+nav_order: 6
 parent: Workshop Units
 ---
 
-# Unit 1: Exploring the Architecture
+# Unit 2: Exploring the Architecture
 
 **Guided Exploration (30 minutes)**
 
