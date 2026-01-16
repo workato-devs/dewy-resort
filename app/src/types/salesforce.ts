@@ -201,6 +201,31 @@ export interface MaintenanceTaskUpdate {
 }
 
 // ============================================================================
+// Contact Types
+// ============================================================================
+
+export interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  contact_type?: 'Guest' | 'Manager' | 'Vendor';
+  loyalty_number?: string;
+  account_id?: string;
+  account_name?: string;
+  created_date: string;
+  last_modified_date: string;
+}
+
+export interface ContactSearchCriteria {
+  query?: string; // Search term for name or email
+  email?: string; // Exact email match
+  contact_type?: 'Guest' | 'Manager' | 'Vendor';
+  limit?: number;
+}
+
+// ============================================================================
 // Charge Entity Types
 // ============================================================================
 

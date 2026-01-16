@@ -28,6 +28,8 @@ import {
   ChargeCreate,
   ChargeSearch,
   ChargeUpdate,
+  Contact,
+  ContactSearchCriteria,
 } from '../../types/salesforce';
 
 /**
@@ -367,6 +369,125 @@ export class SalesforceClient {
    */
   private isRetryable(error: any): boolean {
     return isRetryableError(error);
+  }
+
+  // ============================================================================
+  // Contact Operations
+  // ============================================================================
+
+  /**
+   * Search for contacts based on criteria
+   * Implements caching with 60s TTL for search results
+   * 
+   * MIGRATION NOTE: Uses new /search-contacts endpoint
+   * Requires at least one filter parameter (query, email, or contact_type)
+   * 
+   * @param criteria - Search criteria for filtering contacts (query, email, contact_type)
+   * @returns Promise resolving to array of matching contacts
+   * @throws WorkatoSalesforceError if no filters provided
+   */
+  async searchContacts(criteria: ContactSearchCriteria = {}): Promise<Contact[]> {
+    // Check cache first
+    const cacheKey = this.getCacheKey('searchContacts', criteria);
+    const cachedResult = this.getCachedResponse<Contact[]>(cacheKey);
+    
+    if (cachedResult !== null) {
+      return cachedResult;
+    }
+
+    // Mock mode: return mock data
+    if (this.mockDataStore) {
+      // For mock mode, return sample contacts
+      const mockContacts: Contact[] = [
+        {
+          id: 'contact_001',
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'john.doe@example.com',
+          phone: '+1-555-0101',
+          contact_type: 'Guest',
+          loyalty_number: 'LOYAL123',
+          account_name: 'Doe Family',
+          created_date: new Date().toISOString(),
+          last_modified_date: new Date().toISOString(),
+        },
+        {
+          id: 'contact_002',
+          first_name: 'Jane',
+          last_name: 'Smith',
+          email: 'jane.smith@example.com',
+          phone: '+1-555-0102',
+          contact_type: 'Guest',
+          account_name: 'Smith Family',
+          created_date: new Date().toISOString(),
+          last_modified_date: new Date().toISOString(),
+        },
+      ];
+
+      // Filter mock contacts based on criteria
+      let filtered = mockContacts;
+      
+      if (criteria.query) {
+        const queryLower = criteria.query.toLowerCase();
+        filtered = filtered.filter(c => 
+          c.first_name.toLowerCase().includes(queryLower) ||
+          c.last_name.toLowerCase().includes(queryLower) ||
+          c.email.toLowerCase().includes(queryLower)
+        );
+      }
+      
+      if (criteria.email) {
+        filtered = filtered.filter(c => 
+          c.email.toLowerCase() === criteria.email!.toLowerCase()
+        );
+      }
+      
+      if (criteria.contact_type) {
+        filtered = filtered.filter(c => c.contact_type === criteria.contact_type);
+      }
+
+      const limited = criteria.limit ? filtered.slice(0, criteria.limit) : filtered;
+      this.setCachedResponse(cacheKey, limited, 60000); // 60s TTL
+      return limited;
+    }
+
+    // Validate that at least one filter is provided (required by real API)
+    this.validateSearchCriteria(
+      criteria,
+      ['query', 'email', 'contact_type'],
+      'searchContacts'
+    );
+
+    // Real API call with retry logic
+    // New endpoint: /search-contacts (API Collection)
+    const response = await this.retryWithBackoff(
+      () => this.makeRequest<{ contacts: any[]; count: number; found: boolean }>(
+        'POST', 
+        '/search-contacts', 
+        criteria
+      ),
+      this.config.retryAttempts
+    );
+
+    // Transform API response to match Contact interface
+    const contacts: Contact[] = (response.contacts || []).map((c: any) => ({
+      id: c.Id || c.id,
+      first_name: c.FirstName || c.first_name || '',
+      last_name: c.LastName || c.last_name || '',
+      email: c.Email || c.email || '',
+      phone: c.Phone || c.phone || undefined,
+      contact_type: c.Contact_Type__c || c.contact_type || undefined,
+      loyalty_number: c.Loyalty_Number__c || c.loyalty_number || undefined,
+      account_id: c.AccountId || c.account_id || undefined,
+      account_name: c.Account?.Name || c.account_name || undefined,
+      created_date: c.CreatedDate || c.created_date || new Date().toISOString(),
+      last_modified_date: c.LastModifiedDate || c.last_modified_date || new Date().toISOString(),
+    }));
+
+    // Cache the result
+    this.setCachedResponse(cacheKey, contacts, 60000); // 60s TTL
+    
+    return contacts;
   }
 
   // ============================================================================
