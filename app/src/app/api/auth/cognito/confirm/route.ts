@@ -17,8 +17,12 @@ interface ConfirmRequest {
 
 /**
  * Calculate SECRET_HASH for Cognito API calls
+ * Returns undefined for public clients (no secret)
  */
-function calculateSecretHash(username: string, clientId: string, clientSecret: string): string {
+function calculateSecretHash(username: string, clientId: string, clientSecret?: string): string | undefined {
+  if (!clientSecret) {
+    return undefined; // Public client - no secret hash needed
+  }
   const message = username + clientId;
   const hmac = createHmac('sha256', clientSecret);
   hmac.update(message);
@@ -45,13 +49,6 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    if (!config.clientSecret) {
-      return NextResponse.json({
-        success: false,
-        error: 'Cognito client secret is not configured',
-      }, { status: 500 });
-    }
-
     // Parse request body
     const body = await request.json() as ConfirmRequest;
     const { email, code } = body;
@@ -69,16 +66,23 @@ export async function POST(request: NextRequest) {
       credentials: undefined,
     });
 
-    // Calculate SECRET_HASH
+    // Calculate SECRET_HASH (only for confidential clients)
     const secretHash = calculateSecretHash(email, config.clientId, config.clientSecret);
 
-    // Confirm signup
-    const command = new ConfirmSignUpCommand({
+    // Build command parameters
+    const commandParams: any = {
       ClientId: config.clientId,
-      SecretHash: secretHash,
       Username: email,
       ConfirmationCode: code,
-    });
+    };
+
+    // Only include SECRET_HASH if client has a secret (confidential client)
+    if (secretHash) {
+      commandParams.SecretHash = secretHash;
+    }
+
+    // Confirm signup
+    const command = new ConfirmSignUpCommand(commandParams);
 
     await client.send(command);
 
