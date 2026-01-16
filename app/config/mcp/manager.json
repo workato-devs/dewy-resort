@@ -24,13 +24,7 @@
         "type": "bearer",
         "token": "${MCP_OPERATIONS_TOKEN}"
       },
-      "excludeTools": [
-        "Create_booking",
-        "Manage_bookings",
-        "Submit_guest_service_request",
-        "Submit_maintenance_request",
-        "Create_contact_if_not_found"
-      ]
+      "excludeTools": []
     }
   ]
 }
