@@ -1343,7 +1343,7 @@
                 "case_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"id\"]}')}",
                 "case_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"get_case\",\"path\":[\"CaseNumber\"]}')}",
                 "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"status\"]}')}",
-                "created": "true"
+                "created": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"created\"]}')}"
               }
             },
             "extended_output_schema": [
