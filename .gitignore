@@ -17,3 +17,8 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# working files / artifacts from main and demo environments
+/workato
+.env
+temp*
