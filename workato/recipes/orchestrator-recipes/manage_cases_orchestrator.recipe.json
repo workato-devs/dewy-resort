@@ -458,7 +458,7 @@
             },
             "block": [
               {
-                "number": 6,
+                "number": 4,
                 "provider": "workato_recipe_function",
                 "name": "call_recipe",
                 "as": "call_search_contact",
@@ -551,7 +551,7 @@
                 "uuid": "search-contact-001"
               },
               {
-                "number": 7,
+                "number": 5,
                 "keyword": "if",
                 "input": {
                   "type": "compound",
@@ -566,7 +566,7 @@
                 },
                 "block": [
                   {
-                    "number": 8,
+                    "number": 6,
                     "provider": "workato_api_platform",
                     "name": "return_response",
                     "as": "return_contact_notfound",
@@ -726,7 +726,7 @@
             "uuid": "if-guestemail-001"
           },
           {
-            "number": 9,
+            "number": 7,
             "keyword": "if",
             "input": {
               "type": "compound",
@@ -741,7 +741,7 @@
             },
             "block": [
               {
-                "number": 10,
+                "number": 8,
                 "provider": "workato_recipe_function",
                 "name": "call_recipe",
                 "as": "call_search_room",
@@ -835,7 +835,7 @@
                 "uuid": "search-room-001"
               },
               {
-                "number": 11,
+                "number": 9,
                 "keyword": "if",
                 "input": {
                   "type": "compound",
@@ -850,7 +850,7 @@
                 },
                 "block": [
                   {
-                    "number": 12,
+                    "number": 10,
                     "provider": "workato_api_platform",
                     "name": "return_response",
                     "as": "return_room_notfound",
@@ -1010,7 +1010,7 @@
             "uuid": "if-roomnumber-001"
           },
           {
-            "number": 13,
+            "number": 11,
             "provider": "workato_recipe_function",
             "name": "call_recipe",
             "as": "call_upsert_case",
@@ -1163,7 +1163,7 @@
             "uuid": "upsert-case-001"
           },
           {
-            "number": 14,
+            "number": 12,
             "keyword": "if",
             "input": {
               "type": "compound",
@@ -1178,7 +1178,7 @@
             },
             "block": [
               {
-                "number": 15,
+                "number": 13,
                 "provider": "workato_api_platform",
                 "name": "return_response",
                 "as": "return_upsert_failed",
@@ -1335,7 +1335,7 @@
             "uuid": "if-upsert-failed-001"
           },
           {
-            "number": 16,
+            "number": 14,
             "provider": "workato_api_platform",
             "name": "return_response",
             "as": "return_success",
