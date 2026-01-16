@@ -1,0 +1,15 @@
+{
+  "name": "Search contacts",
+  "recipe_id": {
+    "zip_name": "search_contacts.recipe.json",
+    "name": "Search contacts"
+  },
+  "api_group_id": {
+    "zip_name": "sf_api_collection.api_group.json",
+    "name": "sf-api-collection"
+  },
+  "method": "POST",
+  "path": "search-contacts",
+  "legacy": false,
+  "validate_request": false
+}
