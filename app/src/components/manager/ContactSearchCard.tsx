@@ -15,9 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ContactResult {
   id: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  name: string;
   phone?: string;
+  contact_type?: string;
+  loyalty_number?: string;
+  account_name?: string;
 }
 
 export function ContactSearchCard() {
@@ -26,6 +30,7 @@ export function ContactSearchCard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
+  const [usingFallback, setUsingFallback] = useState(false);
   const { toast } = useToast();
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -62,12 +67,30 @@ export function ContactSearchCard() {
       }
 
       const data = await response.json();
-      setResults(data.contacts || []);
       
-      if (data.contacts?.length === 0) {
+      if (!data.success) {
+        throw new Error(data.error?.message || 'Failed to search contacts');
+      }
+      
+      setResults(data.contacts || []);
+      setUsingFallback(data.usingFallback || false);
+      
+      // Show appropriate toast based on whether we're using fallback data
+      if (data.usingFallback) {
+        toast({
+          title: 'Using mock data',
+          description: `Found ${data.contacts?.length || 0} contact${data.contacts?.length === 1 ? '' : 's'} (Salesforce unavailable: ${data.fallbackReason || 'API error'})`,
+          variant: 'default',
+        });
+      } else if (data.contacts?.length === 0) {
         toast({
           title: 'No results found',
           description: 'Try searching with a different name or email',
+        });
+      } else {
+        toast({
+          title: 'Search complete',
+          description: `Found ${data.contacts.length} contact${data.contacts.length === 1 ? '' : 's'}`,
         });
       }
     } catch (err) {
@@ -89,6 +112,11 @@ export function ContactSearchCard() {
         <CardTitle className="flex items-center gap-2">
           <Search className="h-5 w-5" />
           Guest Contact Search
+          {usingFallback && (
+            <Badge variant="secondary" className="text-xs">
+              Mock Data
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -147,14 +175,16 @@ export function ContactSearchCard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <User className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium text-gray-900">
-                            {contact.name}
+                          <span className="font-medium text-gray-900 dark:text-gray-100">
+                            {contact.first_name} {contact.last_name}
                           </span>
-                          <Badge variant="outline" className="text-xs">
-                            Salesforce
-                          </Badge>
+                          {contact.contact_type && (
+                            <Badge variant="secondary" className="text-xs">
+                              {contact.contact_type}
+                            </Badge>
+                          )}
                         </div>
-                        <div className="space-y-1 text-sm text-gray-600">
+                        <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                           <div className="flex items-center gap-2">
                             <Mail className="h-3 w-3 text-gray-400" />
                             <span>{contact.email}</span>
@@ -165,11 +195,18 @@ export function ContactSearchCard() {
                               <span>{contact.phone}</span>
                             </div>
                           )}
+                          {contact.account_name && (
+                            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                              Account: {contact.account_name}
+                            </div>
+                          )}
+                          {contact.loyalty_number && (
+                            <div className="text-xs text-gray-500 dark:text-gray-500">
+                              Loyalty: {contact.loyalty_number}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                    <div className="mt-2 text-xs text-gray-500">
-                      ID: {contact.id}
                     </div>
                   </div>
                 ))}
