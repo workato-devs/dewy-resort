@@ -98,7 +98,8 @@
       {
         "number": 1,
         "keyword": "try",
-        "input": {},
+        "input": {
+        },
         "block": [
           {
             "number": 2,
@@ -580,7 +581,9 @@
                 "join_point": true,
                 "label": "Account",
                 "name": "get_custom_object+AccountId",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -601,7 +604,9 @@
                 "join_point": true,
                 "label": "Asset",
                 "name": "get_custom_object+AssetId",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -696,7 +701,9 @@
                 "join_point": true,
                 "label": "Case  source",
                 "name": "get_custom_object+SourceId",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -810,7 +817,9 @@
                 "join_point": true,
                 "label": "Contact",
                 "name": "get_custom_object+ContactId",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -851,7 +860,9 @@
                 "join_point": true,
                 "label": "Created  by",
                 "name": "get_custom_object+CreatedById",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -962,7 +973,9 @@
                 "join_point": true,
                 "label": "Last  modified  by",
                 "name": "get_custom_object+LastModifiedById",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -1019,7 +1032,9 @@
                 "join_point": true,
                 "label": "Master  record",
                 "name": "get_custom_object+MasterRecordId",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -1050,7 +1065,9 @@
                 "join_point": true,
                 "label": "Owner",
                 "name": "get_custom_object+OwnerId",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -1071,7 +1088,9 @@
                 "join_point": true,
                 "label": "Parent  case",
                 "name": "get_custom_object+ParentId",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -1178,7 +1197,9 @@
                 "join_point": true,
                 "label": "Booking",
                 "name": "get_custom_object+Booking__c",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -1273,7 +1294,9 @@
                 "join_point": true,
                 "label": "Room",
                 "name": "get_custom_object+Room__c",
-                "properties": [],
+                "properties": [
+
+                ],
                 "type": "object"
               },
               {
@@ -1313,14 +1336,14 @@
             "as": "return_result",
             "keyword": "action",
             "toggleCfg": {
-              "result.created": false
+              "result.created": true
             },
             "input": {
               "result": {
                 "case_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"id\"]}')}",
                 "case_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"get_case\",\"path\":[\"CaseNumber\"]}')}",
                 "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"status\"]}')}",
-                "created": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"status\"]}')}"
+                "created": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"created\"]}')}"
               }
             },
             "extended_output_schema": [
@@ -1467,9 +1490,9 @@
       "provider": "salesforce",
       "skip_validation": false,
       "account_id": {
-        "zip_name": "Workspace-Connections/sf_dev_account.connection.json",
+        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
         "name": "SF Dev Account",
-        "folder": "Workspace-Connections"
+        "folder": "Workspace Connections"
       }
     },
     {
