@@ -322,7 +322,7 @@
             },
             "input": {
               "flow_id": {
-                "name": "Upsert case",
+                "name": "Search contact by email",
                 "folder": "atomic-salesforce-recipes",
                 "folder_full_path": "Home/atomic-salesforce-recipes"
               },
@@ -755,7 +755,7 @@
             },
             "input": {
               "flow_id": {
-                "name": "Upsert case",
+                "name": "Search room by number",
                 "folder": "atomic-salesforce-recipes",
                 "folder_full_path": "Home/atomic-salesforce-recipes"
               },
