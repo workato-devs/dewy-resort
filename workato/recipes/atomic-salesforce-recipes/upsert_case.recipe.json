@@ -1313,14 +1313,14 @@
             "as": "return_result",
             "keyword": "action",
             "toggleCfg": {
-              "result.created": false
+              "result.created": true
             },
             "input": {
               "result": {
                 "case_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"id\"]}')}",
                 "case_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"get_case\",\"path\":[\"CaseNumber\"]}')}",
-                "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"status\"]}')}",
-                "created": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"status\"]}')}"
+                "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"get_case\",\"path\":[\"Status\"]}')}",
+                "created": "true"
               }
             },
             "extended_output_schema": [
@@ -1467,9 +1467,9 @@
       "provider": "salesforce",
       "skip_validation": false,
       "account_id": {
-        "zip_name": "Workspace-Connections/sf_dev_account.connection.json",
+        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
         "name": "SF Dev Account",
-        "folder": "Workspace-Connections"
+        "folder": "Workspace Connections"
       }
     },
     {
