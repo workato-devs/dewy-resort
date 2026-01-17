@@ -1,6 +1,6 @@
 {
   "name": "Upsert case",
-  "version": 1,
+  "version": 3,
   "private": true,
   "concurrency": 1,
   "code": {
@@ -1336,14 +1336,14 @@
             "as": "return_result",
             "keyword": "action",
             "toggleCfg": {
-              "result.created": true
+              "result.created": false
             },
             "input": {
               "result": {
                 "case_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"id\"]}')}",
                 "case_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"get_case\",\"path\":[\"CaseNumber\"]}')}",
                 "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"status\"]}')}",
-                "created": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"created\"]}')}"
+                "created": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"upsert_case\",\"path\":[\"status\"]}')}"
               }
             },
             "extended_output_schema": [
@@ -1490,9 +1490,9 @@
       "provider": "salesforce",
       "skip_validation": false,
       "account_id": {
-        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
+        "zip_name": "Workspace-Connections/sf_dev_account.connection.json",
         "name": "SF Dev Account",
-        "folder": "Workspace Connections"
+        "folder": "Workspace-Connections"
       }
     },
     {
