@@ -1,6 +1,6 @@
 {
   "name": "Upsert case",
-  "version": 3,
+  "version": 1,
   "private": true,
   "concurrency": 1,
   "code": {
