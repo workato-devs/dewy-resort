@@ -1,259 +1,286 @@
 ---
 layout: default
-title: "Unit 2: Exploring the Architecture"
+title: "Unit 2: Testing Your MCP Servers"
 nav_order: 6
 parent: Workshop Units
 ---
 
-# Unit 2: Exploring the Architecture
+# Unit 2: Testing Your MCP Servers
 
-**Guided Exploration (30 minutes)**
+**Hands-On Testing (30 minutes)**
 
 ---
 
 ## Learning Objectives
 
-- Navigate the recipe organization (atomic vs orchestrator)
-- Trace a tool call from MCP config through Workato to Salesforce
-- Understand the API Collection pattern
-- Read recipe execution logs for debugging
+- Configure the hotel app for authenticated chat
+- Test MCP tools as both Guest and Manager personas
+- Use debug mode to observe tool call activity
+- Troubleshoot using Workato execution logs
+- (Optional) Test via Claude Desktop or ChatGPT Desktop
 
 ---
 
-## Part 1: Recipe Organization Tour (10 min)
+## Part 1: Enable Chat in the Hotel App (10 min)
 
-### Explore the Repository Structure
+Now that your MCP servers are created, you'll configure the hotel app to use them with authenticated chat.
 
-Open your cloned repo and navigate:
+### 1.1 Switch to AWS Cognito Authentication
 
-```
-workato/
-+-- atomic-salesforce-recipes/   # 15 single-purpose operations
-|   +-- search_contact_by_email.recipe.json
-|   +-- search_room_by_number.recipe.json
-|   +-- upsert_case.recipe.json
-|   +-- ...
-+-- atomic-stripe-recipes/       # 6 payment operations
-|   +-- create_stripe_payment_intent.recipe.json
-|   +-- ...
-+-- orchestrator-recipes/        # 12 composed workflows
-    +-- check_in_guest.recipe.json
-    +-- process_guest_checkout.recipe.json
-    +-- ...
+<!-- PLACEHOLDER: Specific env vars for Cognito switch -->
+
+Update your `app/.env` file with the following changes:
+
+```bash
+# TODO: Add specific Cognito configuration variables
+# Your facilitator will provide these values
 ```
 
-### Discussion Questions
+### 1.2 Create Your Cognito Account
 
-**At your table, discuss:**
+1. Restart the hotel app (if running):
+   ```bash
+   app/scripts/dev-tools/server.sh restart
+   ```
+2. Open http://localhost:3000
+3. The app will guide you through creating an AWS Cognito account
+4. This provisions LLM access via Amazon Bedrock
 
-1. Why separate atomic from orchestrator recipes?
-2. What makes something "atomic"?
-3. How might orchestrators compose atomics?
+### 1.3 Add Facilitator-Provided Keys
 
-<div class="facilitator-only" markdown="1">
+Your facilitator will provide temporary keys for the workshop. Add them to your `app/.env`:
 
-### Answers to Guide Discussion
+```bash
+# TODO: Add Bedrock/Cognito keys provided by facilitator
+```
 
-| Question | Key Points |
-|----------|------------|
-| Why separate? | Reusability, testing, clear boundaries |
-| What's atomic? | Single operation, one API call, no business logic |
-| How compose? | Orchestrator calls atomic recipes via API endpoints |
+### 1.4 Verify Login Options
 
-</div>
+After configuration is complete:
+
+1. Restart the app
+2. The login page will now show **static login options**:
+   - Guest accounts (use your `+guest` email alias credentials)
+   - Manager accounts (use your `+manager` email alias credentials)
+
+**CHECKPOINT:** Login page shows Guest and Manager login options
 
 ---
 
-## Part 2: Trace a Tool Call (10 min)
+## Part 2: Test as a Guest (10 min)
 
-### Exercise: Follow `check_in_guest` End-to-End
+### 2.1 Log In as Guest
 
-**Step 1: MCP Configuration**
+1. Select a **Guest** login option
+2. Enter your credentials
+3. Navigate to **Chat** in the left sidebar
+4. Wait for the agent greeting message (confirms Bedrock is connected)
 
-Open: `config/mcp/manager/mcp-config.json`
+### 2.2 Enable Debug Mode
 
-Find the `check_in_guest` tool definition:
+1. Look for the **Debug** toggle in the chat interface
+2. Enable it to open the tool call activity panel on the right
+3. This shows real-time MCP tool invocations
+
+### 2.3 Test Guest Scenarios
+
+Try these prompts and observe the tool calls in the debug panel:
+
+**Room Information:**
+```
+What room am I staying in?
+```
+- Expected tool: `search_rooms_on_behalf_of_guest`
+
+**Service Request:**
+```
+I need extra towels in my room
+```
+- Expected tools: `submit_guest_service_request`
+- Watch: How does the agent gather missing info (room number, priority)?
+
+**Check Service Status:**
+```
+What's the status of my service requests?
+```
+- Expected tool: `search_cases_on_behalf_of_guest`
+
+**Booking Management:**
+```
+I'd like to extend my stay by one night
+```
+- Expected tool: `manage_booking_orchestrator`
+
+### 2.4 Observe in Workato Logs
+
+1. Open Workato → **Tools → Logs**
+2. Find your recent tool executions
+3. Click on a log entry to see:
+   - Input parameters received
+   - Each step's execution
+   - Response returned to the agent
+
+**CHECKPOINT:** Successfully tested guest scenarios with debug panel showing tool calls
+
+---
+
+## Part 3: Test as a Manager (5 min)
+
+### 3.1 Switch to Manager Persona
+
+1. Log out of the guest account
+2. Log in with a **Manager** account
+3. Navigate to **Chat**
+
+### 3.2 Test Manager-Only Scenarios
+
+These tools are only available to managers:
+
+**View All Rooms:**
+```
+Show me all vacant rooms
+```
+- Expected tool: `search_rooms_on_behalf_of_staff`
+- Note: Returns ALL rooms, not just guest's bookings
+
+**Maintenance Request:**
+```
+Room 205 has a leaky faucet, please file a maintenance request
+```
+- Expected tool: `submit_maintenance_request`
+
+**Process Refund:**
+```
+Process a refund for the failed checkout on booking BK-12345
+```
+- Expected tool: `compensate_checkout_failure`
+
+**Manage Cases:**
+```
+Show me all open service cases
+```
+- Expected tool: `search_cases_on_behalf_of_staff`
+
+### 3.3 Compare Guest vs Manager Access
+
+Notice the difference:
+- **Guest** `search_rooms` returns only their booked rooms
+- **Manager** `search_rooms` returns all hotel rooms with guest details
+- **Manager** has access to maintenance, case management, and refund tools
+
+**CHECKPOINT:** Confirmed manager has elevated access and additional tools
+
+---
+
+## Part 4: Trigger Error Conditions (5 min)
+
+Test how the system handles errors gracefully:
+
+### 4.1 Resource Not Found (404)
+
+```
+Check in guest with email nonexistent@example.com
+```
+- Expected: Clear error message, no crash
+- Check Workato logs for the 404 response
+
+### 4.2 Invalid State (409)
+
+```
+Check in a guest who is already checked in
+```
+- Expected: Conflict error explaining the issue
+
+### 4.3 Missing Required Info
+
+```
+I need housekeeping
+```
+- Expected: Agent asks for room number, not a tool error
+- Observe: LLM gathers required fields before calling tool
+
+---
+
+## Alternative: Test via Desktop Clients
+
+If the hotel app has issues, test your MCP servers directly:
+
+### Claude Desktop
+
+1. Copy the **Developer MCP Token** from your MCP server's Settings tab in Workato
+2. Add to `claude_desktop_config.json`:
 
 ```json
 {
-  "name": "check_in_guest",
-  "description": "Check in a guest with existing reservation...",
-  "inputSchema": {
-    "properties": {
-      "guest_email": { "type": "string" },
-      "check_in_date": { "type": "string" }
+  "mcpServers": {
+    "dewy-guest-mcp": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://your_url?wkt_token=your_token"
+      ]
     }
   }
 }
 ```
 
-**Note:** Parameters match what users naturally provide (email, date) - not system IDs.
+3. Restart Claude Desktop
+4. Test with: "What tools do you have available?"
+
+### ChatGPT Desktop
+
+1. Open Settings → MCP Servers
+2. Add your MCP server URL and token
+3. Test the same scenarios
+
+### Workato API Platform (Direct)
+
+1. Go to **Tools → API Platform → API Collections**
+2. Click on your collection
+3. Select an endpoint
+4. Use the **Test** tab to send requests directly
 
 ---
 
-**Step 2: API Collection (Workato UI)**
+## Troubleshooting
 
-1. Open Workato
-2. Navigate to **Tools -> API Platform -> API Collections**
-3. Find the collection backing MCP tools
-4. Locate the `/check_in_guest` endpoint
-5. Note the endpoint path: `/[workspace]/check-in-guest`
-
-**Note:** This is the HTTP endpoint the MCP client calls.
-
----
-
-**Step 3: Orchestrator Recipe**
-
-Open in Workato UI: **Projects -> orchestrator-recipes -> check_in_guest**
-
-Trace the flow:
-
-```
-+---------------------------------------------+
-| Trigger: API Platform request               |
-| Input: guest_email, check_in_date           |
-+---------------------------------------------+
-                    |
-                    v
-+---------------------------------------------+
-| Step 1: Search Contact by Email (atomic)    |
-| Returns: contact_id or 404 error            |
-+---------------------------------------------+
-                    |
-                    v
-+---------------------------------------------+
-| Step 2: Search Booking (atomic)             |
-| Filter: contact_id + status=Reserved + date |
-| Returns: booking_id, room_id or 404/409     |
-+---------------------------------------------+
-                    |
-                    v
-+---------------------------------------------+
-| Step 3: Validate Room Status                |
-| Check: Room.Status__c == 'Vacant'           |
-| Error if: Room occupied -> 409              |
-+---------------------------------------------+
-                    |
-                    v
-+---------------------------------------------+
-| Steps 4-6: State Transitions (atomic)       |
-| - Update Booking -> Checked In              |
-| - Update Room -> Occupied                   |
-| - Update Opportunity -> Checked In          |
-+---------------------------------------------+
-                    |
-                    v
-+---------------------------------------------+
-| Return: success, booking_id, room_number    |
-+---------------------------------------------+
-```
-
-**Key observations:**
-- Error handling at each step with specific codes (404, 409)
-- Conditional logic for validation
-- All state transitions happen only if validation passes
+| Issue | Solution |
+|-------|----------|
+| No agent greeting in chat | Bedrock provisioning incomplete; check env vars |
+| Login page unchanged | Restart app after env changes |
+| Tool calls not showing | Enable Debug mode toggle |
+| "Unauthorized" errors | Verify MCP server tokens in .env |
+| Tool returns error | Check Workato **Tools → Logs** for details |
 
 ---
 
-**Step 4: Execution Log**
+## What You Accomplished
 
-1. Use the app to trigger a check-in:
-   - "Check in Sarah Johnson, email sarah@example.com"
-2. Open Workato -> **Tools -> Logs**
-3. Find the recent `check_in_guest` execution
-4. Expand to examine:
-   - Input parameters received
-   - Each step's duration
-   - Output at each step
-   - Final response
-
-**What to notice:**
-- Total execution time (~4 seconds)
-- Where time is spent (Salesforce API calls)
-- Transaction-level traceability
+- Configured authenticated chat with AWS Cognito + Bedrock
+- Tested MCP tools as both Guest and Manager personas
+- Used debug mode to observe real-time tool activity
+- Explored error handling and LLM coaching behavior
+- (Optional) Validated MCP servers via desktop clients
 
 ---
-
-## Part 3: Pattern Recognition (10 min)
-
-### Compare Approaches
-
-| Metric | Naive (API Wrapper) | Compositional |
-|--------|---------------------|---------------|
-| Tool count | 47 | 12 |
-| Calls per checkout | 8-12 | 2 |
-| Average latency | Higher (multiple LLM round-trips) | 4-7 seconds |
-| Complexity location | LLM context | Backend recipes |
-| Error handling | Per-call in prompt | Centralized in recipe |
-| Retry safety | Must engineer at each step | Platform retry + declarative idempotency |
-
-### Discussion Questions
-
-**In pairs or small groups:**
-
-1. What patterns do you see in the orchestrator design?
-   - *Look for: validation-first, atomic composition, structured errors*
-
-2. How does the backend handle ID resolution?
-   - *Look for: email -> contact_id, room_number -> room_id*
-
-3. Where is authorization enforced?
-   - *Look for: "on_behalf_of" patterns, contact type validation*
 
 <div class="facilitator-only" markdown="1">
 
-### Key Patterns to Highlight
+## Facilitator Notes
 
-| Pattern | Implementation |
-|---------|----------------|
-| Business identifiers | `guest_email` not `contact_id` |
-| Validation first | Check prerequisites before mutations |
-| Atomic composition | Orchestrator calls atomic recipes |
-| Structured errors | 404, 409 with clear messages |
-| Idempotency | External_ID__c fields |
+**Before this unit:**
+- Ensure all attendees have MCP servers created from Unit 1
+- Have temporary Cognito/Bedrock keys ready to distribute
+- Test the full flow yourself before the session
 
-</div>
+**Common issues:**
+- Attendees forgetting to restart app after env changes
+- Bedrock provisioning delays (can take 1-2 minutes)
+- Debug panel not appearing (browser cache issue - try hard refresh)
 
----
-
-## Bonus Activity (For Fast Learners)
-
-If you finish early, try these explorations:
-
-### Trigger Different Error Conditions
-
-Use the chat interface to intentionally cause errors. Can you trigger:
-- A 404 (resource not found)?
-- A 409 (conflict/invalid state)?
-- A validation error?
-
-After each error, check the logs in **Tools -> Logs** to see how the error was structured and returned.
-
-**Example prompts to try:**
-- "Check in a guest who doesn't exist"
-- "Check in someone who's already checked in"
-- "Request service for room 999"
-
-### Test LLM Coaching Behavior
-
-Try starting a service request without providing all required information:
-- "I need help with my room"
-- "Something is broken"
-- "Can you send someone?"
-
-Observe: How does the LLM prompt you for the missing details (room number, description, priority)? How many turns does it take to gather everything needed to invoke the tool?
-
----
-
-## Transition to Break
-
-> "You've now seen how the architecture works from MCP config to Salesforce. After a 15-minute break, you'll build your own atomic skill and orchestrator from scratch."
-
-<div class="facilitator-only" markdown="1">
-
-**Display during break:**
-- Time to return
-- Reminder: Keep Workato and Salesforce tabs open
+**If hotel app fails for an attendee:**
+- Pair them with someone whose app works
+- Direct them to desktop client alternative
+- Use Workato's direct API test as fallback
 
 </div>
