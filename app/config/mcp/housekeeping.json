@@ -5,11 +5,8 @@
       "name": "hotel-db",
       "type": "stdio",
       "command": "npx",
-      "args": ["tsx", "lib/mcp/hotel-db-server.ts"],
-      "tools": [
-        "find_service_request_by_token",
-        "get_guest_service_requests"
-      ]
+      "args": ["tsx", "src/lib/mcp/hotel-db-server.ts"],
+      "tools": ["find_service_request_by_token", "get_guest_service_requests"]
     },
     {
       "name": "housekeeping-tasks",

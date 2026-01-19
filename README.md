@@ -278,12 +278,12 @@ cp .env.example .env
 **Add Workato API Collection endpoint to `.env`:**
 
 ```bash
-# Workato API Collection URL (get from Workato UI)
+# Salesforce API Collection URL (get from Workato UI)
 # In Workato: Navigate to any recipe → API Collection tab → Copy base URL
-WORKATO_API_COLLECTION_URL=https://apim.workato.com/your-collection-id
+SALESFORCE_API_COLLECTION_URL=https://apim.workato.com/your-collection-id
 
 # Use same token as deployment
-WORKATO_API_AUTH_TOKEN=your_token_from_step_3
+SALESFORCE_API_AUTH_TOKEN=your_token_from_step_3
 ```
 
 **Initialize local database** (for hotel app sessions, UI state):

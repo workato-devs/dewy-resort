@@ -1,242 +1,163 @@
-# MCP (Model Context Protocol) Configuration
+# MCP Configuration
 
-This directory contains role-specific MCP configurations for the Bedrock chat integration. Each role (guest, manager, housekeeping, maintenance) has its own configuration file that defines which remote MCP servers and tools are available.
+This directory contains MCP (Model Context Protocol) server configurations and tool proxy definitions.
 
 ## Overview
 
-MCP servers provide tools that AI chat agents can use to perform actions on behalf of users. The configuration supports both HTTP-based remote servers and stdio-based local servers.
+The `hotel-db-server` is a local MCP server that provides **two types of tools**:
 
-## Configuration Files
+1. **Database Lookup Tools** - Direct SQLite queries for idempotency tokens, service requests, bookings, and transactions
+2. **Proxied Workato Tools** - Wraps Workato MCP tools with automatic idempotency token generation
 
-- `guest.json` - Guest MCP configuration
-- `manager.json` - Manager MCP configuration
-- `housekeeping.json` - Housekeeping MCP configuration
-- `maintenance.json` - Maintenance MCP configuration
-- `schema.ts` - TypeScript schema definitions
+## Architecture: Dynamic Proxy Pattern
 
-## Configuration Structure
+The local `hotel-db-server` uses a **dynamic proxy architecture** that:
 
-### HTTP-based MCP Server (Recommended)
+1. **Provides direct database access** for token lookups and queries
+2. **Fetches tool definitions from Workato** at startup via `tools/list`
+3. **Proxies tools requiring idempotency tokens** with auto-generation
+4. **Uses Workato's descriptions dynamically** (no hardcoded descriptions)
+5. **Excludes underlying Workato tools** via `excludeTools` config
 
-```json
+This ensures:
+- ✅ Fast local database queries without network calls
+- ✅ Single source of truth for tool descriptions (Workato)
+- ✅ No description drift when Workato tools change
+- ✅ Agent only sees one version of each tool
+- ✅ Automatic UUID token generation and local DB tracking
+
+## Files
+
+### `workato-tool-names.ts`
+
+Defines which Workato tools require idempotency token wrapping. The local server dynamically fetches tool metadata from Workato and proxies these tools with auto-token generation.
+
+**Configuration structure:**
+```typescript
 {
-  "role": "guest",
-  "servers": [
-    {
-      "name": "hotel-services",
-      "type": "http",
-      "url": "${MCP_HOTEL_SERVICES_URL}",
-      "auth": {
-        "type": "bearer",
-        "token": "${MCP_HOTEL_SERVICES_TOKEN}"
-      },
-      "tools": [
-        "create_service_request",
-        "view_my_charges",
-        "request_amenity"
-      ]
-    }
-  ]
+  workatoToolName: 'Create_booking_orchestrator',  // Exact Workato tool name
+  localToolName: 'create_booking_with_token',      // Wrapped tool name
+  server: 'operations',                             // Which Workato server
+  injectParams: ['manager_email', ...]              // Params from env
 }
 ```
 
-### Stdio-based MCP Server (Backward Compatibility)
+**How to update:**
+1. Run discovery to see current Workato tool names:
+   ```bash
+   cd app && npx tsx scripts/discover-mcp-tools.ts
+   ```
+2. Update `TOOLS_REQUIRING_IDEMPOTENCY` array if tool names changed
+3. Update `excludeTools` in role configs to match
+4. Test with: `npx tsx scripts/test-dynamic-mcp-proxy.ts`
 
-```json
-{
-  "role": "guest",
-  "servers": [
-    {
-      "name": "local-services",
-      "type": "stdio",
-      "command": "node",
-      "args": ["mcp-servers/hotel-services/index.js"],
-      "env": {
-        "DATABASE_URL": "sqlite:database/hotel.db"
-      },
-      "tools": [
-        "create_service_request",
-        "view_my_charges"
-      ]
-    }
-  ]
-}
+### Role-specific MCP configs
+
+- `manager.json` - Manager role MCP server configuration
+- `guest.json` - Guest role MCP server configuration  
+- `housekeeping.json` - Housekeeping role MCP server configuration
+- `maintenance.json` - Maintenance role MCP server configuration
+
+Each config defines:
+- Local MCP servers (stdio) - e.g., `hotel-db` wrapper
+- Remote MCP servers (http) - e.g., Workato MCP endpoints
+- Tool filtering via `excludeTools` array
+
+## Architecture
+
+```
+AI Agent
+  ↓
+Local hotel-db MCP Server (stdio)
+  ├─ Database Lookup Tools (local SQLite queries)
+  │  ├─ find_service_request_by_token
+  │  ├─ find_maintenance_task_by_token
+  │  ├─ find_booking_by_token
+  │  ├─ find_transaction_by_token
+  │  ├─ get_guest_service_requests
+  │  ├─ get_room_maintenance_tasks
+  │  └─ find_tokens_by_guest_email
+  │
+  └─ Proxied Workato Tools (with auto-token generation)
+     ├─ Generates UUID idempotency tokens
+     ├─ Stores in local SQLite database
+     └─ Calls Workato MCP tools via HTTP
+         ↓
+Workato MCP Servers (http)
+  ├─ hotel-operations (Manager tools)
+  └─ hotel-services (Guest tools)
+      ↓
+Salesforce / Stripe / Twilio
 ```
 
-## Environment Variables
+### Database Lookup Tools
 
-MCP configurations support environment variable interpolation using the `${VAR_NAME}` syntax. This allows you to keep sensitive credentials out of configuration files.
+These tools provide **direct SQLite access** for querying local records:
 
-### Guest MCP Servers
+- **find_service_request_by_token** - Look up service request by idempotency token
+- **find_maintenance_task_by_token** - Look up maintenance task by idempotency token
+- **find_booking_by_token** - Look up booking by idempotency token
+- **find_transaction_by_token** - Look up transaction by idempotency token
+- **get_guest_service_requests** - Get all service requests for a guest (with optional status filter)
+- **get_room_maintenance_tasks** - Get all maintenance tasks for a room (with optional status/assignee filter)
+- **find_tokens_by_guest_email** - Find all tokens (service requests, bookings, transactions) for a guest email
 
+### Proxied Workato Tools
+
+The local wrapper provides automatic idempotency token generation for:
+- **create_booking_with_token** - Wraps `Create_booking_orchestrator`
+- **manage_booking_with_token** - Wraps `Manage_booking_orchestrator`
+- **create_service_request_with_token** - Wraps `Submit_guest_service_request`
+- **create_maintenance_task_with_token** - Wraps `Submit_maintenance_request`
+
+
+## Dynamic Proxy Flow
+
+```
+AI Agent requests: create_booking_with_token
+  ↓
+Local hotel-db MCP Server
+  ├─ Fetched tool description from Workato (cached)
+  ├─ Added note: "🔑 Auto-generates UUID token"
+  ├─ Removed idempotency_token from input schema
+  └─ Exposed as: create_booking_with_token
+  
+When called:
+  ├─ Generate UUID token
+  ├─ Store in local SQLite
+  ├─ Inject token + env params
+  ├─ Call Workato: Create_booking_orchestrator
+  ├─ Update local DB with Salesforce IDs
+  └─ Return combined result
+
+Agent never sees: Create_booking_orchestrator (excluded)
+```
+
+## Testing
+
+### Test Dynamic Proxy
 ```bash
-# Hotel Services MCP Server
-MCP_HOTEL_SERVICES_URL=https://mcp.hotel.example.com/services
-MCP_HOTEL_SERVICES_TOKEN=your_hotel_services_token
-
-# Room Controls MCP Server
-MCP_ROOM_CONTROLS_URL=https://mcp.hotel.example.com/room-controls
-MCP_ROOM_CONTROLS_TOKEN=your_room_controls_token
+cd app && npx tsx scripts/test-dynamic-mcp-proxy.ts
 ```
 
-### Manager MCP Servers
+Verifies:
+- Tool descriptions fetched from Workato
+- Idempotency token removed from schemas
+- Auto-token indicator added to descriptions
+- Local-only tools present
 
+### Test Tool Discovery
 ```bash
-# Analytics MCP Server
-MCP_ANALYTICS_URL=https://mcp.hotel.example.com/analytics
-MCP_ANALYTICS_TOKEN=your_analytics_token
-
-# Operations MCP Server
-MCP_OPERATIONS_URL=https://mcp.hotel.example.com/operations
-MCP_OPERATIONS_TOKEN=your_operations_token
+cd app && npx tsx scripts/discover-mcp-tools.ts
 ```
 
-### Housekeeping MCP Servers
+Shows current Workato tool names and descriptions.
 
-```bash
-# Housekeeping Tasks MCP Server
-MCP_HOUSEKEEPING_URL=https://mcp.hotel.example.com/housekeeping
-MCP_HOUSEKEEPING_TOKEN=your_housekeeping_token
-```
+## Maintenance
 
-### Maintenance MCP Servers
+When Workato tool names or descriptions change:
 
-```bash
-# Maintenance Tasks MCP Server
-MCP_MAINTENANCE_URL=https://mcp.hotel.example.com/maintenance
-MCP_MAINTENANCE_TOKEN=your_maintenance_token
-```
-
-## Authentication Types
-
-### Bearer Token Authentication
-
-```json
-{
-  "auth": {
-    "type": "bearer",
-    "token": "${MCP_SERVER_TOKEN}"
-  }
-}
-```
-
-The token is sent in the `Authorization` header as `Bearer <token>`.
-
-### Basic Authentication
-
-```json
-{
-  "auth": {
-    "type": "basic",
-    "username": "${MCP_USERNAME}",
-    "password": "${MCP_PASSWORD}"
-  }
-}
-```
-
-Credentials are base64-encoded and sent in the `Authorization` header as `Basic <credentials>`.
-
-### No Authentication
-
-```json
-{
-  "auth": {
-    "type": "none"
-  }
-}
-```
-
-No authentication headers are sent.
-
-## Guest Tools
-
-The guest MCP configuration provides the following tools:
-
-### Hotel Services
-- `create_service_request` - Create a new service request (housekeeping, maintenance, room service, concierge)
-- `view_my_charges` - View current charges and billing information
-- `request_amenity` - Request hotel amenities
-
-### Room Controls
-- `control_lights` - Control room lighting
-- `control_thermostat` - Adjust room temperature
-- `control_blinds` - Control window blinds
-
-## Testing Configuration
-
-Use the test script to validate your MCP configuration:
-
-```bash
-node scripts/test-mcp-guest-config.js
-```
-
-This script will:
-1. Load and validate the configuration structure
-2. Check that all required environment variables are set
-3. Test connectivity to remote MCP servers
-4. Verify tool discovery
-
-## MCP Server Development
-
-When developing MCP servers, they should:
-
-1. **Expose a REST API** for HTTP-based servers:
-   - `GET /` - Health check endpoint
-   - `POST /tools/{toolName}` - Execute a tool
-   - Return JSON responses with tool results
-
-2. **Implement authentication**:
-   - Validate bearer tokens or basic auth credentials
-   - Return 401 for unauthorized requests
-
-3. **Follow the MCP protocol**:
-   - Accept tool input as JSON in request body
-   - Return tool results as JSON
-   - Handle errors gracefully with appropriate status codes
-
-4. **Provide tool schemas**:
-   - Document tool names, descriptions, and input schemas
-   - Follow JSON Schema format for input validation
-
-## Security Considerations
-
-1. **Never commit credentials** to version control
-2. **Use environment variables** for all sensitive data
-3. **Rotate tokens regularly** for production environments
-4. **Implement rate limiting** on MCP servers
-5. **Validate tool access** based on user roles
-6. **Log all tool executions** for audit purposes
-
-## Troubleshooting
-
-### Configuration not loading
-
-- Check that the configuration file exists in `config/mcp/`
-- Verify JSON syntax is valid
-- Ensure the role name matches the filename
-
-### Environment variables not interpolated
-
-- Check that variables are defined in `.env` file
-- Verify the syntax uses `${VAR_NAME}` format
-- Restart the application after changing `.env`
-
-### Connection failures
-
-- Verify the MCP server URL is correct
-- Check that authentication credentials are valid
-- Ensure the MCP server is running and accessible
-- Check network connectivity and firewall rules
-
-### Tool execution errors
-
-- Verify the tool name is listed in the server's tools array
-- Check that the tool input matches the expected schema
-- Review MCP server logs for error details
-- Ensure the user has permission to access the tool
-
-## Related Documentation
-
-- [Bedrock Chat Integration Design](../../.kiro/specs/bedrock-chat-integration/design.md)
-- [MCP Manager Implementation](../../lib/bedrock/MCP_MANAGER_README.md)
-- [System Prompts](../prompts/README.md)
+1. **No code changes needed** - descriptions update automatically
+2. **If tool names change**: Update `workato-tool-names.ts` config
+3. **If new tools need wrapping**: Add to `TOOLS_REQUIRING_IDEMPOTENCY`
+4. **Update excludeTools**: Add to role configs to hide underlying tool

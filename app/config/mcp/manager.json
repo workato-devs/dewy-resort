@@ -5,7 +5,7 @@
       "name": "hotel-db",
       "type": "stdio",
       "command": "npx",
-      "args": ["tsx", "lib/mcp/hotel-db-server.ts"]
+      "args": ["tsx", "src/lib/mcp/hotel-db-server.ts"]
     },
     {
       "name": "hotel-analytics",
@@ -24,7 +24,11 @@
         "type": "bearer",
         "token": "${MCP_OPERATIONS_TOKEN}"
       },
-      "excludeTools": []
+      "excludeTools": [
+        "Create_booking_orchestrator",
+        "Manage_booking_orchestrator",
+        "Submit_maintenance_request"
+      ]
     }
   ]
 }
