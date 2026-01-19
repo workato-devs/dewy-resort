@@ -39,7 +39,7 @@ python3 --version  # Should be 3.11+
 ### 1.1 Clone the Repository
 
 ```bash
-git clone https://github.com/workato-devs/dewy-resort
+git clone https://github.com/workato-devs/dewy-resort.git
 cd dewy-resort
 ```
 
