@@ -14,7 +14,8 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', 'var', 'hotel.db');
+// Script is now in scripts/migration/, so go up 2 levels to app root
+const DB_PATH = path.join(__dirname, '../..', 'var', 'hotel.db');
 
 function migrate() {
   console.log('Starting Cognito token migration...');

@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Hotel, Loader2, AlertCircle } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "@/hooks/use-toast"
+import { ThemeToggle } from "@/components/shared/ThemeToggle"
 
 function LoginForm() {
   const router = useRouter()
@@ -263,9 +264,12 @@ function LoginForm() {
             <Image src="/Dewy-purple 64.png" alt="Dewy Resort Logo" width={64} height={64} />
             <span className="text-2xl font-bold">Dewy Resort</span>
           </Link>
-          <Link href="/">
-            <Button variant="ghost">Back to Home</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/">
+              <Button variant="ghost">Back to Home</Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -355,15 +359,15 @@ function LoginForm() {
                 <div className="mt-6 pt-6 border-t">
                   <p className="text-sm font-semibold mb-3 text-center">Demo Credentials</p>
                   <div className="space-y-3 text-sm">
-                    <div className="bg-slate-50 p-3 rounded-md">
-                      <p className="font-medium mb-1">Guest Account</p>
-                      <p className="text-muted-foreground">Email: guest1@hotel.com</p>
-                      <p className="text-muted-foreground">Password: password123</p>
+                    <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-md border border-slate-200 dark:border-slate-700">
+                      <p className="font-medium mb-1 text-slate-900 dark:text-slate-100">Guest Account</p>
+                      <p className="text-slate-600 dark:text-slate-300">Email: guest1@hotel.com</p>
+                      <p className="text-slate-600 dark:text-slate-300">Password: Hotel2026!</p>
                     </div>
-                    <div className="bg-slate-50 p-3 rounded-md">
-                      <p className="font-medium mb-1">Manager Account</p>
-                      <p className="text-muted-foreground">Email: manager1@hotel.com</p>
-                      <p className="text-muted-foreground">Password: password123</p>
+                    <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-md border border-slate-200 dark:border-slate-700">
+                      <p className="font-medium mb-1 text-slate-900 dark:text-slate-100">Manager Account</p>
+                      <p className="text-slate-600 dark:text-slate-300">Email: manager1@hotel.com</p>
+                      <p className="text-slate-600 dark:text-slate-300">Password: Hotel2026!</p>
                     </div>
                   </div>
                 </div>
@@ -442,14 +446,16 @@ function LoginForm() {
             )}
 
             {/* Create Account Link */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
-                <Link href="/register" className="text-primary hover:underline font-medium">
-                  Create Account
-                </Link>
-              </p>
-            </div>
+            {authProvider !== 'mock' && (
+              <div className="mt-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Don&apos;t have an account?{" "}
+                  <Link href="/register" className="text-primary hover:underline font-medium">
+                    Create Account
+                  </Link>
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>

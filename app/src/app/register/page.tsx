@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Hotel, Loader2, CheckCircle2, XCircle } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import { ThemeToggle } from "@/components/shared/ThemeToggle"
 
 type AuthProvider = 'mock' | 'okta' | 'cognito';
 
@@ -207,9 +208,12 @@ function RegisterForm() {
             <Image src="/Dewy-purple 64.png" alt="Dewy Resort Logo" width={64} height={64} />
             <span className="text-2xl font-bold">Dewy Resort</span>
           </Link>
-          <Link href="/login">
-            <Button variant="ghost">Sign In</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/login">
+              <Button variant="ghost">Sign In</Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -306,17 +310,17 @@ function RegisterForm() {
 
               {/* Password Requirements */}
               {password && (
-                <div className="bg-slate-50 p-3 rounded-md space-y-2">
-                  <p className="text-sm font-semibold">Password Requirements:</p>
+                <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-md space-y-2 border border-slate-200 dark:border-slate-700">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Password Requirements:</p>
                   <div className="space-y-1">
                     {passwordRequirements.map((req, index) => (
                       <div key={index} className="flex items-center gap-2 text-sm">
                         {req.met ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                         ) : (
-                          <XCircle className="h-4 w-4 text-gray-400" />
+                          <XCircle className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                         )}
-                        <span className={req.met ? "text-green-600" : "text-gray-600"}>
+                        <span className={req.met ? "text-green-600 dark:text-green-400" : "text-gray-600 dark:text-gray-400"}>
                           {req.label}
                         </span>
                       </div>

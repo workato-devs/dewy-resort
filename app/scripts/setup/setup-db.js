@@ -14,9 +14,10 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-const DB_PATH = path.join(__dirname, '..', 'var', 'hotel.db');
-const SCHEMA_PATH = path.join(__dirname, '..', 'database', 'schema.sql');
-const MIGRATIONS_DIR = path.join(__dirname, '..', 'database', 'migrations');
+// Script is now in scripts/setup/, so go up 2 levels to app root
+const DB_PATH = path.join(__dirname, '../..', 'var', 'hotel.db');
+const SCHEMA_PATH = path.join(__dirname, '../..', 'database', 'schema.sql');
+const MIGRATIONS_DIR = path.join(__dirname, '../..', 'database', 'migrations');
 
 // Helper to generate UUID
 function generateId() {
@@ -97,7 +98,7 @@ async function setupDatabase() {
     console.log('🌱 Step 3: Seeding demo data...');
     
     // Hash password for all users
-    const passwordHash = await bcrypt.hash('password123', 10);
+    const passwordHash = await bcrypt.hash('Hotel2026!', 10);
 
     // Create managers
     console.log('\n👥 Creating users...');
@@ -371,8 +372,8 @@ async function setupDatabase() {
     console.log(`   - ${maintenanceTasks.length} maintenance tasks`);
     console.log(`   - Multiple charges and transactions`);
     console.log('\n🔑 Demo Credentials:');
-    console.log('   Managers: manager1@hotel.com / password123');
-    console.log('   Guests: guest1@hotel.com / password123 (Room 100)');
+    console.log('   Managers: manager1@hotel.com / Hotel2026!');
+    console.log('   Guests: guest1@hotel.com / Hotel2026! (Room 100)');
     console.log(`   Database: ${DB_PATH}\n`);
 
   } catch (error) {

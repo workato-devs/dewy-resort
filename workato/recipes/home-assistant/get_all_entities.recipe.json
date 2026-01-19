@@ -1,0 +1,458 @@
+{
+  "name": "Get All Entities",
+  "description": "Get all Home Assistant entities - GET /api/states",
+  "version": 6,
+  "private": false,
+  "concurrency": 1,
+  "code": {
+    "number": 0,
+    "provider": "workato_api_platform",
+    "name": "receive_request",
+    "as": "05a31061",
+    "keyword": "trigger",
+    "input": {
+      "request": {
+        "content_type": "json"
+      },
+      "response": {
+        "content_type": "json",
+        "responses": [
+          {
+            "name": "Success",
+            "http_status_code": "200",
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"entities\",\"type\":\"array\",\"of\":\"object\",\"label\":\"Entities\",\"properties\":[]}]"
+          },
+          {
+            "name": "Unauthorized",
+            "http_status_code": "401",
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"}]"
+          },
+          {
+            "name": "Forbidden",
+            "http_status_code": "403",
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"}]"
+          },
+          {
+            "name": "Server Error",
+            "http_status_code": "500",
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"}]"
+          }
+        ]
+      }
+    },
+    "extended_output_schema": [
+
+    ],
+    "block": [
+      {
+        "number": 1,
+        "provider": "logger",
+        "name": "log_message",
+        "as": "log-request-001",
+        "keyword": "action",
+        "input": {
+          "user_logs_enabled": true,
+          "message": "Get all entities requested",
+          "log_level": "INFO"
+        },
+        "extended_input_schema": [
+          {
+            "control_type": "select",
+            "default": "INFO",
+            "disable_formula": true,
+            "hint": "Flag your message with a log level to easily find the right entry in the Workato logs.",
+            "label": "Log level",
+            "name": "log_level",
+            "ngIf": "input.user_logs_enabled == true",
+            "optional": false,
+            "pick_list": [
+              [
+                "INFO",
+                "INFO"
+              ],
+              [
+                "WARN",
+                "WARN"
+              ],
+              [
+                "ERROR",
+                "ERROR"
+              ]
+            ],
+            "type": "string"
+          },
+          {
+            "control_type": "switch",
+            "default": false,
+            "disable_formula": true,
+            "extends_schema": true,
+            "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+            "label": "Send to Workato log service",
+            "name": "user_logs_enabled",
+            "optional": true,
+            "type": "string"
+          }
+        ],
+        "uuid": "log-request-001"
+      },
+      {
+        "number": 2,
+        "keyword": "try",
+        "input": {
+        },
+        "block": [
+          {
+            "number": 3,
+            "provider": "nabu_casa_home_assistant_cloud__connector_2100002083_1768260720",
+            "name": "get_states",
+            "as": "get-states-001",
+            "keyword": "action",
+            "input": {
+            },
+            "uuid": "get-states-001"
+          },
+          {
+            "number": 4,
+            "provider": "workato_api_platform",
+            "name": "return_response",
+            "as": "return-success-001",
+            "keyword": "action",
+            "input": {
+              "http_status_code": "200",
+              "response": {
+                "success": "true",
+                "entities": "=_dp('{\"pill_type\":\"output\",\"provider\":\"nabu_casa_home_assistant_cloud__connector_2100002083_1768260720\",\"line\":\"get-states-001\",\"path\":[\"entities\"]}')"
+              }
+            },
+            "extended_input_schema": [
+              {
+                "change_on_blur": true,
+                "control_type": "select",
+                "extends_schema": true,
+                "label": "Response",
+                "name": "http_status_code",
+                "pick_list": [
+                  [
+                    "Success",
+                    "200"
+                  ],
+                  [
+                    "Unauthorized",
+                    "401"
+                  ],
+                  [
+                    "Forbidden",
+                    "403"
+                  ],
+                  [
+                    "Server Error",
+                    "500"
+                  ]
+                ],
+                "type": "string"
+              }
+            ],
+            "uuid": "return-success-001"
+          },
+          {
+            "number": 5,
+            "as": "catch-error-001",
+            "keyword": "catch",
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "block": [
+              {
+                "number": 6,
+                "provider": "logger",
+                "name": "log_message",
+                "as": "log-error-001",
+                "keyword": "action",
+                "input": {
+                  "user_logs_enabled": true,
+                  "message": "Error getting entities: =_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                  "log_level": "ERROR"
+                },
+                "extended_input_schema": [
+                  {
+                    "control_type": "select",
+                    "default": "INFO",
+                    "disable_formula": true,
+                    "hint": "Flag your message with a log level to easily find the right entry in the Workato logs.",
+                    "label": "Log level",
+                    "name": "log_level",
+                    "ngIf": "input.user_logs_enabled == true",
+                    "optional": false,
+                    "pick_list": [
+                      [
+                        "INFO",
+                        "INFO"
+                      ],
+                      [
+                        "WARN",
+                        "WARN"
+                      ],
+                      [
+                        "ERROR",
+                        "ERROR"
+                      ]
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "switch",
+                    "default": false,
+                    "disable_formula": true,
+                    "extends_schema": true,
+                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "label": "Send to Workato log service",
+                    "name": "user_logs_enabled",
+                    "optional": true,
+                    "type": "string"
+                  }
+                ],
+                "uuid": "log-error-001"
+              },
+              {
+                "number": 7,
+                "keyword": "if",
+                "as": "check-unauthorized",
+                "input": {
+                  "type": "compound",
+                  "operand": "or",
+                  "conditions": [
+                    {
+                      "operand": "contains",
+                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                      "rhs": "401",
+                      "uuid": "cond-401-001"
+                    },
+                    {
+                      "operand": "contains",
+                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                      "rhs": "Unauthorized",
+                      "uuid": "cond-unauth-001"
+                    },
+                    {
+                      "operand": "contains",
+                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                      "rhs": "Authentication failed",
+                      "uuid": "cond-auth-fail-001"
+                    }
+                  ]
+                },
+                "block": [
+                  {
+                    "number": 8,
+                    "provider": "workato_api_platform",
+                    "name": "return_response",
+                    "as": "return-401-001",
+                    "keyword": "action",
+                    "input": {
+                      "http_status_code": "401",
+                      "response": {
+                        "success": "false",
+                        "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')"
+                      }
+                    },
+                    "extended_input_schema": [
+                      {
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "Success",
+                            "200"
+                          ],
+                          [
+                            "Unauthorized",
+                            "401"
+                          ],
+                          [
+                            "Forbidden",
+                            "403"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
+                        "type": "string"
+                      }
+                    ],
+                    "uuid": "return-401-001"
+                  },
+                  {
+                    "number": 9,
+                    "keyword": "else",
+                    "as": "check-forbidden",
+                    "input": {
+                    },
+                    "block": [
+                      {
+                        "number": 10,
+                        "keyword": "if",
+                        "as": "check-403",
+                        "input": {
+                          "type": "compound",
+                          "operand": "or",
+                          "conditions": [
+                            {
+                              "operand": "contains",
+                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                              "rhs": "403",
+                              "uuid": "cond-403-001"
+                            },
+                            {
+                              "operand": "contains",
+                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                              "rhs": "Forbidden",
+                              "uuid": "cond-forbidden-001"
+                            }
+                          ]
+                        },
+                        "block": [
+                          {
+                            "number": 11,
+                            "provider": "workato_api_platform",
+                            "name": "return_response",
+                            "as": "return-403-001",
+                            "keyword": "action",
+                            "input": {
+                              "http_status_code": "403",
+                              "response": {
+                                "success": "false",
+                                "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')"
+                              }
+                            },
+                            "extended_input_schema": [
+                              {
+                                "change_on_blur": true,
+                                "control_type": "select",
+                                "extends_schema": true,
+                                "label": "Response",
+                                "name": "http_status_code",
+                                "pick_list": [
+                                  [
+                                    "Success",
+                                    "200"
+                                  ],
+                                  [
+                                    "Unauthorized",
+                                    "401"
+                                  ],
+                                  [
+                                    "Forbidden",
+                                    "403"
+                                  ],
+                                  [
+                                    "Server Error",
+                                    "500"
+                                  ]
+                                ],
+                                "type": "string"
+                              }
+                            ],
+                            "uuid": "return-403-001"
+                          },
+                          {
+                            "number": 12,
+                            "keyword": "else",
+                            "as": "default-error",
+                            "input": {
+                            },
+                            "block": [
+                              {
+                                "number": 13,
+                                "provider": "workato_api_platform",
+                                "name": "return_response",
+                                "as": "return-500-001",
+                                "keyword": "action",
+                                "input": {
+                                  "http_status_code": "500",
+                                  "response": {
+                                    "success": "false",
+                                    "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')"
+                                  }
+                                },
+                                "extended_input_schema": [
+                                  {
+                                    "change_on_blur": true,
+                                    "control_type": "select",
+                                    "extends_schema": true,
+                                    "label": "Response",
+                                    "name": "http_status_code",
+                                    "pick_list": [
+                                      [
+                                        "Success",
+                                        "200"
+                                      ],
+                                      [
+                                        "Unauthorized",
+                                        "401"
+                                      ],
+                                      [
+                                        "Forbidden",
+                                        "403"
+                                      ],
+                                      [
+                                        "Server Error",
+                                        "500"
+                                      ]
+                                    ],
+                                    "type": "string"
+                                  }
+                                ],
+                                "uuid": "return-500-001"
+                              }
+                            ],
+                            "uuid": "default-error"
+                          }
+                        ],
+                        "uuid": "check-403"
+                      }
+                    ],
+                    "uuid": "check-forbidden"
+                  }
+                ],
+                "uuid": "check-unauthorized"
+              }
+            ],
+            "uuid": "catch-error-001"
+          }
+        ],
+        "uuid": "try-main-001"
+      }
+    ],
+    "uuid": "trigger-001"
+  },
+  "config": [
+    {
+      "keyword": "application",
+      "provider": "workato_api_platform",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "logger",
+      "skip_validation": false,
+      "account_id": null
+    },
+    {
+      "keyword": "application",
+      "provider": "nabu_casa_home_assistant_cloud__connector_2100002083_1768260720",
+      "skip_validation": false,
+      "account_id": {
+        "zip_name": "my_nabu_casa_home_assistant_cloud_account.connection.json",
+        "name": "My Nabu Casa (Home Assistant Cloud) account",
+        "folder": "",
+        "custom": true
+      }
+    }
+  ]
+}

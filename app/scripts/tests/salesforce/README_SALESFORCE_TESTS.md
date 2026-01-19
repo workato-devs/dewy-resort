@@ -89,8 +89,8 @@ Both scripts use environment variables from `.env`:
 
 ```bash
 # Required
-WORKATO_API_COLLECTION_URL=https://your-workato-url
-WORKATO_API_AUTH_TOKEN=your-token
+SALESFORCE_API_COLLECTION_URL=https://your-workato-url
+SALESFORCE_API_AUTH_TOKEN=your-token
 
 # Optional
 WORKATO_TIMEOUT=30000
@@ -217,8 +217,8 @@ npm run test:salesforce
 ```
 
 **Solution:** Check `.env` file has required variables:
-- `WORKATO_API_COLLECTION_URL`
-- `WORKATO_API_AUTH_TOKEN`
+- `SALESFORCE_API_COLLECTION_URL`
+- `SALESFORCE_API_AUTH_TOKEN`
 
 ### API Errors
 

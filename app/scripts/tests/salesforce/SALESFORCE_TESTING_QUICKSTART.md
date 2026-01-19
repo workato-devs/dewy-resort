@@ -41,8 +41,8 @@ npm run test:salesforce:interactive  ✅
 
 **Solution:** Check your `.env` file has:
 ```bash
-WORKATO_API_COLLECTION_URL=https://your-workato-url
-WORKATO_API_AUTH_TOKEN=your-token
+SALESFORCE_API_COLLECTION_URL=https://your-workato-url
+SALESFORCE_API_AUTH_TOKEN=your-token
 ```
 
 ### Getting 401 errors

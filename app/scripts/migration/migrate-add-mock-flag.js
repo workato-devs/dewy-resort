@@ -9,8 +9,9 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-const DB_PATH = path.join(__dirname, '..', 'var', 'hotel.db');
-const MIGRATION_PATH = path.join(__dirname, '..', 'database', 'migrations', 'add-mock-device-flag.sql');
+// Script is now in scripts/migration/, so go up 2 levels to app root
+const DB_PATH = path.join(__dirname, '../..', 'var', 'hotel.db');
+const MIGRATION_PATH = path.join(__dirname, '../..', 'database', 'migrations', 'add-mock-device-flag.sql');
 
 async function runMigration() {
   try {

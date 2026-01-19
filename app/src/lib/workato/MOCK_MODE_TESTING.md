@@ -122,8 +122,8 @@ Or remove the variable entirely (defaults to `false`).
 When you're ready to test with real Workato APIs:
 
 1. Set `WORKATO_MOCK_MODE=false`
-2. Ensure `WORKATO_API_AUTH_TOKEN` is set
-3. Ensure `WORKATO_API_COLLECTION_URL` is set
+2. Ensure `SALESFORCE_API_AUTH_TOKEN` is set
+3. Ensure `SALESFORCE_API_COLLECTION_URL` is set
 4. Restart the dev server
 5. Test with real data
 

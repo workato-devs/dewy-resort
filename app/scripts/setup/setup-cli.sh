@@ -39,8 +39,9 @@ if [ -z "$TOOL" ]; then
 fi
 
 # Get project root directory
+# Script is now in app/scripts/setup/, so go up 3 levels to project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Map tool names to their setup script locations
 case "$TOOL" in
@@ -84,8 +85,16 @@ if [ -f "$WRAPPER_SCRIPT" ]; then
     echo -e "${YELLOW}⚠️  $TOOL CLI appears to be already installed${NC}"
     echo "Wrapper found at: $WRAPPER_SCRIPT"
     echo ""
-    read -p "Reinstall anyway? [y/N] " -n 1 -r
-    echo
+    
+    # Check if running interactively
+    if [ -t 0 ]; then
+        echo -n "Reinstall anyway? [y/N] "
+        read -r REPLY
+    else
+        # Non-interactive mode, skip reinstall
+        REPLY="n"
+    fi
+    
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Skipping installation. To force reinstall:"
         echo "  make clean tool=$TOOL && make setup tool=$TOOL"

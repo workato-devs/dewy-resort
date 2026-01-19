@@ -8,7 +8,8 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', 'var', 'hotel.db');
+// Script is now in scripts/utils/, so go up 2 levels to app root
+const DB_PATH = path.join(__dirname, '../..', 'var', 'hotel.db');
 
 function showUsage() {
   console.log(`

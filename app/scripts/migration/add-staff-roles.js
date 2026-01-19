@@ -44,8 +44,9 @@ function logSection(message) {
 }
 
 // Database path
-const dbPath = path.join(__dirname, '..', 'var', 'hotel.db');
-const migrationPath = path.join(__dirname, '..', 'database', 'migrations', 'add-staff-roles.sql');
+// Script is now in scripts/migration/, so go up 2 levels to app root
+const dbPath = path.join(__dirname, '../..', 'var', 'hotel.db');
+const migrationPath = path.join(__dirname, '../..', 'database', 'migrations', 'add-staff-roles.sql');
 
 // Check if database exists
 if (!fs.existsSync(dbPath)) {
