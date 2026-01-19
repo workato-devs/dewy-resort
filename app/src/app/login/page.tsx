@@ -358,12 +358,12 @@ function LoginForm() {
                     <div className="bg-slate-50 p-3 rounded-md">
                       <p className="font-medium mb-1">Guest Account</p>
                       <p className="text-muted-foreground">Email: guest1@hotel.com</p>
-                      <p className="text-muted-foreground">Password: password123</p>
+                      <p className="text-muted-foreground">Password: Hotel2026!</p>
                     </div>
                     <div className="bg-slate-50 p-3 rounded-md">
                       <p className="font-medium mb-1">Manager Account</p>
                       <p className="text-muted-foreground">Email: manager1@hotel.com</p>
-                      <p className="text-muted-foreground">Password: password123</p>
+                      <p className="text-muted-foreground">Password: Hotel2026!</p>
                     </div>
                   </div>
                 </div>

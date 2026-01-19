@@ -67,8 +67,8 @@ async function seedDatabase() {
     db.pragma('foreign_keys = ON');
     console.log('✓ Cleared existing data\n');
 
-    // Hash password for all users (demo password: "password123")
-    const passwordHash = await bcrypt.hash('password123', 10);
+    // Hash password for all users (demo password: "Hotel2026!")
+    const passwordHash = await bcrypt.hash('Hotel2026!', 10);
 
     // Seed Users (2 managers + 10 guests)
     console.log('👥 Creating users...');
@@ -440,12 +440,12 @@ async function seedDatabase() {
     console.log(`   - Sample chat messages`);
     console.log('\n🔑 Demo Credentials:');
     console.log('   Managers:');
-    console.log('   - manager1@hotel.com / password123');
-    console.log('   - manager2@hotel.com / password123');
+    console.log('   - manager1@hotel.com / Hotel2026!');
+    console.log('   - manager2@hotel.com / Hotel2026!');
     console.log('   Guests:');
-    console.log('   - guest1@hotel.com / password123 (Room 100)');
-    console.log('   - guest2@hotel.com / password123 (Room 101)');
-    console.log('   - guest6@hotel.com / password123 (Room 200)');
+    console.log('   - guest1@hotel.com / Hotel2026! (Room 100)');
+    console.log('   - guest2@hotel.com / Hotel2026! (Room 101)');
+    console.log('   - guest6@hotel.com / Hotel2026! (Room 200)');
     console.log('   - ... (guest3-10@hotel.com)\n');
 
   } catch (error) {
