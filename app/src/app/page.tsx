@@ -1,20 +1,40 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Hotel, Users, Wrench, CreditCard } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
+import { ThemeToggle } from "@/components/shared/ThemeToggle"
 
 export default function Home() {
   const { user, loading, refreshSession } = useAuth()
+  const [authProvider, setAuthProvider] = useState<'mock' | 'okta' | 'cognito' | null>(null)
 
   // Refresh session when page loads to ensure we have the latest auth state
   useEffect(() => {
     refreshSession()
   }, [refreshSession])
+
+  // Fetch auth provider status on mount
+  useEffect(() => {
+    async function checkAuthProvider() {
+      try {
+        const response = await fetch("/api/auth/config")
+        if (response.ok) {
+          const data = await response.json()
+          setAuthProvider(data.provider)
+        } else {
+          setAuthProvider('mock')
+        }
+      } catch (error) {
+        setAuthProvider('mock')
+      }
+    }
+    checkAuthProvider()
+  }, [])
 
   // Determine dashboard URL based on user role
   const getDashboardUrl = () => {
@@ -31,17 +51,20 @@ export default function Home() {
             <Image src="/Dewy-purple 64.png" alt="Dewy Resort Logo" width={64} height={64} />
             <span className="text-2xl font-bold">Dewy Resort</span>
           </div>
-          {!loading && (
-            user ? (
-              <Link href={getDashboardUrl()}>
-                <Button>Go to Dashboard</Button>
-              </Link>
-            ) : (
-              <Link href="/login">
-                <Button>Sign In</Button>
-              </Link>
-            )
-          )}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            {!loading && (
+              user ? (
+                <Link href={getDashboardUrl()}>
+                  <Button>Go to Dashboard</Button>
+                </Link>
+              ) : (
+                <Link href="/login">
+                  <Button>Sign In</Button>
+                </Link>
+              )
+            )}
+          </div>
         </div>
       </header>
 
@@ -50,10 +73,10 @@ export default function Home() {
         <div className="flex flex-col items-center justify-center min-h-[600px] text-center py-16">
           {/* Dewy Icon */}
           <div className="mb-8">
-            <Hotel className="h-24 w-24 text-[#1F0757]" />
+            <Hotel className="h-24 w-24 text-[#1F0757] dark:text-purple-400" />
           </div>
           
-          <h1 className="font-rakkas text-[70px] text-dewy-purple text-center mb-6 leading-tight sm:text-[48px]">
+          <h1 className="font-rakkas text-[70px] text-dewy-purple dark:text-purple-300 text-center mb-6 leading-tight sm:text-[48px]">
             Welcome to Dewy Resort Hotel
           </h1>
           <p className="text-[34px] sm:text-[24px] text-[#1F0757] dark:text-gray-300 text-center mb-8 max-w-4xl mx-auto leading-snug">
@@ -74,17 +97,19 @@ export default function Home() {
                       size="lg" 
                       className="bg-dewy-purple dark:bg-purple-700 text-white hover:bg-dewy-purple/90 dark:hover:bg-purple-800 transition-colors px-8 py-3 text-lg rounded-lg"
                     >
-                      Guest Portal
+                      Sign In
                     </Button>
                   </Link>
-                  <Link href="/login">
-                    <Button 
-                      size="lg" 
-                      className="bg-white dark:bg-gray-800 text-dewy-purple dark:text-white border-2 border-dewy-purple dark:border-gray-600 hover:bg-dewy-purple hover:text-white transition-colors px-8 py-3 text-lg rounded-lg"
-                    >
-                      Staff Login
-                    </Button>
-                  </Link>
+                  {authProvider !== 'mock' && (
+                    <Link href="/register">
+                      <Button 
+                        size="lg" 
+                        className="bg-dewy-purple dark:bg-purple-700 text-white hover:bg-dewy-purple/90 dark:hover:bg-purple-800 transition-colors px-8 py-3 text-lg rounded-lg"
+                      >
+                        Create an Account
+                      </Button>
+                    </Link>
+                  )}
                 </>
               )}
             </div>
