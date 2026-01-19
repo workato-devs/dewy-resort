@@ -142,6 +142,7 @@ start_server() {
     sleep 2
     if is_running; then
         echo -e "${GREEN}Server started successfully (PID: $(cat "$PID_FILE"))${NC}"
+        echo -e "${GREEN}➜${NC}  Local:   \033]8;;http://localhost:3000\033\\http://localhost:3000\033]8;;\033\\"
         echo "Tail logs with: tail -f $LOG_FILE"
     else
         echo -e "${RED}Server failed to start. Check logs: $LOG_FILE${NC}"
@@ -212,6 +213,7 @@ show_status() {
         echo -e "${GREEN}Server is running${NC}"
         echo "PID: $PID"
         echo "Environment: $ENV"
+        echo -e "${GREEN}➜${NC}  Local:   \033]8;;http://localhost:3000\033\\http://localhost:3000\033]8;;\033\\"
         echo "Log file: $LOG_FILE"
         echo ""
         echo "Recent logs:"
