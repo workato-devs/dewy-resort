@@ -795,7 +795,8 @@
                   },
                   "parameters": {
                     "contact_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"id\"]}')}",
-                    "check_in_date": "=now.to_date"
+                    "check_in_date": "=now.to_date",
+                    "status": "Checked Out"
                   }
                 },
                 "extended_output_schema": [
