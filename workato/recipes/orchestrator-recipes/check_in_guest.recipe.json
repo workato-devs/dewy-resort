@@ -1552,7 +1552,7 @@
                 "check_in_date": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}') : now.to_date",
                 "check_out_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"check_out_date\"]}')}",
                 "total_nights": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_booking\",\"path\":[\"result\",\"bookings\",{\"path_element_type\":\"current_item\"},\"total_nights\"]}')}",
-                "guest_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"first_name\"]}')} + ' ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"last_name\"]}'})",
+                "guest_name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"first_name\"]}') + ' ' + _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"last_name\"]}')",
                 "guest_email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"search_contact\",\"path\":[\"result\",\"email\"]}')}",
                 "checked_in_at": "=now"
               }

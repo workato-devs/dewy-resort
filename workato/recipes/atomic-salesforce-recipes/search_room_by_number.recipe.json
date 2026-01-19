@@ -34,8 +34,7 @@
       {
         "number": 1,
         "keyword": "try",
-        "input": {
-        },
+        "input": {},
         "block": [
           {
             "number": 2,
@@ -49,7 +48,7 @@
             "input": {
               "limit": "150",
               "sobject_name": "Hotel_Room__c",
-              "query": "Room_Number__c = :#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"room_number\"]}')}"
+              "query": "Room_Number__c = '#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"room_number\"]}')}'"
             },
             "extended_output_schema": [
               {
@@ -76,9 +75,7 @@
                     "label": "Created  by",
                     "fetch_with": "get_custom_object(CreatedById>id, sobject_name: User)",
                     "join_point": true,
-                    "properties": [
-
-                    ]
+                    "properties": []
                   },
                   {
                     "control_type": "date_time",
@@ -147,9 +144,7 @@
                     "label": "Last  modified  by",
                     "fetch_with": "get_custom_object(LastModifiedById>id, sobject_name: User)",
                     "join_point": true,
-                    "properties": [
-
-                    ]
+                    "properties": []
                   },
                   {
                     "control_type": "date_time",
@@ -206,9 +201,7 @@
                     "label": "Owner",
                     "fetch_with": "get_custom_object(OwnerId>id, sobject_name: Group)",
                     "join_point": true,
-                    "properties": [
-
-                    ]
+                    "properties": []
                   },
                   {
                     "control_type": "text",
