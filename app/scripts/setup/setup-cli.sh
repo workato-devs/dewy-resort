@@ -39,8 +39,9 @@ if [ -z "$TOOL" ]; then
 fi
 
 # Get project root directory
+# Script is now in app/scripts/setup/, so go up 3 levels to project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Map tool names to their setup script locations
 case "$TOOL" in
