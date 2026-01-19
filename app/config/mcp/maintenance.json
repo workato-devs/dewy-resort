@@ -5,11 +5,8 @@
       "name": "hotel-db",
       "type": "stdio",
       "command": "npx",
-      "args": ["tsx", "lib/mcp/hotel-db-server.ts"],
-      "tools": [
-        "find_maintenance_task_by_token",
-        "get_room_maintenance_tasks"
-      ]
+      "args": ["tsx", "src/lib/mcp/hotel-db-server.ts"],
+      "tools": ["find_maintenance_task_by_token", "get_room_maintenance_tasks"]
     },
     {
       "name": "maintenance-tasks",

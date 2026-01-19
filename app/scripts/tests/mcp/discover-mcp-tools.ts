@@ -89,24 +89,24 @@ async function main() {
   console.log('🏨 Workato MCP Tool Discovery\n');
   console.log('=' .repeat(60));
   
-  // Discover tools from hotel-services
-  const servicesUrl = env.MCP_HOTEL_SERVICES_URL;
-  const servicesToken = env.MCP_HOTEL_SERVICES_TOKEN;
+  // Discover tools from guest server
+  const guestUrl = env.MCP_GUEST_URL;
+  const guestToken = env.MCP_GUEST_TOKEN;
   
-  if (servicesUrl && servicesToken) {
-    await discoverTools(servicesUrl, servicesToken, 'hotel-services');
+  if (guestUrl && guestToken) {
+    await discoverTools(guestUrl, guestToken, 'hotel-services');
   } else {
-    console.log('\n⚠️  MCP_HOTEL_SERVICES_URL or MCP_HOTEL_SERVICES_TOKEN not configured');
+    console.log('\n⚠️  MCP_GUEST_URL or MCP_GUEST_TOKEN not configured');
   }
   
-  // Discover tools from hotel-operations
-  const operationsUrl = env.MCP_OPERATIONS_URL;
-  const operationsToken = env.MCP_OPERATIONS_TOKEN;
+  // Discover tools from manager server
+  const managerUrl = env.MCP_MANAGER_URL;
+  const managerToken = env.MCP_MANAGER_TOKEN;
   
-  if (operationsUrl && operationsToken) {
-    await discoverTools(operationsUrl, operationsToken, 'hotel-operations');
+  if (managerUrl && managerToken) {
+    await discoverTools(managerUrl, managerToken, 'hotel-operations');
   } else {
-    console.log('\n⚠️  MCP_OPERATIONS_URL or MCP_OPERATIONS_TOKEN not configured');
+    console.log('\n⚠️  MCP_MANAGER_URL or MCP_MANAGER_TOKEN not configured');
   }
   
   console.log('\n' + '='.repeat(60));

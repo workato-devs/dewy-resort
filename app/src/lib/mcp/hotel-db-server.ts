@@ -2,9 +2,13 @@
 /**
  * Hotel Database MCP Server
  * 
- * Provides MCP tools for querying the local SQLite database.
- * Exposes idempotency token lookups and database queries as tools
- * that can be called by the AI agent.
+ * Dynamic proxy server that wraps Workato MCP tools requiring idempotency tokens.
+ * 
+ * Architecture:
+ * 1. On startup, fetches tool definitions from Workato MCP servers
+ * 2. Proxies tools that require idempotency tokens with auto-generation
+ * 3. Exposes local-only database lookup tools
+ * 4. Uses Workato's tool descriptions dynamically (no hardcoded descriptions)
  * 
  * Usage: node lib/mcp/hotel-db-server.js
  */
@@ -28,71 +32,139 @@ import {
 import { executeQuery, executeUpdate } from '../db/client.js';
 import { randomUUID } from 'crypto';
 import path from 'path';
+import { 
+  TOOLS_REQUIRING_IDEMPOTENCY, 
+  LOCAL_ONLY_TOOLS,
+  type ToolProxyConfig 
+} from '../../../config/mcp/workato-tool-names.js';
 
 /**
- * Tool definitions
+ * Workato tool metadata cache
  */
-const TOOLS: Tool[] = [
-  {
-    name: 'create_maintenance_task_with_token',
-    description: 'Create a maintenance task with auto-generated idempotency token. This tool generates a UUID token, stores it in the local database, and creates the task in Salesforce via Workato. The manager information (email, first name, last name) will be automatically populated from the user profile. Returns the created task with the token.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        room_number: {
-          type: 'string',
-          description: 'Room number (e.g., "101", "205")',
-        },
-        title: {
-          type: 'string',
-          description: 'Brief title of the maintenance task (e.g., "AC not working", "Leaky faucet")',
-        },
-        description: {
-          type: 'string',
-          description: 'Detailed description of the maintenance issue',
-        },
-        priority: {
-          type: 'string',
-          description: 'Priority level - defaults to Medium if not specified',
-          enum: ['Low', 'Medium', 'High', 'Urgent'],
-        },
-        type: {
-          type: 'string',
-          description: 'Type of maintenance - defaults to General if not specified',
-          enum: ['Plumbing', 'Electrical', 'HVAC', 'Housekeeping', 'General'],
-        },
+interface WorkatoToolMetadata {
+  name: string;
+  description: string;
+  inputSchema: any;
+}
+
+const workatoToolsCache = new Map<string, WorkatoToolMetadata>();
+let toolsFetched = false;
+
+/**
+ * Fetch tool definitions from Workato MCP server
+ */
+async function fetchWorkatoTools(url: string, token: string): Promise<WorkatoToolMetadata[]> {
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'API-TOKEN': token,
       },
-      required: ['room_number', 'description'],
-    },
-  },
-  {
-    name: 'create_service_request_with_token',
-    description: 'Create a service request with auto-generated idempotency token. This tool generates a UUID token, stores it in the local database, and creates the request in Salesforce via Workato. Guest information will be looked up from the room number. Returns the created request with the token.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        room_number: {
-          type: 'string',
-          description: 'Room number',
-        },
-        request_type: {
-          type: 'string',
-          description: 'Type of service request - defaults to Housekeeping if not specified',
-          enum: ['Housekeeping', 'Room Service', 'Concierge', 'Maintenance'],
-        },
-        priority: {
-          type: 'string',
-          description: 'Priority level - defaults to Medium if not specified',
-          enum: ['Low', 'Medium', 'High'],
-        },
-        description: {
-          type: 'string',
-          description: 'Description of the service request',
-        },
-      },
-      required: ['room_number', 'description'],
-    },
-  },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: Date.now(),
+        method: 'tools/list',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.result && data.result.tools) {
+      return data.result.tools.map((tool: any) => ({
+        name: tool.name,
+        description: tool.description || '',
+        inputSchema: tool.inputSchema || tool.input_schema || {},
+      }));
+    }
+    
+    return [];
+  } catch (error) {
+    console.error(`Failed to fetch tools from ${url}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Initialize tool cache by fetching from Workato
+ */
+async function initializeToolCache(): Promise<void> {
+  if (toolsFetched) return;
+
+  const managerUrl = process.env.MCP_MANAGER_URL;
+  const managerToken = process.env.MCP_MANAGER_TOKEN;
+  const guestUrl = process.env.MCP_GUEST_URL;
+  const guestToken = process.env.MCP_GUEST_TOKEN;
+
+  // Fetch from manager server
+  if (managerUrl && managerToken) {
+    const tools = await fetchWorkatoTools(managerUrl, managerToken);
+    tools.forEach(tool => workatoToolsCache.set(tool.name, tool));
+  }
+
+  // Fetch from guest server
+  if (guestUrl && guestToken) {
+    const tools = await fetchWorkatoTools(guestUrl, guestToken);
+    tools.forEach(tool => workatoToolsCache.set(tool.name, tool));
+  }
+
+  toolsFetched = true;
+}
+
+/**
+ * Generate tool definition for a proxied Workato tool
+ */
+function generateProxiedToolDefinition(config: ToolProxyConfig): Tool | null {
+  const workatoTool = workatoToolsCache.get(config.workatoToolName);
+  
+  if (!workatoTool) {
+    console.error(`Workato tool not found: ${config.workatoToolName}`);
+    return null;
+  }
+
+  // Clone the input schema and modify it
+  const inputSchema = JSON.parse(JSON.stringify(workatoTool.inputSchema));
+  
+  // Remove idempotency_token from required fields if present
+  if (inputSchema.required && Array.isArray(inputSchema.required)) {
+    inputSchema.required = inputSchema.required.filter((field: string) => 
+      field !== 'idempotency_token' && field !== 'booking_external_id'
+    );
+  }
+  
+  // Remove idempotency_token from properties if present
+  if (inputSchema.properties) {
+    delete inputSchema.properties.idempotency_token;
+    delete inputSchema.properties.booking_external_id;
+  }
+
+  // Remove injected params from schema (they come from env)
+  if (config.injectParams) {
+    config.injectParams.forEach(param => {
+      if (inputSchema.properties) {
+        delete inputSchema.properties[param];
+      }
+      if (inputSchema.required) {
+        inputSchema.required = inputSchema.required.filter((field: string) => field !== param);
+      }
+    });
+  }
+
+  return {
+    name: config.localToolName,
+    description: `${workatoTool.description}\n\n🔑 This tool automatically generates a UUID idempotency token and stores it in the local database for tracking.`,
+    inputSchema,
+  };
+}
+
+/**
+ * Local-only tool definitions (database lookups)
+ */
+const LOCAL_TOOL_DEFINITIONS: Tool[] = [
   {
     name: 'find_service_request_by_token',
     description: 'Find a service request by its idempotency token. Returns the full service request record including Salesforce ticket ID.',
@@ -133,91 +205,6 @@ const TOOLS: Tool[] = [
         },
       },
       required: ['idempotency_token'],
-    },
-  },
-  {
-    name: 'create_booking_with_token',
-    description: 'Create a booking with auto-generated idempotency token. This tool generates a UUID token, stores it in the local database, and creates the booking in Salesforce via Workato. Returns the created booking with the token.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        guest_email: {
-          type: 'string',
-          description: 'Guest email address',
-        },
-        guest_first_name: {
-          type: 'string',
-          description: 'Guest first name',
-        },
-        guest_last_name: {
-          type: 'string',
-          description: 'Guest last name',
-        },
-        room_number: {
-          type: 'string',
-          description: 'Room number (e.g., "101", "205")',
-        },
-        check_in_date: {
-          type: 'string',
-          description: 'Check-in date (ISO 8601 format: YYYY-MM-DD)',
-        },
-        check_out_date: {
-          type: 'string',
-          description: 'Check-out date (ISO 8601 format: YYYY-MM-DD)',
-        },
-        number_of_guests: {
-          type: 'number',
-          description: 'Number of guests (default: 1)',
-        },
-        special_requests: {
-          type: 'string',
-          description: 'Special requests or notes',
-        },
-      },
-      required: ['guest_email', 'guest_first_name', 'guest_last_name', 'room_number', 'check_in_date', 'check_out_date'],
-    },
-  },
-  {
-    name: 'manage_booking_with_token',
-    description: 'Update an existing booking with auto-generated idempotency token. This tool generates a UUID token, stores it in the local database, and updates the booking in Salesforce via Workato. Returns the updated booking with the token.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        external_id: {
-          type: 'string',
-          description: 'External ID of the booking to update (from previous create_booking_with_token call)',
-        },
-        guest_email: {
-          type: 'string',
-          description: 'Updated guest email address',
-        },
-        room_number: {
-          type: 'string',
-          description: 'Updated room number',
-        },
-        check_in_date: {
-          type: 'string',
-          description: 'Updated check-in date (ISO 8601 format: YYYY-MM-DD)',
-        },
-        check_out_date: {
-          type: 'string',
-          description: 'Updated check-out date (ISO 8601 format: YYYY-MM-DD)',
-        },
-        number_of_guests: {
-          type: 'number',
-          description: 'Updated number of guests',
-        },
-        special_requests: {
-          type: 'string',
-          description: 'Updated special requests or notes',
-        },
-        status: {
-          type: 'string',
-          description: 'Updated booking status',
-          enum: ['reserved', 'checked_in', 'checked_out', 'cancelled', 'no_show'],
-        },
-      },
-      required: ['external_id'],
     },
   },
   {
@@ -313,7 +300,7 @@ const TOOLS: Tool[] = [
 const server = new Server(
   {
     name: 'hotel-db-server',
-    version: '1.0.0',
+    version: '2.0.0',
   },
   {
     capabilities: {
@@ -323,32 +310,49 @@ const server = new Server(
 );
 
 /**
- * List available tools
+ * List available tools (dynamically generated)
  */
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: TOOLS,
-  };
+  // Ensure tools are fetched from Workato
+  await initializeToolCache();
+
+  const tools: Tool[] = [];
+
+  // Add proxied Workato tools
+  for (const config of TOOLS_REQUIRING_IDEMPOTENCY) {
+    const tool = generateProxiedToolDefinition(config);
+    if (tool) {
+      tools.push(tool);
+    }
+  }
+
+  // Add local-only tools
+  tools.push(...LOCAL_TOOL_DEFINITIONS);
+
+  return { tools };
 });
 
 /**
  * Call Workato MCP tool via HTTP
+ * 
+ * @param toolName - The Workato tool name
+ * @param input - Tool input parameters
+ * @param useManagerUrl - If true, uses MCP_MANAGER_URL; otherwise uses MCP_GUEST_URL
+ * @returns Tool execution result
  */
-async function callWorkatoTool(toolName: string, input: any, useOperationsUrl: boolean = false): Promise<any> {
-  // Use operations URL for booking operations, services URL for others
-  const workatoUrl = useOperationsUrl 
-    ? (process.env.MCP_OPERATIONS_URL || process.env.MCP_HOTEL_SERVICES_URL || 'https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1')
-    : (process.env.MCP_HOTEL_SERVICES_URL || 'https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1');
+async function callWorkatoTool(toolName: string, input: any, useManagerUrl: boolean = false): Promise<any> {
+  const workatoUrl = useManagerUrl 
+    ? (process.env.MCP_MANAGER_URL || process.env.MCP_GUEST_URL || 'https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1')
+    : (process.env.MCP_GUEST_URL || 'https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1');
   
-  const workatoToken = useOperationsUrl
-    ? (process.env.MCP_OPERATIONS_TOKEN || process.env.MCP_HOTEL_SERVICES_TOKEN)
-    : process.env.MCP_HOTEL_SERVICES_TOKEN;
+  const workatoToken = useManagerUrl
+    ? (process.env.MCP_MANAGER_TOKEN || process.env.MCP_GUEST_TOKEN)
+    : process.env.MCP_GUEST_TOKEN;
   
   if (!workatoToken) {
-    throw new Error('Workato token not configured in environment. Please set MCP_HOTEL_SERVICES_TOKEN or MCP_OPERATIONS_TOKEN in .env file.');
+    throw new Error('Workato token not configured in environment. Please set MCP_GUEST_TOKEN or MCP_MANAGER_TOKEN in .env file.');
   }
 
-  // Workato MCP uses JSON-RPC protocol with /tools/call endpoint
   const fullUrl = `${workatoUrl}/tools/call`;
   
   // Log request for debugging
@@ -357,7 +361,6 @@ async function callWorkatoTool(toolName: string, input: any, useOperationsUrl: b
   fs.appendFileSync(logPath, `${new Date().toISOString()} - Calling Workato tool: ${toolName}\n`);
   fs.appendFileSync(logPath, `${new Date().toISOString()} - Request body: ${JSON.stringify(input, null, 2)}\n`);
   
-  // Workato MCP servers use JSON-RPC 2.0 protocol
   const response = await fetch(fullUrl, {
     method: 'POST',
     headers: {
@@ -375,13 +378,11 @@ async function callWorkatoTool(toolName: string, input: any, useOperationsUrl: b
     }),
   });
 
-  // Get response text first to handle both JSON and non-JSON responses
   const responseText = await response.text();
   
   fs.appendFileSync(logPath, `${new Date().toISOString()} - Response status: ${response.status}\n`);
   fs.appendFileSync(logPath, `${new Date().toISOString()} - Response body: ${responseText.substring(0, 500)}\n`);
 
-  // Parse JSON-RPC response
   let jsonRpcResponse;
   try {
     jsonRpcResponse = JSON.parse(responseText);
@@ -389,18 +390,15 @@ async function callWorkatoTool(toolName: string, input: any, useOperationsUrl: b
     throw new Error(`Failed to parse Workato JSON-RPC response. Response: ${responseText.substring(0, 200)}`);
   }
 
-  // Check for JSON-RPC error
   if (jsonRpcResponse.error) {
     throw new Error(`Workato JSON-RPC error calling ${toolName}:\n${jsonRpcResponse.error.message || JSON.stringify(jsonRpcResponse.error)}`);
   }
 
-  // Check if the result indicates an error (isError flag)
   if (jsonRpcResponse.result?.isError) {
     const errorText = jsonRpcResponse.result.content?.[0]?.text || 'Tool execution failed';
     throw new Error(`Workato tool error calling ${toolName}:\n${errorText}`);
   }
 
-  // Return the result content
   return jsonRpcResponse.result;
 }
 
@@ -411,670 +409,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
+    // Find if this is a proxied tool
+    const proxyConfig = TOOLS_REQUIRING_IDEMPOTENCY.find(c => c.localToolName === name);
+    
+    if (proxyConfig) {
+      return await handleProxiedTool(proxyConfig, args);
+    }
+
+    // Handle local-only tools
     switch (name) {
-      case 'create_maintenance_task_with_token': {
-        const {
-          room_number,
-          title,
-          description,
-          priority = 'Medium',
-          type = 'General',
-        } = args as {
-          room_number: string;
-          title?: string;
-          description: string;
-          priority?: string;
-          type?: string;
-        };
-
-        // Look up room ID from room number
-        // Ensure room_number is a string
-        const roomNumberStr = String(room_number);
-        
-        // Debug logging
-        const fs = require('fs');
-        const logPath = path.join(process.cwd(), 'var', 'logs', 'mcp-server-debug.log');
-        fs.appendFileSync(logPath, `${new Date().toISOString()} - Looking up room ${roomNumberStr} (type: ${typeof room_number}, converted: ${typeof roomNumberStr})\n`);
-        
-        const roomQuery = `SELECT id FROM rooms WHERE room_number = ? LIMIT 1`;
-        const roomResults = executeQuery(roomQuery, [roomNumberStr]);
-        
-        fs.appendFileSync(logPath, `${new Date().toISOString()} - Query returned ${roomResults.length} results\n`);
-        
-        if (roomResults.length === 0) {
-          // Log all rooms for debugging
-          const allRooms = executeQuery('SELECT room_number FROM rooms ORDER BY room_number', []);
-          fs.appendFileSync(logPath, `${new Date().toISOString()} - Available rooms: ${JSON.stringify(allRooms.map((r: any) => r.room_number))}\n`);
-          throw new Error(`Room ${roomNumberStr} not found in database`);
-        }
-        
-        const room_id = (roomResults[0] as any).id;
-        fs.appendFileSync(logPath, `${new Date().toISOString()} - Found room_id: ${room_id}\n`);
-
-        // Get manager info from environment (set by the chat context)
-        const manager_email = process.env.USER_EMAIL || 'manager@hotel.com';
-        const manager_first_name = process.env.USER_FIRST_NAME || 'Manager';
-        const manager_last_name = process.env.USER_LAST_NAME || 'User';
-        
-        // Look up manager user ID from email
-        const managerQuery = `SELECT id FROM users WHERE email = ? LIMIT 1`;
-        const managerResults = executeQuery(managerQuery, [manager_email]);
-        
-        let created_by_id;
-        if (managerResults.length > 0) {
-          created_by_id = (managerResults[0] as any).id;
-          fs.appendFileSync(logPath, `${new Date().toISOString()} - Found manager user_id: ${created_by_id}\n`);
-        } else {
-          // If manager not found, use first manager in database
-          const defaultManager = executeQuery('SELECT id FROM users WHERE role = ? LIMIT 1', ['manager']);
-          if (defaultManager.length > 0) {
-            created_by_id = (defaultManager[0] as any).id;
-            fs.appendFileSync(logPath, `${new Date().toISOString()} - Using default manager user_id: ${created_by_id}\n`);
-          } else {
-            throw new Error('No manager found in database');
-          }
-        }
-
-        // Generate title from description if not provided
-        const taskTitle = title || description.substring(0, 50);
-
-        // Generate idempotency token
-        const idempotencyToken = generateIdempotencyToken();
-        const taskId = `task_${Date.now()}_${randomUUID().substring(0, 8)}`;
-        const now = new Date().toISOString();
-
-        // Store in local database first
-        executeUpdate(
-          `INSERT INTO maintenance_tasks (
-            id, room_id, title, description, priority, status, 
-            created_by, idempotency_token, created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [taskId, room_id, taskTitle, description, priority.toLowerCase(), 'pending', created_by_id, idempotencyToken, now]
-        );
-
-        // Call Workato to create in Salesforce
-        // Use the actual Workato tool name: Submit_maintenance_request
-        const workatoResult = await callWorkatoTool('Submit_maintenance_request', {
-          idempotency_token: idempotencyToken,
-          manager_email,
-          manager_first_name,
-          manager_last_name,
-          room_number,
-          type,
-          priority,
-          description,
-        });
-
-        // Update with Salesforce case ID if returned
-        if (workatoResult.case_id) {
-          executeUpdate(
-            `UPDATE maintenance_tasks SET salesforce_case_id = ? WHERE id = ?`,
-            [workatoResult.case_id, taskId]
-          );
-        }
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                success: true,
-                task_id: taskId,
-                room_number,
-                idempotency_token: idempotencyToken,
-                salesforce_case_id: workatoResult.case_id,
-                message: `Maintenance task created successfully for room ${room_number}. Tracking token: ${idempotencyToken}`,
-              }, null, 2),
-            },
-          ],
-        };
-      }
-
-      case 'create_service_request_with_token': {
-        const {
-          room_number,
-          request_type = 'Housekeeping',
-          priority = 'Medium',
-          description,
-        } = args as {
-          room_number: string;
-          request_type?: string;
-          priority?: string;
-          description: string;
-        };
-
-        // Look up guest info from room number
-        const guestQuery = `
-          SELECT u.id, u.email, u.name 
-          FROM users u 
-          WHERE u.room_number = ? AND u.role = 'guest'
-          LIMIT 1
-        `;
-        const guestResults = executeQuery(guestQuery, [room_number]);
-        
-        if (guestResults.length === 0) {
-          throw new Error(`No guest found in room ${room_number}`);
-        }
-        
-        const guest = guestResults[0] as any;
-        const [guest_first_name, ...lastNameParts] = guest.name.split(' ');
-        const guest_last_name = lastNameParts.join(' ') || guest_first_name;
-
-        // Generate idempotency token
-        const idempotencyToken = generateIdempotencyToken();
-        const requestId = `req_${Date.now()}_${randomUUID().substring(0, 8)}`;
-        const now = new Date().toISOString();
-
-        // Store in local database first
-        executeUpdate(
-          `INSERT INTO service_requests (
-            id, guest_id, room_number, type, priority, description, 
-            status, idempotency_token, created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [requestId, guest.id, room_number, request_type.toLowerCase(), priority.toLowerCase(), description, 'pending', idempotencyToken, now]
-        );
-
-        // Call Workato to create in Salesforce
-        // Use the actual Workato tool name: Submit_guest_service_request
-        const workatoResult = await callWorkatoTool('Submit_guest_service_request', {
-          idempotency_token: idempotencyToken,
-          guest_email: guest.email,
-          guest_first_name,
-          guest_last_name,
-          room_number,
-          request_type,
-          priority,
-          description,
-        });
-
-        // Update with Salesforce case ID if returned
-        if (workatoResult.case_id) {
-          executeUpdate(
-            `UPDATE service_requests SET salesforce_ticket_id = ? WHERE id = ?`,
-            [workatoResult.case_id, requestId]
-          );
-        }
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                success: true,
-                request_id: requestId,
-                idempotency_token: idempotencyToken,
-                salesforce_case_id: workatoResult.case_id,
-                message: `Service request created successfully. Tracking token: ${idempotencyToken}`,
-              }, null, 2),
-            },
-          ],
-        };
-      }
-
-      case 'find_service_request_by_token': {
-        const { idempotency_token } = args as { idempotency_token: string };
-        const result = findServiceRequestByToken(idempotency_token);
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: result 
-                ? JSON.stringify(result, null, 2)
-                : 'No service request found with that idempotency token',
-            },
-          ],
-        };
-      }
-
-      case 'find_maintenance_task_by_token': {
-        const { idempotency_token } = args as { idempotency_token: string };
-        const result = findMaintenanceTaskByToken(idempotency_token);
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: result 
-                ? JSON.stringify(result, null, 2)
-                : 'No maintenance task found with that idempotency token',
-            },
-          ],
-        };
-      }
-
-      case 'find_transaction_by_token': {
-        const { idempotency_token } = args as { idempotency_token: string };
-        const result = findTransactionByToken(idempotency_token);
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: result 
-                ? JSON.stringify(result, null, 2)
-                : 'No transaction found with that idempotency token',
-            },
-          ],
-        };
-      }
-
-      case 'create_booking_with_token': {
-        const {
-          guest_email,
-          guest_first_name,
-          guest_last_name,
-          room_number,
-          check_in_date,
-          check_out_date,
-          number_of_guests = 1,
-          special_requests,
-        } = args as {
-          guest_email: string;
-          guest_first_name: string;
-          guest_last_name: string;
-          room_number: string;
-          check_in_date: string;
-          check_out_date: string;
-          number_of_guests?: number;
-          special_requests?: string;
-        };
-
-        // NOTE: The create-booking Workato recipe does not exist yet
-        // This tool is a placeholder for when the recipe is implemented
-        // See: workato/docs/mcp-create-booking.md for specification
-        
-        // Look up guest ID from email
-        const guestQuery = `SELECT id FROM users WHERE email = ? LIMIT 1`;
-        const guestResults = executeQuery(guestQuery, [guest_email]);
-        const guest_id = guestResults.length > 0 ? (guestResults[0] as any).id : null;
-
-        // Look up room ID from room number
-        const roomQuery = `SELECT id FROM rooms WHERE room_number = ? LIMIT 1`;
-        const roomResults = executeQuery(roomQuery, [room_number]);
-        
-        if (roomResults.length === 0) {
-          throw new Error(`Room ${room_number} not found in database`);
-        }
-        
-        const room_id = (roomResults[0] as any).id;
-
-        // Generate idempotency token
-        const idempotencyToken = generateIdempotencyToken();
-        const now = new Date().toISOString();
-
-        // Store in local database first
-        executeUpdate(
-          `INSERT INTO bookings (
-            idempotency_token, guest_id, room_id, check_in_date, check_out_date, 
-            number_of_guests, special_requests, status, created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [idempotencyToken, guest_id, room_id, check_in_date, check_out_date, number_of_guests, special_requests, 'reserved', now]
-        );
-
-        // Call Workato to create in Salesforce (use operations URL for booking operations)
-        // Use the actual Workato tool name: Create_booking (singular)
-        let workatoResult;
-        try {
-          workatoResult = await callWorkatoTool('Create_booking', {
-            guest_email,
-            guest_first_name,
-            guest_last_name,
-            room_number,
-            check_in_date,
-            check_out_date,
-            number_of_guests,
-            special_requests,
-            booking_external_id: idempotencyToken,
-          }, true);
-        } catch (workatoError) {
-          // Re-throw with more context
-          const errorMsg = workatoError instanceof Error ? workatoError.message : String(workatoError);
-          throw new Error(`Failed to create booking in Workato/Salesforce: ${errorMsg}`);
-        }
-
-        // Update with Salesforce IDs if returned
-        if (workatoResult.opportunity_id) {
-          executeUpdate(
-            `UPDATE bookings SET 
-              salesforce_opportunity_id = ?,
-              booking_number = ?,
-              updated_at = ?
-            WHERE idempotency_token = ?`,
-            [
-              workatoResult.opportunity_id || null,
-              workatoResult.booking_number || null,
-              new Date().toISOString(),
-              idempotencyToken
-            ]
-          );
-        }
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                success: true,
-                idempotency_token: idempotencyToken,
-                salesforce_opportunity_id: workatoResult.opportunity_id,
-                booking_number: workatoResult.booking_number,
-                room_number,
-                check_in_date,
-                check_out_date,
-                message: `Booking created successfully for ${guest_first_name} ${guest_last_name}. Tracking token: ${idempotencyToken}`,
-              }, null, 2),
-            },
-          ],
-        };
-      }
-
-      case 'manage_booking_with_token': {
-        const {
-          external_id,
-          guest_email,
-          room_number,
-          check_in_date,
-          check_out_date,
-          number_of_guests,
-          special_requests,
-          status,
-        } = args as {
-          external_id: string;
-          guest_email?: string;
-          room_number?: string;
-          check_in_date?: string;
-          check_out_date?: string;
-          number_of_guests?: number;
-          special_requests?: string;
-          status?: string;
-        };
-
-        // NOTE: The manage-booking Workato recipe does not exist yet
-        // This tool is a placeholder for when the recipe is implemented
-        // See: workato/docs/mcp-manage-booking.md for specification
-
-        const now = new Date().toISOString();
-
-        // Call Workato to update in Salesforce (use operations URL for booking operations)
-        // Use the actual Workato tool name from MCP discovery: Manage_bookings
-        let workatoResult;
-        try {
-          workatoResult = await callWorkatoTool('Manage_bookings', {
-            external_id: external_id, // Workato expects external_id (the booking's External_ID__c)
-            guest_email,
-            room_number,
-            check_in_date,
-            check_out_date,
-            number_of_guests,
-            special_requests,
-            status,
-          }, true);
-        } catch (workatoError) {
-          // Re-throw with more context
-          const errorMsg = workatoError instanceof Error ? workatoError.message : String(workatoError);
-          throw new Error(`Failed to update booking in Workato/Salesforce: ${errorMsg}`);
-        }
-
-        // Update local database with new values
-        const updateFields: string[] = [];
-        const updateValues: any[] = [];
-
-        if (guest_email) {
-          const guestQuery = `SELECT id FROM users WHERE email = ? LIMIT 1`;
-          const guestResults = executeQuery(guestQuery, [guest_email]);
-          if (guestResults.length > 0) {
-            updateFields.push('guest_id = ?');
-            updateValues.push((guestResults[0] as any).id);
-          }
-        }
-
-        if (room_number) {
-          const roomQuery = `SELECT id FROM rooms WHERE room_number = ? LIMIT 1`;
-          const roomResults = executeQuery(roomQuery, [room_number]);
-          if (roomResults.length > 0) {
-            updateFields.push('room_id = ?');
-            updateValues.push((roomResults[0] as any).id);
-          }
-        }
-
-        if (check_in_date) {
-          updateFields.push('check_in_date = ?');
-          updateValues.push(check_in_date);
-        }
-
-        if (check_out_date) {
-          updateFields.push('check_out_date = ?');
-          updateValues.push(check_out_date);
-        }
-
-        if (number_of_guests !== undefined) {
-          updateFields.push('number_of_guests = ?');
-          updateValues.push(number_of_guests);
-        }
-
-        if (special_requests !== undefined) {
-          updateFields.push('special_requests = ?');
-          updateValues.push(special_requests);
-        }
-
-        if (status) {
-          updateFields.push('status = ?');
-          updateValues.push(status);
-        }
-
-        updateFields.push('updated_at = ?');
-        updateValues.push(now);
-
-        // Update by idempotency token (external_id)
-        updateValues.push(external_id);
-
-        if (updateFields.length > 1) { // More than just updated_at
-          executeUpdate(
-            `UPDATE bookings SET ${updateFields.join(', ')} WHERE idempotency_token = ?`,
-            updateValues
-          );
-        }
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                success: true,
-                external_id,
-                message: `Booking updated successfully.`,
-              }, null, 2),
-            },
-          ],
-        };
-      }
-
-      case 'find_booking_by_token': {
-        const { idempotency_token } = args as { idempotency_token: string };
-        const result = findBookingByToken(idempotency_token);
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: result 
-                ? JSON.stringify(result, null, 2)
-                : 'No booking found with that idempotency token',
-            },
-          ],
-        };
-      }
-
-      case 'get_guest_service_requests': {
-        const { guest_id, status, limit = 10 } = args as { 
-          guest_id: string; 
-          status?: string;
-          limit?: number;
-        };
-        
-        let query = `
-          SELECT id, guest_id, room_number, type, priority, description, 
-                 status, idempotency_token, salesforce_ticket_id, created_at
-          FROM service_requests 
-          WHERE guest_id = ?
-        `;
-        const params: any[] = [guest_id];
-        
-        if (status) {
-          query += ' AND status = ?';
-          params.push(status);
-        }
-        
-        query += ' ORDER BY created_at DESC LIMIT ?';
-        params.push(limit);
-        
-        const results = executeQuery(query, params);
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: results.length > 0
-                ? JSON.stringify(results, null, 2)
-                : 'No service requests found for this guest',
-            },
-          ],
-        };
-      }
-
-      case 'get_room_maintenance_tasks': {
-        const { room_id, status, assigned_to, limit = 20 } = args as { 
-          room_id: string; 
-          status?: string;
-          assigned_to?: string;
-          limit?: number;
-        };
-        
-        let query = `
-          SELECT id, room_id, title, description, priority, status, 
-                 assigned_to, created_by, idempotency_token, created_at
-          FROM maintenance_tasks 
-          WHERE room_id = ?
-        `;
-        const params: any[] = [room_id];
-        
-        if (status) {
-          query += ' AND status = ?';
-          params.push(status);
-        }
-        
-        if (assigned_to) {
-          query += ' AND assigned_to = ?';
-          params.push(assigned_to);
-        }
-        
-        query += ' ORDER BY created_at DESC LIMIT ?';
-        params.push(limit);
-        
-        const results = executeQuery(query, params);
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: results.length > 0
-                ? JSON.stringify(results, null, 2)
-                : 'No maintenance tasks found for this room',
-            },
-          ],
-        };
-      }
-
-      case 'find_tokens_by_guest_email': {
-        const { guest_email, limit = 50 } = args as { 
-          guest_email: string; 
-          limit?: number;
-        };
-        
-        // First, find the guest user ID
-        const guestQuery = `SELECT id FROM users WHERE email = ? AND role = 'guest' LIMIT 1`;
-        const guestResults = executeQuery(guestQuery, [guest_email]);
-        
-        if (guestResults.length === 0) {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  guest_email,
-                  found: false,
-                  message: 'No guest found with this email address',
-                }, null, 2),
-              },
-            ],
-          };
-        }
-        
-        const guest_id = (guestResults[0] as any).id;
-        
-        // Get service requests
-        const serviceRequestsQuery = `
-          SELECT id, room_number, type, priority, description, status, 
-                 idempotency_token, salesforce_ticket_id, created_at
-          FROM service_requests 
-          WHERE guest_id = ?
-          ORDER BY created_at DESC 
-          LIMIT ?
-        `;
-        const serviceRequests = executeQuery(serviceRequestsQuery, [guest_id, limit]);
-        
-        // Get bookings
-        const bookingsQuery = `
-          SELECT b.idempotency_token, r.room_number, b.check_in_date, b.check_out_date, 
-                 b.number_of_guests, b.status, 
-                 b.salesforce_opportunity_id, 
-                 b.booking_number, b.created_at
-          FROM bookings b
-          LEFT JOIN rooms r ON b.room_id = r.id
-          WHERE b.guest_id = ?
-          ORDER BY b.created_at DESC 
-          LIMIT ?
-        `;
-        const bookings = executeQuery(bookingsQuery, [guest_id, limit]);
-        
-        // Get transactions
-        const transactionsQuery = `
-          SELECT id, amount, type, status, 
-                 idempotency_token, stripe_transaction_id, created_at
-          FROM transactions 
-          WHERE guest_id = ?
-          ORDER BY created_at DESC 
-          LIMIT ?
-        `;
-        const transactions = executeQuery(transactionsQuery, [guest_id, limit]);
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                guest_email,
-                guest_id,
-                found: true,
-                service_requests: {
-                  count: serviceRequests.length,
-                  items: serviceRequests,
-                },
-                bookings: {
-                  count: bookings.length,
-                  items: bookings,
-                },
-                transactions: {
-                  count: transactions.length,
-                  items: transactions,
-                },
-              }, null, 2),
-            },
-          ],
-        };
-      }
-
+      case 'find_service_request_by_token':
+        return handleFindServiceRequestByToken(args);
+      
+      case 'find_maintenance_task_by_token':
+        return handleFindMaintenanceTaskByToken(args);
+      
+      case 'find_transaction_by_token':
+        return handleFindTransactionByToken(args);
+      
+      case 'find_booking_by_token':
+        return handleFindBookingByToken(args);
+      
+      case 'get_guest_service_requests':
+        return handleGetGuestServiceRequests(args);
+      
+      case 'get_room_maintenance_tasks':
+        return handleGetRoomMaintenanceTasks(args);
+      
+      case 'find_tokens_by_guest_email':
+        return handleFindTokensByGuestEmail(args);
+      
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -1093,13 +457,439 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 /**
+ * Handle proxied Workato tool with idempotency token injection
+ */
+async function handleProxiedTool(config: ToolProxyConfig, args: any): Promise<any> {
+  const idempotencyToken = generateIdempotencyToken();
+  const now = new Date().toISOString();
+  
+  // Inject environment parameters if configured
+  const enrichedArgs = { ...args };
+  
+  if (config.injectParams) {
+    for (const param of config.injectParams) {
+      if (param === 'manager_email') {
+        enrichedArgs.manager_email = process.env.USER_EMAIL || 'manager@hotel.com';
+      } else if (param === 'manager_first_name') {
+        enrichedArgs.manager_first_name = process.env.USER_FIRST_NAME || 'Manager';
+      } else if (param === 'manager_last_name') {
+        enrichedArgs.manager_last_name = process.env.USER_LAST_NAME || 'User';
+      }
+    }
+  }
+
+  // Add idempotency token based on tool type
+  if (config.workatoToolName.includes('booking')) {
+    enrichedArgs.booking_external_id = idempotencyToken;
+  } else {
+    enrichedArgs.idempotency_token = idempotencyToken;
+  }
+
+  // Store in local database before calling Workato
+  await storeLocalRecord(config, args, idempotencyToken, now);
+
+  // Call Workato tool
+  const useOperationsUrl = config.server === 'operations';
+  const workatoResult = await callWorkatoTool(config.workatoToolName, enrichedArgs, useOperationsUrl);
+
+  // Update local database with Salesforce IDs
+  await updateLocalRecordWithSalesforceIds(config, idempotencyToken, workatoResult);
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({
+          success: true,
+          idempotency_token: idempotencyToken,
+          ...extractResultData(workatoResult),
+        }, null, 2),
+      },
+    ],
+  };
+}
+
+/**
+ * Store record in local database
+ */
+async function storeLocalRecord(config: ToolProxyConfig, args: any, token: string, timestamp: string): Promise<void> {
+  const fs = require('fs');
+  const logPath = path.join(process.cwd(), 'var', 'logs', 'mcp-server-debug.log');
+
+  if (config.localToolName === 'create_booking_with_token') {
+    const roomQuery = `SELECT id FROM rooms WHERE room_number = ? LIMIT 1`;
+    const roomResults = executeQuery(roomQuery, [args.room_number]);
+    
+    if (roomResults.length === 0) {
+      throw new Error(`Room ${args.room_number} not found in database`);
+    }
+    
+    const room_id = (roomResults[0] as any).id;
+    
+    const guestQuery = `SELECT id FROM users WHERE email = ? LIMIT 1`;
+    const guestResults = executeQuery(guestQuery, [args.guest_email]);
+    const guest_id = guestResults.length > 0 ? (guestResults[0] as any).id : null;
+
+    executeUpdate(
+      `INSERT INTO bookings (
+        idempotency_token, guest_id, room_id, check_in_date, check_out_date, 
+        number_of_guests, special_requests, status, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [token, guest_id, room_id, args.check_in_date, args.check_out_date, 
+       args.number_of_guests || 1, args.special_requests, 'reserved', timestamp]
+    );
+  } 
+  else if (config.localToolName === 'create_maintenance_task_with_token') {
+    const roomNumberStr = String(args.room_number);
+    const roomQuery = `SELECT id FROM rooms WHERE room_number = ? LIMIT 1`;
+    const roomResults = executeQuery(roomQuery, [roomNumberStr]);
+    
+    if (roomResults.length === 0) {
+      throw new Error(`Room ${roomNumberStr} not found in database`);
+    }
+    
+    const room_id = (roomResults[0] as any).id;
+    const manager_email = process.env.USER_EMAIL || 'manager@hotel.com';
+    
+    const managerQuery = `SELECT id FROM users WHERE email = ? LIMIT 1`;
+    const managerResults = executeQuery(managerQuery, [manager_email]);
+    
+    let created_by_id;
+    if (managerResults.length > 0) {
+      created_by_id = (managerResults[0] as any).id;
+    } else {
+      const defaultManager = executeQuery('SELECT id FROM users WHERE role = ? LIMIT 1', ['manager']);
+      if (defaultManager.length > 0) {
+        created_by_id = (defaultManager[0] as any).id;
+      } else {
+        throw new Error('No manager found in database');
+      }
+    }
+
+    const taskTitle = args.title || args.description.substring(0, 50);
+    const taskId = `task_${Date.now()}_${randomUUID().substring(0, 8)}`;
+
+    executeUpdate(
+      `INSERT INTO maintenance_tasks (
+        id, room_id, title, description, priority, status, 
+        created_by, idempotency_token, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [taskId, room_id, taskTitle, args.description, (args.priority || 'Medium').toLowerCase(), 
+       'pending', created_by_id, token, timestamp]
+    );
+  }
+  else if (config.localToolName === 'create_service_request_with_token') {
+    const guestQuery = `
+      SELECT u.id, u.email, u.name 
+      FROM users u 
+      WHERE u.room_number = ? AND u.role = 'guest'
+      LIMIT 1
+    `;
+    const guestResults = executeQuery(guestQuery, [args.room_number]);
+    
+    if (guestResults.length === 0) {
+      throw new Error(`No guest found in room ${args.room_number}`);
+    }
+    
+    const guest = guestResults[0] as any;
+    const requestId = `req_${Date.now()}_${randomUUID().substring(0, 8)}`;
+
+    executeUpdate(
+      `INSERT INTO service_requests (
+        id, guest_id, room_number, type, priority, description, 
+        status, idempotency_token, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [requestId, guest.id, args.room_number, (args.request_type || 'Housekeeping').toLowerCase(), 
+       (args.priority || 'Medium').toLowerCase(), args.description, 'pending', token, timestamp]
+    );
+  }
+}
+
+/**
+ * Update local record with Salesforce IDs from Workato response
+ */
+async function updateLocalRecordWithSalesforceIds(config: ToolProxyConfig, token: string, result: any): Promise<void> {
+  // Extract data from MCP result format
+  const resultText = result.content?.[0]?.text;
+  if (!resultText) return;
+
+  try {
+    const data = JSON.parse(resultText);
+    
+    if (config.localToolName === 'create_booking_with_token') {
+      if (data.opportunity_id) {
+        executeUpdate(
+          `UPDATE bookings SET 
+            salesforce_opportunity_id = ?,
+            booking_number = ?,
+            updated_at = ?
+          WHERE idempotency_token = ?`,
+          [data.opportunity_id, data.booking_number, new Date().toISOString(), token]
+        );
+      }
+    }
+    else if (config.localToolName === 'create_maintenance_task_with_token') {
+      if (data.case_id) {
+        executeUpdate(
+          `UPDATE maintenance_tasks SET salesforce_case_id = ? WHERE idempotency_token = ?`,
+          [data.case_id, token]
+        );
+      }
+    }
+    else if (config.localToolName === 'create_service_request_with_token') {
+      if (data.case_id) {
+        executeUpdate(
+          `UPDATE service_requests SET salesforce_ticket_id = ? WHERE idempotency_token = ?`,
+          [data.case_id, token]
+        );
+      }
+    }
+  } catch (error) {
+    // Ignore parse errors - result might not be JSON
+  }
+}
+
+/**
+ * Extract relevant data from Workato result
+ */
+function extractResultData(result: any): any {
+  const resultText = result.content?.[0]?.text;
+  if (!resultText) return {};
+
+  try {
+    return JSON.parse(resultText);
+  } catch {
+    return { raw_result: resultText };
+  }
+}
+
+/**
+ * Local-only tool handlers
+ */
+function handleFindServiceRequestByToken(args: any) {
+  const { idempotency_token } = args;
+  const result = findServiceRequestByToken(idempotency_token);
+  
+  return {
+    content: [
+      {
+        type: 'text',
+        text: result 
+          ? JSON.stringify(result, null, 2)
+          : 'No service request found with that idempotency token',
+      },
+    ],
+  };
+}
+
+function handleFindMaintenanceTaskByToken(args: any) {
+  const { idempotency_token } = args;
+  const result = findMaintenanceTaskByToken(idempotency_token);
+  
+  return {
+    content: [
+      {
+        type: 'text',
+        text: result 
+          ? JSON.stringify(result, null, 2)
+          : 'No maintenance task found with that idempotency token',
+      },
+    ],
+  };
+}
+
+function handleFindTransactionByToken(args: any) {
+  const { idempotency_token } = args;
+  const result = findTransactionByToken(idempotency_token);
+  
+  return {
+    content: [
+      {
+        type: 'text',
+        text: result 
+          ? JSON.stringify(result, null, 2)
+          : 'No transaction found with that idempotency token',
+      },
+    ],
+  };
+}
+
+function handleFindBookingByToken(args: any) {
+  const { idempotency_token } = args;
+  const result = findBookingByToken(idempotency_token);
+  
+  return {
+    content: [
+      {
+        type: 'text',
+        text: result 
+          ? JSON.stringify(result, null, 2)
+          : 'No booking found with that idempotency token',
+      },
+    ],
+  };
+}
+
+function handleGetGuestServiceRequests(args: any) {
+  const { guest_id, status, limit = 10 } = args;
+  
+  let query = `
+    SELECT id, guest_id, room_number, type, priority, description, 
+           status, idempotency_token, salesforce_ticket_id, created_at
+    FROM service_requests 
+    WHERE guest_id = ?
+  `;
+  const params: any[] = [guest_id];
+  
+  if (status) {
+    query += ' AND status = ?';
+    params.push(status);
+  }
+  
+  query += ' ORDER BY created_at DESC LIMIT ?';
+  params.push(limit);
+  
+  const results = executeQuery(query, params);
+  
+  return {
+    content: [
+      {
+        type: 'text',
+        text: results.length > 0
+          ? JSON.stringify(results, null, 2)
+          : 'No service requests found for this guest',
+      },
+    ],
+  };
+}
+
+function handleGetRoomMaintenanceTasks(args: any) {
+  const { room_id, status, assigned_to, limit = 20 } = args;
+  
+  let query = `
+    SELECT id, room_id, title, description, priority, status, 
+           assigned_to, created_by, idempotency_token, created_at
+    FROM maintenance_tasks 
+    WHERE room_id = ?
+  `;
+  const params: any[] = [room_id];
+  
+  if (status) {
+    query += ' AND status = ?';
+    params.push(status);
+  }
+  
+  if (assigned_to) {
+    query += ' AND assigned_to = ?';
+    params.push(assigned_to);
+  }
+  
+  query += ' ORDER BY created_at DESC LIMIT ?';
+  params.push(limit);
+  
+  const results = executeQuery(query, params);
+  
+  return {
+    content: [
+      {
+        type: 'text',
+        text: results.length > 0
+          ? JSON.stringify(results, null, 2)
+          : 'No maintenance tasks found for this room',
+      },
+    ],
+  };
+}
+
+function handleFindTokensByGuestEmail(args: any) {
+  const { guest_email, limit = 50 } = args;
+  
+  const guestQuery = `SELECT id FROM users WHERE email = ? AND role = 'guest' LIMIT 1`;
+  const guestResults = executeQuery(guestQuery, [guest_email]);
+  
+  if (guestResults.length === 0) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify({
+            guest_email,
+            found: false,
+            message: 'No guest found with this email address',
+          }, null, 2),
+        },
+      ],
+    };
+  }
+  
+  const guest_id = (guestResults[0] as any).id;
+  
+  const serviceRequestsQuery = `
+    SELECT id, room_number, type, priority, description, status, 
+           idempotency_token, salesforce_ticket_id, created_at
+    FROM service_requests 
+    WHERE guest_id = ?
+    ORDER BY created_at DESC 
+    LIMIT ?
+  `;
+  const serviceRequests = executeQuery(serviceRequestsQuery, [guest_id, limit]);
+  
+  const bookingsQuery = `
+    SELECT b.idempotency_token, r.room_number, b.check_in_date, b.check_out_date, 
+           b.number_of_guests, b.status, 
+           b.salesforce_opportunity_id, 
+           b.booking_number, b.created_at
+    FROM bookings b
+    LEFT JOIN rooms r ON b.room_id = r.id
+    WHERE b.guest_id = ?
+    ORDER BY b.created_at DESC 
+    LIMIT ?
+  `;
+  const bookings = executeQuery(bookingsQuery, [guest_id, limit]);
+  
+  const transactionsQuery = `
+    SELECT id, amount, type, status, 
+           idempotency_token, stripe_transaction_id, created_at
+    FROM transactions 
+    WHERE guest_id = ?
+    ORDER BY created_at DESC 
+    LIMIT ?
+  `;
+  const transactions = executeQuery(transactionsQuery, [guest_id, limit]);
+  
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({
+          guest_email,
+          guest_id,
+          found: true,
+          service_requests: {
+            count: serviceRequests.length,
+            items: serviceRequests,
+          },
+          bookings: {
+            count: bookings.length,
+            items: bookings,
+          },
+          transactions: {
+            count: transactions.length,
+            items: transactions,
+          },
+        }, null, 2),
+      },
+    ],
+  };
+}
+
+/**
  * Start the server
  */
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   // Don't log to stderr as it interferes with JSON-RPC communication
-  // console.error('Hotel DB MCP server running on stdio');
 }
 
 main().catch((error) => {

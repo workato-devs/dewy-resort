@@ -53,11 +53,11 @@ help:
 setup:
 ifeq ($(tool),all)
 	@echo "Setting up all vendor CLIs..."
-	@bash app/scripts/setup-cli.sh --tool=workato
-	@bash app/scripts/setup-cli.sh --tool=salesforce
+	@bash app/scripts/setup/setup-cli.sh --tool=workato
+	@bash app/scripts/setup/setup-cli.sh --tool=salesforce
 else
 	@echo "Setting up $(tool) CLI..."
-	@bash app/scripts/setup-cli.sh --tool=$(tool)
+	@bash app/scripts/setup/setup-cli.sh --tool=$(tool)
 endif
 
 # ============================================================

@@ -18,8 +18,8 @@ envContent.split('\n').forEach(line => {
 });
 
 async function testWorkatoCall() {
-  const url = env.MCP_OPERATIONS_URL;
-  const token = env.MCP_OPERATIONS_TOKEN;
+  const url = env.MCP_MANAGER_URL;
+  const token = env.MCP_MANAGER_TOKEN;
   
   console.log('🧪 Testing Workato Create_booking API\n');
   console.log(`URL: ${url}/Create_booking`);

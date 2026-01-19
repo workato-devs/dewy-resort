@@ -33,8 +33,8 @@ The manager MCP configuration defines which remote MCP servers and tools are ava
 **Configuration**:
 - **Name**: `hotel-operations`
 - **Type**: HTTP
-- **URL**: Configured via `MCP_OPERATIONS_URL` environment variable
-- **Authentication**: Bearer token via `MCP_OPERATIONS_TOKEN` environment variable
+- **URL**: Configured via `MCP_MANAGER_URL` environment variable
+- **Authentication**: Bearer token via `MCP_MANAGER_TOKEN` environment variable
 
 **Available Tools**:
 - `view_all_bookings` - View all current and upcoming bookings
@@ -48,8 +48,8 @@ The following environment variables must be set in your `.env` file:
 # Manager MCP Servers
 MCP_ANALYTICS_URL=https://mcp.hotel.example.com/analytics
 MCP_ANALYTICS_TOKEN=your_analytics_token
-MCP_OPERATIONS_URL=https://mcp.hotel.example.com/operations
-MCP_OPERATIONS_TOKEN=your_operations_token
+MCP_MANAGER_URL=https://mcp.hotel.example.com/operations
+MCP_MANAGER_TOKEN=your_manager_mcp_token
 ```
 
 ## Tool Descriptions

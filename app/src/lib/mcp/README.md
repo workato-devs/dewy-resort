@@ -130,7 +130,7 @@ The server is configured in role-specific MCP config files:
 {
   "name": "hotel-operations",
   "type": "http",
-  "url": "${MCP_OPERATIONS_URL}",
+  "url": "${MCP_MANAGER_URL}",
   "excludeTools": [
     "create-booking",
     "manage-booking"
@@ -154,7 +154,7 @@ The server is configured in role-specific MCP config files:
 {
   "name": "hotel-operations",
   "type": "http",
-  "url": "${MCP_OPERATIONS_URL}",
+  "url": "${MCP_MANAGER_URL}",
   "excludeTools": [
     "create-booking",
     "manage-booking"
