@@ -316,8 +316,7 @@
       {
         "number": 1,
         "keyword": "try",
-        "input": {
-        },
+        "input": {},
         "block": [
           {
             "number": 2,
@@ -332,7 +331,8 @@
               "flow_id": {
                 "name": "Search case by token",
                 "folder": "atomic-salesforce-recipes",
-                "folder_full_path": "Home/atomic-salesforce-recipes"
+                "folder_full_path": "Home/atomic-salesforce-recipes",
+                "zip_name": "atomic-salesforce-recipes/search_case_by_token.recipe.json"
               },
               "parameters": {
                 "idempotency_token": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"idempotency_token\"]}')}"
@@ -470,7 +470,8 @@
                   "flow_id": {
                     "name": "Search contact by email",
                     "folder": "atomic-salesforce-recipes",
-                    "folder_full_path": "Home/atomic-salesforce-recipes"
+                    "folder_full_path": "Home/atomic-salesforce-recipes",
+                    "zip_name": "atomic-salesforce-recipes/search_contact_by_email.recipe.json"
                   },
                   "parameters": {
                     "email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}"
@@ -753,7 +754,8 @@
                   "flow_id": {
                     "name": "Search room by number",
                     "folder": "atomic-salesforce-recipes",
-                    "folder_full_path": "Home/atomic-salesforce-recipes"
+                    "folder_full_path": "Home/atomic-salesforce-recipes",
+                    "zip_name": "atomic-salesforce-recipes/search_room_by_number.recipe.json"
                   },
                   "parameters": {
                     "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"room_number\"]}')}"
@@ -1022,7 +1024,8 @@
               "flow_id": {
                 "name": "Upsert case",
                 "folder": "atomic-salesforce-recipes",
-                "folder_full_path": "Home/atomic-salesforce-recipes"
+                "folder_full_path": "Home/atomic-salesforce-recipes",
+                "zip_name": "atomic-salesforce-recipes/upsert_case.recipe.json"
               },
               "parameters": {
                 "idempotency_token": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"idempotency_token\"]}')}",
