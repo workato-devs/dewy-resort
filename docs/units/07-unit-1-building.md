@@ -106,38 +106,6 @@ Orchestrate hotel check-in: validates guest/reservation prerequisites, checks ro
 
 ---
 
-**Endpoint: `process_guest_checkout`**
-
-```
-Orchestrate hotel checkout with Stripe payment: validates guest/booking, processes payment, executes state transitions (Booking→Checked Out, Room→Dirty, Opportunity→Closed Won). Requires guest_email, guest_name, amount (cents), payment_method_id, idempotency_token; optional room_number, booking_number. Returns payment confirmation or error codes (402: payment failed, 404: guest/booking not found, 202: 3D Secure required with next_action_url).
-```
-
----
-
-**Endpoint: `submit_guest_service_request`**
-
-```
-Create Salesforce Case for guest service request (housekeeping, amenities). Validates guest contact exists with type=Guest, links case to guest and room. Requires idempotency_token, guest_email, guest_first_name, guest_last_name, room_number, type, priority, description. Returns case_id/case_number or error codes (400: guest not found, invalid contact type, or room not found).
-```
-
----
-
-**Endpoint: `search_rooms_on_behalf_of_guest`**
-
-```
-Search rooms associated with a guest's bookings. Requires guest_email; optional filter (current/historical/all, default: current), limit (default: 10). Returns array of rooms with room_number, status, room_type, floor, nightly_rate, max_occupancy, plus count and filter_applied.
-```
-
----
-
-**Endpoint: `search_cases_on_behalf_of_guest`**
-
-```
-Search service cases filed by a specific guest. Requires guest_email; optional status_filter (Open/Closed/All, default: Open), case_type_filter (Facilities/Service Request/Housekeeping), limit (default: 10). Returns array of cases with case_number, type, status, priority, subject, description, room info, plus count.
-```
-
----
-
 **Endpoint: `create_booking_orchestrator`**
 
 ```
@@ -150,6 +118,38 @@ Create new hotel booking: upserts guest contact, validates room availability for
 
 ```
 Update existing booking by external_id. Resolves guest_email→contact_id and room_number→room_id automatically. Requires external_id; optional guest_email, room_number, check_in_date, check_out_date, number_of_guests, special_requests. Returns updated booking details or error codes (400: booking/guest/room not found).
+```
+
+---
+
+**Endpoint: `process_guest_checkout`**
+
+```
+Orchestrate hotel checkout with Stripe payment: validates guest/booking, processes payment, executes state transitions (Booking→Checked Out, Room→Dirty, Opportunity→Closed Won). Requires guest_email, guest_name, amount (cents), payment_method_id, idempotency_token; optional room_number, booking_number. Returns payment confirmation or error codes (402: payment failed, 404: guest/booking not found, 202: 3D Secure required with next_action_url).
+```
+
+---
+
+**Endpoint: `search_cases_on_behalf_of_guest`**
+
+```
+Search service cases filed by a specific guest. Requires guest_email; optional status_filter (Open/Closed/All, default: Open), case_type_filter (Facilities/Service Request/Housekeeping), limit (default: 10). Returns array of cases with case_number, type, status, priority, subject, description, room info, plus count.
+```
+
+---
+
+**Endpoint: `search_rooms_on_behalf_of_guest`**
+
+```
+Search rooms associated with a guest's bookings. Requires guest_email; optional filter (current/historical/all, default: current), limit (default: 10). Returns array of rooms with room_number, status, room_type, floor, nightly_rate, max_occupancy, plus count and filter_applied.
+```
+
+---
+
+**Endpoint: `submit_guest_service_request`**
+
+```
+Create Salesforce Case for guest service request (housekeeping, amenities). Validates guest contact exists with type=Guest, links case to guest and room. Requires idempotency_token, guest_email, guest_first_name, guest_last_name, room_number, type, priority, description. Returns case_id/case_number or error codes (400: guest not found, invalid contact type, or room not found).
 ```
 
 ---
@@ -210,34 +210,10 @@ Orchestrate hotel check-in: validates guest/reservation prerequisites, checks ro
 
 ---
 
-**Endpoint: `process_guest_checkout`**
+**Endpoint: `compensate_checkout_failure`**
 
 ```
-Orchestrate hotel checkout with Stripe payment: validates guest/booking, processes payment, executes state transitions (Booking→Checked Out, Room→Dirty, Opportunity→Closed Won). Requires guest_email, guest_name, amount (cents), payment_method_id, idempotency_token; optional room_number, booking_number. Returns payment confirmation or error codes (402: payment failed, 404: guest/booking not found, 202: 3D Secure required with next_action_url).
-```
-
----
-
-**Endpoint: `submit_maintenance_request`**
-
-```
-Create Salesforce Case for staff-reported maintenance/facilities issues. Validates contact exists with type=Manager, links case to room. Requires idempotency_token, manager_email, manager_first_name, manager_last_name, room_number, type (Maintenance/Facilities), priority, description. Returns case_id/case_number or error codes (400: manager not found, invalid contact type, or room not found).
-```
-
----
-
-**Endpoint: `search_rooms_on_behalf_of_staff`**
-
-```
-Search all hotel rooms with staff-level access. Optional status_filter (Vacant/Occupied/Dirty/Maintenance), floor_filter (1-10), limit (default: 20). Returns array of rooms with full details including current guest name/email/phone, plus count.
-```
-
----
-
-**Endpoint: `search_cases_on_behalf_of_staff`**
-
-```
-Search all service cases with staff-level access. Optional guest_email, status_filter (New/In Progress/Closed), priority_filter (Low/Medium/High/Urgent), case_type_filter (Maintenance/Facilities/Service Request/Housekeeping), room_number, limit (default: 50). Returns array of cases with full details including guest contact info.
+Saga compensation for failed checkout: refunds Stripe payment and reverts Salesforce state (Booking→Checked In, Room→Occupied, Opportunity→Checked In). Requires payment_intent_id, guest_email, idempotency_token; optional reason (for audit). Returns refund_id/refund_amount/refund_status or error codes (404: payment not found, 422: payment not refundable).
 ```
 
 ---
@@ -266,18 +242,42 @@ Create or update Salesforce Case by idempotency_token. Resolves guest_email→co
 
 ---
 
-**Endpoint: `upsert_contact_by_email`**
+**Endpoint: `process_guest_checkout`**
 
 ```
-Find or create Salesforce Contact by email. Requires email, first_name, last_name, contact_type (Guest/Manager/Vendor); optional phone, account_id (uses default if omitted). Returns contact_id, found (boolean), created (boolean). HTTP 200 if existing contact found, 201 if new contact created.
+Orchestrate hotel checkout with Stripe payment: validates guest/booking, processes payment, executes state transitions (Booking→Checked Out, Room→Dirty, Opportunity→Closed Won). Requires guest_email, guest_name, amount (cents), payment_method_id, idempotency_token; optional room_number, booking_number. Returns payment confirmation or error codes (402: payment failed, 404: guest/booking not found, 202: 3D Secure required with next_action_url).
 ```
 
 ---
 
-**Endpoint: `compensate_checkout_failure`**
+**Endpoint: `search_cases_on_behalf_of_staff`**
 
 ```
-Saga compensation for failed checkout: refunds Stripe payment and reverts Salesforce state (Booking→Checked In, Room→Occupied, Opportunity→Checked In). Requires payment_intent_id, guest_email, idempotency_token; optional reason (for audit). Returns refund_id/refund_amount/refund_status or error codes (404: payment not found, 422: payment not refundable).
+Search all service cases with staff-level access. Optional guest_email, status_filter (New/In Progress/Closed), priority_filter (Low/Medium/High/Urgent), case_type_filter (Maintenance/Facilities/Service Request/Housekeeping), room_number, limit (default: 50). Returns array of cases with full details including guest contact info.
+```
+
+---
+
+**Endpoint: `search_rooms_on_behalf_of_staff`**
+
+```
+Search all hotel rooms with staff-level access. Optional status_filter (Vacant/Occupied/Dirty/Maintenance), floor_filter (1-10), limit (default: 20). Returns array of rooms with full details including current guest name/email/phone, plus count.
+```
+
+---
+
+**Endpoint: `submit_maintenance_request`**
+
+```
+Create Salesforce Case for staff-reported maintenance/facilities issues. Validates contact exists with type=Manager, links case to room. Requires idempotency_token, manager_email, manager_first_name, manager_last_name, room_number, type (Maintenance/Facilities), priority, description. Returns case_id/case_number or error codes (400: manager not found, invalid contact type, or room not found).
+```
+
+---
+
+**Endpoint: `upsert_contact_by_email`**
+
+```
+Find or create Salesforce Contact by email. Requires email, first_name, last_name, contact_type (Guest/Manager/Vendor); optional phone, account_id (uses default if omitted). Returns contact_id, found (boolean), created (boolean). HTTP 200 if existing contact found, 201 if new contact created.
 ```
 
 ---
@@ -372,13 +372,13 @@ For each MCP server, you need to copy the URL and token:
 Open your project's `app/.env` file and add the following variables:
 
 ```bash
-# Guest MCP Server (Hotel Services)
-MCP_HOTEL_SERVICES_URL=<paste guest server URL here>
-MCP_HOTEL_SERVICES_TOKEN=<paste guest server token here>
+# Guest MCP Server
+MCP_GUEST_URL=<paste guest server URL here>
+MCP_GUEST_TOKEN=<paste guest server token here>
 
-# Manager MCP Server (Operations)
-MCP_OPERATIONS_URL=<paste manager server URL here>
-MCP_OPERATIONS_TOKEN=<paste manager server token here>
+# Manager MCP Server
+MCP_MANAGER_URL=<paste manager server URL here>
+MCP_MANAGER_TOKEN=<paste manager server token here>
 ```
 
 ### 6.3 Unit 1 Checklist
