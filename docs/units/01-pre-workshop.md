@@ -24,6 +24,18 @@ parent: Workshop Units
 - **Cost:** Free
 - **Approval Time:** Instant
 - **Action:** Verify you can log in before workshop day
+- **Important:** Note your username (e.g., `yourname@yourcompany.com.devorg`) — you'll need it for CLI authentication
+
+### 3. Stripe Developer Account (Highly Recommended)
+- **URL:** [dashboard.stripe.com/register](https://dashboard.stripe.com/register)
+- **Cost:** Free
+- **Purpose:** Payment processing features (checkout, refunds)
+- **Why it matters:** Without Stripe, payment-related recipes won't function and you'll miss key parts of the workshop experience
+- **Important Setup Steps:**
+  1. For new accounts, Stripe's onboarding asks you to register a business
+  2. Click **"Skip for now"** (twice)
+  3. Choose the **"Sandbox"** option
+  4. **Never use a Live Stripe account** for the workshop
 
 ---
 
@@ -45,16 +57,27 @@ parent: Workshop Units
 
 ## Optional (Enhanced Experience)
 
-### Stripe Developer Account
-- **URL:** [dashboard.stripe.com/register](https://dashboard.stripe.com/register)
-- **Purpose:** Payment processing features in Unit 2
-- **Note:** Workshop works without this; payment features will be mocked
-- **Important:** For new accounts, Stripe's onboarding process asks you to register a new business. Click "Skip for now" (twice), then choose the "Sandbox" option. Do not use a Live Stripe account for the workshop.
+### MCP Desktop Client (Backup Testing Option)
 
-### LLM API Key
-- Anthropic or OpenAI API key
-- **Purpose:** Testing MCP client interactions
-- **Note:** Workshop provides test mode; API key enables live testing
+If the LLM setup in the hotel app has issues, you can test your MCP servers directly using a desktop client:
+
+- **Claude Desktop:** [claude.ai/download](https://claude.ai/download) (requires Claude Pro)
+- **ChatGPT Desktop:** [openai.com/chatgpt/desktop](https://openai.com/chatgpt/desktop) (requires ChatGPT Plus)
+
+Configuration instructions are provided in Unit 1 after you create your MCP servers.
+
+---
+
+## Testing Multiple Personas with Gmail Aliases
+
+To test both guest and manager personas using a single Gmail account, use the `+` alias feature:
+
+| Persona | Email Format | Example |
+|---------|-------------|---------|
+| Guest | `yourname+guest@gmail.com` | `john.doe+guest@gmail.com` |
+| Manager | `yourname+manager@gmail.com` | `john.doe+manager@gmail.com` |
+
+All emails go to your main inbox. Register each alias as a separate contact in Salesforce with the appropriate contact type (Guest or Manager).
 
 ---
 
@@ -112,12 +135,16 @@ Please complete these steps before the workshop on [Date]:
    https://developer.salesforce.com/signup
    Note: Instant approval, but verify you can log in
 
-3. Verify your local environment:
+3. Sign up for Stripe Developer Account (Highly Recommended)
+   https://dashboard.stripe.com/register
+   Note: Skip business registration, choose Sandbox mode
+
+4. Verify your local environment:
    - Node.js 20+: `node --version`
    - Git: `git --version`
    - Python 3.11+: `python3 --version`
 
-4. Ensure you have an IDE installed:
+5. Ensure you have an IDE installed:
    - Recommended: VS Code (https://code.visualstudio.com)
    - Any code editor that supports TypeScript will work
 
@@ -178,7 +205,9 @@ nvm use 20
 ## Day-Before Checklist
 
 - [ ] Workato Developer Edition approved and accessible
-- [ ] Salesforce Developer Edition login working
+- [ ] Salesforce Developer Edition login working (note your username!)
+- [ ] Stripe Developer Account created (Sandbox mode)
+- [ ] Gmail aliases created for testing (e.g., `yourname+guest@gmail.com`, `yourname+manager@gmail.com`)
 - [ ] Node.js 20+ installed and verified
 - [ ] Python 3.11+ installed and verified
 - [ ] Git installed

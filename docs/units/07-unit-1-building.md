@@ -35,29 +35,59 @@ Managers have greater authorization and access to business processes than guests
 
 ---
 
+## Step 0: Understand the Recipe Organization (5 min)
+
+Before creating API Collections, take a moment to understand how the recipes are organized in your cloned repository:
+
+```
+workato/
+├── atomic-salesforce-recipes/   # Single-purpose Salesforce operations
+│   ├── search_contact_by_email.recipe.json
+│   ├── search_room_by_number.recipe.json
+│   ├── upsert_case.recipe.json
+│   └── ...
+├── atomic-stripe-recipes/       # Single-purpose payment operations
+│   ├── create_stripe_payment_intent.recipe.json
+│   └── ...
+└── orchestrator-recipes/        # Composed workflows (what we'll expose as tools)
+    ├── check_in_guest.recipe.json
+    ├── process_guest_checkout.recipe.json
+    └── ...
+```
+
+**Key concept:**
+- **Atomic recipes** perform a single operation (one API call, no business logic)
+- **Orchestrator recipes** compose multiple atomic recipes into complete workflows
+
+When creating API Collections, you'll select from the **orchestrator-recipes** folder — these are the complete workflows suitable for exposing as MCP tools.
+
+---
+
 ## Step 1: Create the Guest API Collection (10 min)
 
 ### 1.1 Navigate to API Platform
 
-1. In Workato, navigate to **Tools → API Platform**
-2. Click **API Collections** in the left sidebar
-3. Click **Create Collection**
+1. In Workato, navigate to **Tools → API Platform → API Collections**
+2. Click **Create Collection**
 
 ### 1.2 Select Guest Recipes
 
 1. When prompted to choose a collection type, select **Recipe folder**
 2. Select the **orchestrator-recipes** folder
-3. **Select only the following 7 recipes** for the guest collection:
+3. **Important:** First, **uncheck all endpoints** (they may be pre-selected)
+4. **Select only the following 7 recipes** for the guest collection (listed in alphabetical order as they appear):
 
 | Recipe | Purpose |
 |--------|---------|
 | `check_in_guest` | Self-service check-in |
-| `process_guest_checkout` | Self-service checkout with payment |
-| `submit_guest_service_request` | Request housekeeping, amenities |
-| `search_rooms_on_behalf_of_guest` | View their room information |
-| `search_cases_on_behalf_of_guest` | Track their service requests |
 | `create_booking_orchestrator` | Make new reservations |
 | `manage_booking_orchestrator` | Modify existing bookings |
+| `process_guest_checkout` | Self-service checkout with payment |
+| `search_cases_on_behalf_of_guest` | Track their service requests |
+| `search_rooms_on_behalf_of_guest` | View their room information |
+| `submit_guest_service_request` | Request housekeeping, amenities |
+
+![Guest API Collection endpoint selection](../assets/images/guest_apis.png)
 
 ### 1.3 Configure Guest Endpoints
 
@@ -130,6 +160,7 @@ Update existing booking by external_id. Resolves guest_email→contact_id and ro
 2. Enter the collection details:
    - **Name:** `dewy-resort-guest`
    - **Version:** `1.0`
+   - **Description:** `Self-service API endpoints for hotel guests to manage check-in, checkout, bookings, and service requests.`
 3. Click **Save**
 
 **CHECKPOINT:** Guest API Collection created with 7 endpoints
@@ -147,20 +178,23 @@ Update existing booking by external_id. Resolves guest_email→contact_id and ro
 
 1. Select **Recipe folder**
 2. Select the **orchestrator-recipes** folder
-3. **Select only the following 10 recipes** for the manager collection:
+3. **Important:** First, **uncheck all endpoints** (they may be pre-selected)
+4. **Select only the following 10 recipes** for the manager collection (listed in alphabetical order as they appear):
 
 | Recipe | Purpose |
 |--------|---------|
 | `check_in_guest` | Check in guests |
-| `process_guest_checkout` | Process guest checkouts |
-| `submit_maintenance_request` | Report maintenance/facilities issues |
-| `search_rooms_on_behalf_of_staff` | View all rooms with guest details |
-| `search_cases_on_behalf_of_staff` | View all cases across the hotel |
+| `compensate_checkout_failure` | Process refunds for failed checkouts |
 | `create_booking_orchestrator` | Create bookings for guests |
 | `manage_booking_orchestrator` | Modify any booking |
 | `manage_cases_orchestrator` | Create/update any case |
+| `process_guest_checkout` | Process guest checkouts |
+| `search_cases_on_behalf_of_staff` | View all cases across the hotel |
+| `search_rooms_on_behalf_of_staff` | View all rooms with guest details |
+| `submit_maintenance_request` | Report maintenance/facilities issues |
 | `upsert_contact_by_email` | Manage guest/staff contacts |
-| `compensate_checkout_failure` | Process refunds for failed checkouts |
+
+![Manager API Collection endpoint selection](../assets/images/staff_apis.png)
 
 ### 2.3 Configure Manager Endpoints
 
@@ -254,6 +288,7 @@ Saga compensation for failed checkout: refunds Stripe payment and reverts Salesf
 2. Enter the collection details:
    - **Name:** `dewy-resort-manager`
    - **Version:** `1.0`
+   - **Description:** `Operations API endpoints for hotel managers including guest services, maintenance, case management, and compensation workflows.`
 3. Click **Save**
 
 **CHECKPOINT:** Manager API Collection created with 10 endpoints
@@ -334,7 +369,7 @@ For each MCP server, you need to copy the URL and token:
 
 ### 6.2 Configure Your Local Environment
 
-Open your project's `.env` file and add the following variables:
+Open your project's `app/.env` file and add the following variables:
 
 ```bash
 # Guest MCP Server (Hotel Services)
@@ -346,29 +381,16 @@ MCP_OPERATIONS_URL=<paste manager server URL here>
 MCP_OPERATIONS_TOKEN=<paste manager server token here>
 ```
 
-### 6.3 Verify Tool Availability
+### 6.3 Unit 1 Checklist
 
-Test that the tools are properly exposed:
+- [ ] Guest API Collection created with 7 endpoints, all set to POST
+- [ ] Manager API Collection created with 10 endpoints, all set to POST
+- [ ] All endpoints activated via `make enable-api-endpoints`
+- [ ] Guest MCP server created and linked to guest collection
+- [ ] Manager MCP server created and linked to manager collection
+- [ ] `.env` file configured with MCP server URLs and tokens
 
-**Guest Server Test Prompts:**
-- "What tools do you have available?"
-- "Can you help me check in?"
-- "I'd like to request housekeeping"
-
-**Manager Server Test Prompts:**
-- "Show me all vacant rooms"
-- "I need to file a maintenance request for room 205"
-- "Process a refund for a failed checkout"
-
-### 6.4 Verification Checklist
-
-- [ ] Guest API Collection has 7 endpoints, all set to POST
-- [ ] Manager API Collection has 10 endpoints, all set to POST
-- [ ] All endpoints are activated
-- [ ] Guest MCP server created with guest collection
-- [ ] Manager MCP server created with manager collection
-- [ ] `.env` file configured with all 4 variables (URLs and tokens)
-- [ ] Application connects to MCP servers successfully
+**CHECKPOINT:** MCP servers created and configured. Testing happens in Unit 2.
 
 ---
 
@@ -397,20 +419,9 @@ This is the power of well-designed MCP tool descriptions—they enable natural l
 
 ## Troubleshooting
 
-### Endpoint Not Appearing in MCP Server
-
-- Verify the endpoint is part of an active API collection
-- Check that the recipe behind the endpoint is running
-- Run `make enable-api-endpoints` to ensure all endpoints are activated
-
-### Authentication Errors
-
-- Regenerate the API key in Workato
-- Verify the key is copied correctly (no extra spaces)
-- Check that the MCP server is created successfully
-
-### Tool Not Being Called by LLM
-
-- Review the tool description for clarity
-- Ensure required parameters are documented
-- Test the endpoint directly in Workato's API Platform test interface
+| Issue | Solution |
+|-------|----------|
+| Endpoint not appearing in MCP server | Verify endpoint is in an active API collection; check recipe is running |
+| Can't find recipes in folder | Use the search box to filter by recipe name |
+| Authentication errors | Regenerate API key; verify copied correctly (no extra spaces) |
+| `make enable-api-endpoints` fails | Check WORKATO_API_TOKEN in .env is valid |

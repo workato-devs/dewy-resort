@@ -39,7 +39,7 @@ python3 --version  # Should be 3.11+
 ### 1.1 Clone the Repository
 
 ```bash
-git clone https://github.com/workato-devs/dewy-resort
+git clone https://github.com/workato-devs/dewy-resort.git
 cd dewy-resort
 ```
 
@@ -130,6 +130,8 @@ bin/sf org login web --alias myDevOrg
 
 A browser window will open. Log in to your Salesforce Developer Edition org.
 
+> **Tip:** If you have multiple Salesforce accounts, make sure to use the correct username for your Developer Edition org (the one you noted during pre-workshop setup).
+
 ### 3.2 Deploy Metadata + Seed Data
 
 ```bash
@@ -167,7 +169,7 @@ bin/sf org open --target-org myDevOrg
 ### 4.1 Get Workato API Token
 
 1. Log in to your Workato Developer Edition
-2. Go to **Settings -> API Keys & Clients**
+2. Go to **Workspace Admin → Settings → API Keys & Clients**
 3. Click **Create API Key**
 4. Set permissions:
    - Projects -> Project Assets (all)
@@ -178,7 +180,7 @@ bin/sf org open --target-org myDevOrg
 
 ### 4.2 Add Token to Environment
 
-Edit `.env` file:
+Edit `app/.env` file:
 
 ```bash
 WORKATO_API_TOKEN=your_token_here
@@ -190,9 +192,9 @@ WORKATO_API_TOKEN=your_token_here
 make workato-init
 ```
 
-### 4.4 Configure Salesforce Connection
+### 4.4 Configure Salesforce Connector in Workato
 
-1. Go to **Projects -> Workspace-Connections**
+1. Go to **Projects → Workspace Connections**
 2. Click the **Salesforce** connection
 3. Click **Connect**
 4. Authenticate to your Salesforce Developer Edition org
@@ -202,13 +204,14 @@ make workato-init
 
 Four recipes need manual activation due to SOQL metadata caching:
 
-1. Open Workato -> **Projects -> atomic-salesforce-recipes**
-2. Find and activate each of these recipes:
+1. Open Workato → **Projects → orchestrator-recipes**
+2. In the recipe search box, type **"search"** to filter the list
+3. Find and activate each of these recipes:
    - `Search cases on behalf of guest`
    - `Search cases on behalf of staff`
    - `Search rooms on behalf of guest`
    - `Search rooms on behalf of staff`
-3. For each recipe:
+4. For each recipe:
    - Click the recipe name
    - Click **Edit Recipe**
    - Click the Salesforce action step
@@ -217,7 +220,7 @@ Four recipes need manual activation due to SOQL metadata caching:
 
 ### 4.6 Configure Stripe Connection (Optional)
 
-1. Go to **Projects -> Workspace-Connections**
+1. Go to **Projects → Workspace Connections**
 2. Click the **Stripe** connection
 3. Click **Connect**
 4. Select **API key** as the authentication type
@@ -246,11 +249,13 @@ make start-recipes
 ========================================
 Summary
 ========================================
-Total recipes: 36
-Started: 36
+Total recipes: <count>
+Started: <count>
 Already running: 0
 Failed: 0
 ```
+
+All recipes should show as started with 0 failed.
 
 **NOTE** If you did not setup or activate Stripe, some recipes will fail to start
 
@@ -274,6 +279,31 @@ This creates an API Client for the Salesforce API Collection.
 
 **CHECKPOINT:** API endpoints enabled and client created
 
+### 4.10 Configure API Collection Token
+
+1. In Workato, go to **Tools → API Platform → API Collections**
+2. Click on **salesforce-collection**
+3. Click **Clients**
+4. Click **Edit client access**
+5. Enter the name of your API client (created in step 4.1)
+6. Click **Save**
+7. Click on the client name
+8. Under **Access Token**, click **Refresh** (if no token exists)
+9. Click **Copy** to copy the token
+10. Add the token to your `app/.env` file:
+
+```bash
+TOKEN_FOR_API_COLLECTION=your_collection_token_here
+```
+
+7. Also copy the **API Collection URL** from the client settings and add it:
+
+```bash
+API_COLLECTION_URL=https://apim.workato.com/your-workspace/your-collection
+```
+
+**CHECKPOINT:** API Collection token and URL configured in .env
+
 ---
 
 ## Step 5: Verify End-to-End (5 min)
@@ -284,20 +314,22 @@ This creates an API Client for the Salesforce API Collection.
 app/scripts/dev-tools/server.sh start
 ```
 
-### 5.2 Test the System
+### 5.2 Verify the Dashboard
 
 1. Open http://localhost:3000
-2. Navigate to **Guest** interface
-3. Type: "What rooms are available?"
-4. Wait for response (may take 5-10 seconds first time)
+2. Check the dashboard UI indicators:
+   - **Mock Mode indicator:** Should show as OFF/disabled
+   - **Data source:** Should show "Live" (not "Mock")
+3. Verify the dashboard displays live data from Salesforce (room counts, bookings, etc.)
 
-**Expected:** Response listing available rooms with data from Salesforce
+**Expected:** Dashboard shows live data indicators and displays real Salesforce data (not mock/sample data)
 
 ### 5.3 Verify in Workato
 
-1. Open Workato -> **Tools -> Logs**
+1. Open Workato → **Tools → Logs**
 2. Find recent log entry (within last minute)
-3. Verify it completed successfully
+3. Click on the most recent log to see details
+4. Verify it completed successfully
 
 **CHECKPOINT:** Room availability response received with real data
 
@@ -307,7 +339,7 @@ app/scripts/dev-tools/server.sh start
 
 You now have:
 - Salesforce org with hotel data model
-- Workato workspace with 36 recipes
+- Workato workspace with all recipes running
 - Local application connected to both
 
 ---
@@ -319,9 +351,11 @@ You now have:
 | Python version mismatch | Use `pyenv local 3.11` |
 | Salesforce login timeout | Re-run `bin/sf org login web --alias myDevOrg` |
 | Recipes won't start | Manual activation (Step 4.7) |
-| "Connection not configured" | Verify Workspace-Connections authenticated |
+| "Connection not configured" | Verify Workspace Connections authenticated |
 | API Collection 401 | Check WORKATO_API_TOKEN in .env |
 | Room search returns empty | Verify SF seed data imported |
+| API call fails silently | Check **Tools → Logs** in Workato for error details |
+| Recipe returns error | Expand the job in Logs to see error message and code |
 
 ---
 
