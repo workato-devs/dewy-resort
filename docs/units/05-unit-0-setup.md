@@ -102,8 +102,8 @@ If Workato CLI fails with Python errors:
 # Check Python version
 python3 --version
 
-# If using pyenv, ensure correct version is active
-pyenv local 3.11
+# If Python 3.11 not found, install via Homebrew
+brew install python@3.11
 
 # Retry Workato setup only
 make setup tool=workato
@@ -215,8 +215,10 @@ Four recipes need manual activation due to SOQL metadata caching:
    - Click the recipe name
    - Click **Edit Recipe**
    - Click the Salesforce action step
-   - Re-select the Salesforce connection
+   - Click the **Edit** button to the right of "Connect to Salesforce"
+   - Re-select the Salesforce connection **"SF Dev Account"**
    - Click **Save**
+   - Click **Exit**
 
 ### 4.6 Configure Stripe Connection (Optional)
 
@@ -226,8 +228,12 @@ Four recipes need manual activation due to SOQL metadata caching:
 4. Select **API key** as the authentication type
 5. **Get your Stripe Secret API Key:**
    - Open the [Stripe Dashboard](https://dashboard.stripe.com/) in a new tab
-   - Ensure you're in **Test mode** (toggle in the top-right corner)
-   - Navigate to **Developers -> API keys**
+   - Stripe is in **Test mode** by default when you don't fill out a profile. You must be in **Sandbox mode**:
+     - Click your account drop-down menu (upper left)
+     - Select **"Switch to Sandbox"** → choose your sandbox environment
+     - Close any pop-ups
+   - Click the **"Developers"** toolbar (bottom of page)
+   - Select **"API keys"**
    - Under "Standard keys", find the **Secret key**
    - Click **Reveal test key** to show the full key
    - Copy the key (starts with `sk_test_`)
@@ -279,31 +285,6 @@ This creates an API Client for the Salesforce API Collection.
 
 **CHECKPOINT:** API endpoints enabled and client created
 
-### 4.10 Configure API Collection Token
-
-1. In Workato, go to **Tools → API Platform → API Collections**
-2. Click on **salesforce-collection**
-3. Click **Clients**
-4. Click **Edit client access**
-5. Enter the name of your API client (created in step 4.1)
-6. Click **Save**
-7. Click on the client name
-8. Under **Access Token**, click **Refresh** (if no token exists)
-9. Click **Copy** to copy the token
-10. Add the token to your `app/.env` file:
-
-```bash
-TOKEN_FOR_API_COLLECTION=your_collection_token_here
-```
-
-7. Also copy the **API Collection URL** from the client settings and add it:
-
-```bash
-API_COLLECTION_URL=https://apim.workato.com/your-workspace/your-collection
-```
-
-**CHECKPOINT:** API Collection token and URL configured in .env
-
 ---
 
 ## Step 5: Verify End-to-End (5 min)
@@ -316,22 +297,8 @@ app/scripts/dev-tools/server.sh start
 
 ### 5.2 Verify the Dashboard
 
-1. Open http://localhost:3000
-2. Check the dashboard UI indicators:
-   - **Mock Mode indicator:** Should show as OFF/disabled
-   - **Data source:** Should show "Live" (not "Mock")
-3. Verify the dashboard displays live data from Salesforce (room counts, bookings, etc.)
-
-**Expected:** Dashboard shows live data indicators and displays real Salesforce data (not mock/sample data)
-
-### 5.3 Verify in Workato
-
-1. Open Workato → **Tools → Logs**
-2. Find recent log entry (within last minute)
-3. Click on the most recent log to see details
-4. Verify it completed successfully
-
-**CHECKPOINT:** Room availability response received with real data
+1. Open [http://localhost:3000](http://localhost:3000){:target="_blank"}
+2. All indicators should show **Mock Mode enabled**
 
 ---
 
@@ -348,7 +315,7 @@ You now have:
 
 | Issue | Solution |
 |-------|----------|
-| Python version mismatch | Use `pyenv local 3.11` |
+| Python version mismatch | Run `brew install python@3.11` |
 | Salesforce login timeout | Re-run `bin/sf org login web --alias myDevOrg` |
 | Recipes won't start | Manual activation (Step 4.7) |
 | "Connection not configured" | Verify Workspace Connections authenticated |

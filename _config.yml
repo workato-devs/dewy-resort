@@ -29,7 +29,7 @@ callouts:
     color: blue
 
 # Footer
-footer_content: "MCP Compositional Architecture Workshop &copy; 2025. Built with <a href=\"https://github.com/just-the-docs/just-the-docs\">Just the Docs</a>."
+footer_content: "MCP Compositional Architecture Workshop &copy; 2026. Built with <a href=\"https://github.com/just-the-docs/just-the-docs\">Just the Docs</a>."
 
 # Exclude files from build
 exclude:

@@ -163,18 +163,16 @@ See you there!
 
 **Problem:** `python3 --version` shows version < 3.11
 
-**Solution using pyenv:**
+**Solution using Homebrew:**
 ```bash
-# Install pyenv
-curl https://pyenv.run | bash
+# Install Python 3.11 using Homebrew
+brew install python@3.11
 
-# Add to shell profile (~/.zshrc or ~/.bashrc)
-export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init -)"
+# Verify installation
+python3.11 --version
 
-# Restart shell, then install Python 3.11
-pyenv install 3.11.14
-pyenv local 3.11.14
+# If python3 still points to old version, add to PATH:
+export PATH="/opt/homebrew/opt/python@3.11/bin:$PATH"
 ```
 
 ### Node.js Version Issues
