@@ -146,12 +146,15 @@ validate:
 	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bin/workato recipe validate workato/recipes/**/*.recipe.json
 
 push:
-	@if [ ! -f bin/workato ]; then \
+	@if [ ! -f bin/workato ] && ! command -v workato &> /dev/null; then \
 		echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."; \
 		exit 1; \
 	fi
 	@echo "Pushing recipes to developer sandbox..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bin/workato recipe push workato/recipes/
+	@for folder in projects/*/; do \
+		echo "Pushing $$folder..."; \
+		(cd "$$folder" && workato push); \
+	done
 
 pull:
 	@if [ ! -f bin/workato ]; then \
