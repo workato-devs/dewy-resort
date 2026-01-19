@@ -95,20 +95,20 @@ async function fetchWorkatoTools(url: string, token: string): Promise<WorkatoToo
 async function initializeToolCache(): Promise<void> {
   if (toolsFetched) return;
 
-  const operationsUrl = process.env.MCP_OPERATIONS_URL;
-  const operationsToken = process.env.MCP_OPERATIONS_TOKEN;
-  const servicesUrl = process.env.MCP_HOTEL_SERVICES_URL;
-  const servicesToken = process.env.MCP_HOTEL_SERVICES_TOKEN;
+  const managerUrl = process.env.MCP_MANAGER_URL;
+  const managerToken = process.env.MCP_MANAGER_TOKEN;
+  const guestUrl = process.env.MCP_GUEST_URL;
+  const guestToken = process.env.MCP_GUEST_TOKEN;
 
-  // Fetch from operations server
-  if (operationsUrl && operationsToken) {
-    const tools = await fetchWorkatoTools(operationsUrl, operationsToken);
+  // Fetch from manager server
+  if (managerUrl && managerToken) {
+    const tools = await fetchWorkatoTools(managerUrl, managerToken);
     tools.forEach(tool => workatoToolsCache.set(tool.name, tool));
   }
 
-  // Fetch from services server
-  if (servicesUrl && servicesToken) {
-    const tools = await fetchWorkatoTools(servicesUrl, servicesToken);
+  // Fetch from guest server
+  if (guestUrl && guestToken) {
+    const tools = await fetchWorkatoTools(guestUrl, guestToken);
     tools.forEach(tool => workatoToolsCache.set(tool.name, tool));
   }
 
@@ -337,20 +337,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
  * 
  * @param toolName - The Workato tool name
  * @param input - Tool input parameters
- * @param useOperationsUrl - If true, uses MCP_OPERATIONS_URL; otherwise uses MCP_HOTEL_SERVICES_URL
+ * @param useManagerUrl - If true, uses MCP_MANAGER_URL; otherwise uses MCP_GUEST_URL
  * @returns Tool execution result
  */
-async function callWorkatoTool(toolName: string, input: any, useOperationsUrl: boolean = false): Promise<any> {
-  const workatoUrl = useOperationsUrl 
-    ? (process.env.MCP_OPERATIONS_URL || process.env.MCP_HOTEL_SERVICES_URL || 'https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1')
-    : (process.env.MCP_HOTEL_SERVICES_URL || 'https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1');
+async function callWorkatoTool(toolName: string, input: any, useManagerUrl: boolean = false): Promise<any> {
+  const workatoUrl = useManagerUrl 
+    ? (process.env.MCP_MANAGER_URL || process.env.MCP_GUEST_URL || 'https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1')
+    : (process.env.MCP_GUEST_URL || 'https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1');
   
-  const workatoToken = useOperationsUrl
-    ? (process.env.MCP_OPERATIONS_TOKEN || process.env.MCP_HOTEL_SERVICES_TOKEN)
-    : process.env.MCP_HOTEL_SERVICES_TOKEN;
+  const workatoToken = useManagerUrl
+    ? (process.env.MCP_MANAGER_TOKEN || process.env.MCP_GUEST_TOKEN)
+    : process.env.MCP_GUEST_TOKEN;
   
   if (!workatoToken) {
-    throw new Error('Workato token not configured in environment. Please set MCP_HOTEL_SERVICES_TOKEN or MCP_OPERATIONS_TOKEN in .env file.');
+    throw new Error('Workato token not configured in environment. Please set MCP_GUEST_TOKEN or MCP_MANAGER_TOKEN in .env file.');
   }
 
   const fullUrl = `${workatoUrl}/tools/call`;

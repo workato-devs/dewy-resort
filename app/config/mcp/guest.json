@@ -16,10 +16,10 @@
     {
       "name": "hotel-services",
       "type": "http",
-      "url": "${MCP_HOTEL_SERVICES_URL}",
+      "url": "${MCP_GUEST_URL}",
       "auth": {
         "type": "bearer",
-        "token": "${MCP_HOTEL_SERVICES_TOKEN}"
+        "token": "${MCP_GUEST_TOKEN}"
       },
       "excludeTools": ["Submit_guest_service_request"]
     },

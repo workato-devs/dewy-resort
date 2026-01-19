@@ -104,11 +104,11 @@ async function makeRestRequest(
   // Use the REST API base URL (not the MCP URL)
   // MCP URL: https://220.apim.mcp.trial.workato.com/zaynet2/dewy-hotel-apis-v1
   // REST URL: https://apim.trial.workato.com/zaynet2/dewy-hotel-apis-v1
-  const mcpUrl = process.env.MCP_OPERATIONS_URL;
+  const mcpUrl = process.env.MCP_MANAGER_URL;
   const apiToken = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!mcpUrl) {
-    throw new Error('MCP_OPERATIONS_URL not set in .env');
+    throw new Error('MCP_MANAGER_URL not set in .env');
   }
   
   if (!apiToken) {
@@ -317,17 +317,17 @@ async function main() {
   logSection('Workato REST API - Direct Endpoint Tests');
   
   // Check environment variables
-  const mcpUrl = process.env.MCP_OPERATIONS_URL;
-  const mcpToken = process.env.MCP_OPERATIONS_TOKEN;
+  const mcpUrl = process.env.MCP_MANAGER_URL;
+  const mcpToken = process.env.MCP_MANAGER_TOKEN;
   const workatoToken = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!mcpUrl) {
-    logError('MCP_OPERATIONS_URL not set in .env');
+    logError('MCP_MANAGER_URL not set in .env');
     process.exit(1);
   }
   
   if (!mcpToken) {
-    logError('MCP_OPERATIONS_TOKEN not set in .env');
+    logError('MCP_MANAGER_TOKEN not set in .env');
     process.exit(1);
   }
   

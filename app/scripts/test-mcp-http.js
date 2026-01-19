@@ -123,8 +123,8 @@ async function main() {
   const servers = [
     {
       name: 'Hotel Operations',
-      url: process.env.MCP_OPERATIONS_URL,
-      token: process.env.MCP_OPERATIONS_TOKEN
+      url: process.env.MCP_MANAGER_URL,
+      token: process.env.MCP_MANAGER_TOKEN
     },
     {
       name: 'Hotel Analytics',
@@ -133,8 +133,8 @@ async function main() {
     },
     {
       name: 'Hotel Services',
-      url: process.env.MCP_HOTEL_SERVICES_URL,
-      token: process.env.MCP_HOTEL_SERVICES_TOKEN
+      url: process.env.MCP_GUEST_URL,
+      token: process.env.MCP_GUEST_TOKEN
     }
   ];
   

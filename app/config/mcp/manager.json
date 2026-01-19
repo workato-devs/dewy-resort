@@ -19,10 +19,10 @@
     {
       "name": "hotel-operations",
       "type": "http",
-      "url": "${MCP_OPERATIONS_URL}",
+      "url": "${MCP_MANAGER_URL}",
       "auth": {
         "type": "bearer",
-        "token": "${MCP_OPERATIONS_TOKEN}"
+        "token": "${MCP_MANAGER_TOKEN}"
       },
       "excludeTools": [
         "Create_booking_orchestrator",

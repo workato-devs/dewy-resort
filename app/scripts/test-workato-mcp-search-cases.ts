@@ -102,15 +102,15 @@ async function makeWorkatoRequest(
   body: any,
   description: string
 ): Promise<any> {
-  const baseUrl = process.env.MCP_OPERATIONS_URL;
-  const token = process.env.MCP_OPERATIONS_TOKEN;
+  const baseUrl = process.env.MCP_MANAGER_URL;
+  const token = process.env.MCP_MANAGER_TOKEN;
   
   if (!baseUrl) {
-    throw new Error('MCP_OPERATIONS_URL not set in .env');
+    throw new Error('MCP_MANAGER_URL not set in .env');
   }
   
   if (!token) {
-    throw new Error('MCP_OPERATIONS_TOKEN not set in .env');
+    throw new Error('MCP_MANAGER_TOKEN not set in .env');
   }
   
   const url = `${baseUrl}${endpoint}`;
@@ -274,11 +274,11 @@ async function testAlternativeEndpoint() {
 // ============================================================================
 
 async function testMCPToolsList() {
-  const baseUrl = process.env.MCP_OPERATIONS_URL;
-  const token = process.env.MCP_OPERATIONS_TOKEN;
+  const baseUrl = process.env.MCP_MANAGER_URL;
+  const token = process.env.MCP_MANAGER_TOKEN;
   
   if (!baseUrl || !token) {
-    throw new Error('MCP_OPERATIONS_URL or MCP_OPERATIONS_TOKEN not set');
+    throw new Error('MCP_MANAGER_URL or MCP_MANAGER_TOKEN not set');
   }
   
   const url = `${baseUrl}/tools/list`;
@@ -322,15 +322,15 @@ async function testMCPToolsList() {
 }
 
 // ============================================================================
-// Test 8: Call MCP tool directly via tools/call (with MCP_OPERATIONS_TOKEN)
+// Test 8: Call MCP tool directly via tools/call (with MCP_MANAGER_TOKEN)
 // ============================================================================
 
 async function testMCPToolCall() {
-  const baseUrl = process.env.MCP_OPERATIONS_URL;
-  const token = process.env.MCP_OPERATIONS_TOKEN;
+  const baseUrl = process.env.MCP_MANAGER_URL;
+  const token = process.env.MCP_MANAGER_TOKEN;
   
   if (!baseUrl || !token) {
-    throw new Error('MCP_OPERATIONS_URL or MCP_OPERATIONS_TOKEN not set');
+    throw new Error('MCP_MANAGER_URL or MCP_MANAGER_TOKEN not set');
   }
   
   const url = `${baseUrl}/tools/call`;
@@ -383,11 +383,11 @@ async function testMCPToolCall() {
 // ============================================================================
 
 async function testMCPToolCallWithWorkatoToken() {
-  const baseUrl = process.env.MCP_OPERATIONS_URL;
+  const baseUrl = process.env.MCP_MANAGER_URL;
   const token = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!baseUrl || !token) {
-    throw new Error('MCP_OPERATIONS_URL or SALESFORCE_API_AUTH_TOKEN not set');
+    throw new Error('MCP_MANAGER_URL or SALESFORCE_API_AUTH_TOKEN not set');
   }
   
   const url = `${baseUrl}/tools/call`;
@@ -440,11 +440,11 @@ async function testMCPToolCallWithWorkatoToken() {
 // ============================================================================
 
 async function testMCPToolCallWithAPITokenHeader() {
-  const baseUrl = process.env.MCP_OPERATIONS_URL;
+  const baseUrl = process.env.MCP_MANAGER_URL;
   const token = process.env.SALESFORCE_API_AUTH_TOKEN;
   
   if (!baseUrl || !token) {
-    throw new Error('MCP_OPERATIONS_URL or SALESFORCE_API_AUTH_TOKEN not set');
+    throw new Error('MCP_MANAGER_URL or SALESFORCE_API_AUTH_TOKEN not set');
   }
   
   const url = `${baseUrl}/tools/call`;
@@ -504,16 +504,16 @@ async function main() {
   log('  This is the endpoint behind Search_cases_on_behalf_of_staff MCP tool', colors.yellow);
   
   // Check environment variables
-  const baseUrl = process.env.MCP_OPERATIONS_URL;
-  const token = process.env.MCP_OPERATIONS_TOKEN;
+  const baseUrl = process.env.MCP_MANAGER_URL;
+  const token = process.env.MCP_MANAGER_TOKEN;
   
   if (!baseUrl) {
-    logError('MCP_OPERATIONS_URL not set in .env');
+    logError('MCP_MANAGER_URL not set in .env');
     process.exit(1);
   }
   
   if (!token) {
-    logError('MCP_OPERATIONS_TOKEN not set in .env');
+    logError('MCP_MANAGER_TOKEN not set in .env');
     process.exit(1);
   }
   
@@ -528,7 +528,7 @@ async function main() {
   await runTest('Test 5: Search Cases with multiple filters', testSearchCasesMultipleFilters);
   await runTest('Test 6: Try alternative endpoint (search-cases-in-salesforce)', testAlternativeEndpoint);
   await runTest('Test 7: Check MCP tools/list endpoint', testMCPToolsList);
-  await runTest('Test 8: Call MCP tool directly via tools/call (MCP_OPERATIONS_TOKEN)', testMCPToolCall);
+  await runTest('Test 8: Call MCP tool directly via tools/call (MCP_MANAGER_TOKEN)', testMCPToolCall);
   await runTest('Test 9: Call MCP tool with SALESFORCE_API_AUTH_TOKEN', testMCPToolCallWithWorkatoToken);
   await runTest('Test 10: Call MCP tool with API-TOKEN header', testMCPToolCallWithAPITokenHeader);
   
