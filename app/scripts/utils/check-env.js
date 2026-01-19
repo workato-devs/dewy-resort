@@ -9,7 +9,8 @@ const fs = require('fs');
 const path = require('path');
 
 function loadEnvFile() {
-  const envPath = path.join(__dirname, '..', '.env');
+  // Script is now in scripts/utils/, so go up 2 levels to app root
+  const envPath = path.join(__dirname, '../..', '.env');
   
   if (!fs.existsSync(envPath)) {
     return {};

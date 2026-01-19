@@ -9,7 +9,8 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', 'var', 'hotel.db');
+// Script is now in scripts/setup/, so go up 2 levels to app root
+const DB_PATH = path.join(__dirname, '../..', 'var', 'hotel.db');
 
 // Helper to generate UUID
 function generateId() {

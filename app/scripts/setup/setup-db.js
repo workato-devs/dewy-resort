@@ -14,9 +14,10 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-const DB_PATH = path.join(__dirname, '..', 'var', 'hotel.db');
-const SCHEMA_PATH = path.join(__dirname, '..', 'database', 'schema.sql');
-const MIGRATIONS_DIR = path.join(__dirname, '..', 'database', 'migrations');
+// Script is now in scripts/setup/, so go up 2 levels to app root
+const DB_PATH = path.join(__dirname, '../..', 'var', 'hotel.db');
+const SCHEMA_PATH = path.join(__dirname, '../..', 'database', 'schema.sql');
+const MIGRATIONS_DIR = path.join(__dirname, '../..', 'database', 'migrations');
 
 // Helper to generate UUID
 function generateId() {

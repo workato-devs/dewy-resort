@@ -9,8 +9,9 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', 'var', 'hotel.db');
-const SCHEMA_PATH = path.join(__dirname, '..', 'database', 'schema.sql');
+// Script is now in scripts/setup/, so go up 2 levels to app root
+const DB_PATH = path.join(__dirname, '../..', 'var', 'hotel.db');
+const SCHEMA_PATH = path.join(__dirname, '../..', 'database', 'schema.sql');
 
 function initDatabase() {
   try {
