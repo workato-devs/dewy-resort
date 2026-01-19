@@ -280,52 +280,52 @@ echo -e "${YELLOW}Step 4: Updating app/.env file...${NC}"
 
 if [ -f "$ENV_FILE" ]; then
     # Check if the variables exist
-    if grep -q "^WORKATO_API_COLLECTION_URL=" "$ENV_FILE"; then
-        # Update existing WORKATO_API_COLLECTION_URL
+    if grep -q "^SALESFORCE_API_COLLECTION_URL=" "$ENV_FILE"; then
+        # Update existing SALESFORCE_API_COLLECTION_URL
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|^WORKATO_API_COLLECTION_URL=.*|WORKATO_API_COLLECTION_URL=$API_URL|" "$ENV_FILE"
+            sed -i '' "s|^SALESFORCE_API_COLLECTION_URL=.*|SALESFORCE_API_COLLECTION_URL=$API_URL|" "$ENV_FILE"
         else
-            sed -i "s|^WORKATO_API_COLLECTION_URL=.*|WORKATO_API_COLLECTION_URL=$API_URL|" "$ENV_FILE"
+            sed -i "s|^SALESFORCE_API_COLLECTION_URL=.*|SALESFORCE_API_COLLECTION_URL=$API_URL|" "$ENV_FILE"
         fi
-        echo -e "${GREEN}✓ Updated WORKATO_API_COLLECTION_URL${NC}"
+        echo -e "${GREEN}✓ Updated SALESFORCE_API_COLLECTION_URL${NC}"
     else
-        # Add WORKATO_API_COLLECTION_URL after WORKATO_HOST
+        # Add SALESFORCE_API_COLLECTION_URL after WORKATO_HOST
         if [[ "$OSTYPE" == "darwin"* ]]; then
             sed -i '' "/^WORKATO_HOST=/a\\
 \\
 # Workato API Collection Configuration\\
-WORKATO_API_COLLECTION_URL=$API_URL\\
-WORKATO_API_AUTH_TOKEN=
+SALESFORCE_API_COLLECTION_URL=$API_URL\\
+SALESFORCE_API_AUTH_TOKEN=
 " "$ENV_FILE"
         else
             sed -i "/^WORKATO_HOST=/a\\
 \\
 # Workato API Collection Configuration\\
-WORKATO_API_COLLECTION_URL=$API_URL\\
-WORKATO_API_AUTH_TOKEN=" "$ENV_FILE"
+SALESFORCE_API_COLLECTION_URL=$API_URL\\
+SALESFORCE_API_AUTH_TOKEN=" "$ENV_FILE"
         fi
-        echo -e "${GREEN}✓ Added WORKATO_API_COLLECTION_URL${NC}"
+        echo -e "${GREEN}✓ Added SALESFORCE_API_COLLECTION_URL${NC}"
     fi
     
-    if grep -q "^WORKATO_API_AUTH_TOKEN=" "$ENV_FILE"; then
-        # Update existing WORKATO_API_AUTH_TOKEN
+    if grep -q "^SALESFORCE_API_AUTH_TOKEN=" "$ENV_FILE"; then
+        # Update existing SALESFORCE_API_AUTH_TOKEN
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|^WORKATO_API_AUTH_TOKEN=.*|WORKATO_API_AUTH_TOKEN=$API_TOKEN|" "$ENV_FILE"
+            sed -i '' "s|^SALESFORCE_API_AUTH_TOKEN=.*|SALESFORCE_API_AUTH_TOKEN=$API_TOKEN|" "$ENV_FILE"
         else
-            sed -i "s|^WORKATO_API_AUTH_TOKEN=.*|WORKATO_API_AUTH_TOKEN=$API_TOKEN|" "$ENV_FILE"
+            sed -i "s|^SALESFORCE_API_AUTH_TOKEN=.*|SALESFORCE_API_AUTH_TOKEN=$API_TOKEN|" "$ENV_FILE"
         fi
-        echo -e "${GREEN}✓ Updated WORKATO_API_AUTH_TOKEN${NC}"
+        echo -e "${GREEN}✓ Updated SALESFORCE_API_AUTH_TOKEN${NC}"
     else
-        # Add WORKATO_API_AUTH_TOKEN after WORKATO_API_COLLECTION_URL
+        # Add SALESFORCE_API_AUTH_TOKEN after SALESFORCE_API_COLLECTION_URL
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "/^WORKATO_API_COLLECTION_URL=/a\\
-WORKATO_API_AUTH_TOKEN=$API_TOKEN
+            sed -i '' "/^SALESFORCE_API_COLLECTION_URL=/a\\
+SALESFORCE_API_AUTH_TOKEN=$API_TOKEN
 " "$ENV_FILE"
         else
-            sed -i "/^WORKATO_API_COLLECTION_URL=/a\\
-WORKATO_API_AUTH_TOKEN=$API_TOKEN" "$ENV_FILE"
+            sed -i "/^SALESFORCE_API_COLLECTION_URL=/a\\
+SALESFORCE_API_AUTH_TOKEN=$API_TOKEN" "$ENV_FILE"
         fi
-        echo -e "${GREEN}✓ Added WORKATO_API_AUTH_TOKEN${NC}"
+        echo -e "${GREEN}✓ Added SALESFORCE_API_AUTH_TOKEN${NC}"
     fi
     
     echo -e "${GREEN}✓ app/.env file updated successfully${NC}"

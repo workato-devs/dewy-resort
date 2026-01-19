@@ -549,7 +549,7 @@ curl -X POST "https://apim.workato.com/your-collection-id/search_room_by_number"
 **Cause**: API token is missing, expired, or incorrect.
 
 **Solution**:
-1. Verify `WORKATO_API_AUTH_TOKEN` in `.env` matches your Workato API key
+1. Verify `SALESFORCE_API_AUTH_TOKEN` in `.env` matches your Workato API key
 2. Check API key permissions in Workato:
    - Go to **Settings** → **API Keys & Clients**
    - Ensure "Execute recipes" permission is enabled
