@@ -72,7 +72,7 @@
               "limit": "2",
               "Primary_Guest__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_id\"]}')}",
               "Check_In_Date__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"check_in_date\"]}')}",
-              "Status__c": "Reserved"
+              "Status__c": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}') : 'Reserved'"
             },
             "extended_output_schema": [
               {
