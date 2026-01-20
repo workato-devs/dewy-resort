@@ -20,7 +20,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"status_filter\",\"label\":\"Status filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Room Status__c picklist value\"},{\"name\":\"floor_filter\",\"label\":\"Floor filter\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Floor number (1-10)\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results (default 20)\"}]"
+        "schema": "[{\"name\":\"status_filter\",\"label\":\"Status filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Room Status__c picklist value\"},{\"name\":\"floor_filter\",\"label\":\"Floor filter\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":true,\"hint\":\"Floor number (1-10)\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":true,\"hint\":\"Maximum results (default 20)\"}]"
       },
       "response": {
         "content_type": "json",
@@ -238,20 +238,20 @@
             "hint": "Room Status__c picklist value"
           },
           {
-            "control_type": "number",
+            "control_type": "integer",
             "label": "Floor filter",
-            "parse_output": "float_conversion",
+            "parse_output": "integer_conversion",
             "name": "floor_filter",
-            "type": "number",
+            "type": "integer",
             "optional": true,
             "hint": "Floor number (1-10)"
           },
           {
-            "control_type": "number",
+            "control_type": "integer",
             "label": "Limit",
-            "parse_output": "float_conversion",
+            "parse_output": "integer_conversion",
             "name": "limit",
-            "type": "number",
+            "type": "integer",
             "optional": true,
             "hint": "Maximum results (default 20)"
           }

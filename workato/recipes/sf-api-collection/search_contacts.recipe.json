@@ -22,7 +22,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"query\",\"label\":\"Query\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Fuzzy search on FirstName, LastName, Email (uses LIKE)\"},{\"name\":\"email\",\"label\":\"Email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact.Email (exact match)\"},{\"name\":\"contact_type\",\"label\":\"Contact type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact_Type__c filter (Guest, Manager, Vendor)\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
+        "schema": "[{\"name\":\"query\",\"label\":\"Query\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Fuzzy search on FirstName, LastName, Email (uses LIKE)\"},{\"name\":\"email\",\"label\":\"Email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact.Email (exact match)\"},{\"name\":\"contact_type\",\"label\":\"Contact type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Contact_Type__c filter (Guest, Manager, Vendor)\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
       },
       "response": {
         "content_type": "json",
@@ -193,8 +193,8 @@
           {
             "control_type": "number",
             "label": "Limit",
-            "parse_output": "float_conversion",
-            "type": "number",
+            "parse_output": "integer_conversion",
+            "type": "integer",
             "name": "limit",
             "optional": true
           }

@@ -22,7 +22,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"type\",\"label\":\"Type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Type filter (Maintenance, Service Request)\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Status filter (New, Working, Escalated, Closed)\"},{\"name\":\"priority\",\"label\":\"Priority\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Priority filter (Low, Medium, High, Urgent)\"},{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by guest email (Contact.Email)\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by room number (Room__r.Room_Number__c)\"},{\"name\":\"assigned_to\",\"label\":\"Assigned to\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by owner ID\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
+        "schema": "[{\"name\":\"type\",\"label\":\"Type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Type filter (Maintenance, Service Request)\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Status filter (New, Working, Escalated, Closed)\"},{\"name\":\"priority\",\"label\":\"Priority\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Priority filter (Low, Medium, High, Urgent)\"},{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by guest email (Contact.Email)\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by room number (Room__r.Room_Number__c)\"},{\"name\":\"assigned_to\",\"label\":\"Assigned to\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by owner ID\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
       },
       "response": {
         "content_type": "json",
@@ -285,11 +285,11 @@
             "hint": "Filter by owner ID"
           },
           {
-            "control_type": "number",
+            "control_type": "integer",
             "label": "Limit",
-            "parse_output": "float_conversion",
+            "parse_output": "integer_conversion",
             "name": "limit",
-            "type": "number",
+            "type": "integer",
             "optional": true,
             "hint": "Maximum results (default 50)"
           }
