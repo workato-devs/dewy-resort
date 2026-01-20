@@ -20,7 +20,27 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Token Refresh] Proactive refresh request from user ${userId} with role ${role}`);
 
-    // Attempt to refresh tokens
+    // Check if this is a Cognito session before attempting refresh
+    const { executeQueryOne } = await import('@/lib/db/client');
+    const { SessionRow } = await import('@/types');
+    
+    const sessionData = executeQueryOne<any>(
+      `SELECT cognito_refresh_token FROM sessions WHERE id = ?`,
+      [sessionId]
+    );
+    
+    // If no Cognito refresh token, this is not a Cognito session (Mock or Okta)
+    // Return success without attempting refresh
+    if (!sessionData || !sessionData.cognito_refresh_token) {
+      console.log(`[Token Refresh] Not a Cognito session, skipping refresh for user ${userId}`);
+      return NextResponse.json({ 
+        success: true,
+        message: 'Session does not require token refresh',
+        skipped: true
+      });
+    }
+
+    // Attempt to refresh Cognito tokens
     const refreshed = await refreshCognitoTokens(sessionId);
     
     if (!refreshed) {
