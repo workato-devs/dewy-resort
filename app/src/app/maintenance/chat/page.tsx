@@ -17,6 +17,7 @@
 import { useState, useEffect } from 'react';
 import { BedrockChatInterface } from '@/components/shared/BedrockChatInterface';
 import { useToast } from '@/hooks/use-toast';
+import { useTokenRefresh } from '@/hooks/use-token-refresh';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -47,6 +48,15 @@ export default function MaintenanceChatPage() {
   const [configError, setConfigError] = useState<string | null>(null);
   
   const { toast } = useToast();
+
+  // Enable proactive token refresh to prevent session expiration
+  useTokenRefresh({
+    enabled: bedrockEnabled, // Only refresh when using Bedrock chat
+    onRefreshError: (error) => {
+      console.error('Token refresh failed:', error);
+      // Session will be invalidated on next API call
+    },
+  });
 
   // Check Bedrock availability on mount
   useEffect(() => {
@@ -87,11 +97,36 @@ export default function MaintenanceChatPage() {
    */
   const handleBedrockError = (error: Error) => {
     console.error('Bedrock chat error:', error);
-    toast({
-      title: 'Chat Error',
-      description: error.message || 'An error occurred in the chat',
-      variant: 'destructive',
-    });
+    
+    // Check if error indicates session expiration
+    const errorMessage = error.message || '';
+    const isAuthError = 
+      errorMessage.includes('session has expired') ||
+      errorMessage.includes('Please log in again') ||
+      errorMessage.includes('Failed to exchange ID token') ||
+      errorMessage.toLowerCase().includes('authentication') ||
+      errorMessage.toLowerCase().includes('unauthorized');
+    
+    if (isAuthError) {
+      // Show clear message and redirect to login
+      toast({
+        title: 'Session Expired',
+        description: 'Your session has expired. Redirecting to login...',
+        variant: 'destructive',
+      });
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } else {
+      // Generic error
+      toast({
+        title: 'Chat Error',
+        description: error.message || 'An error occurred in the chat',
+        variant: 'destructive',
+      });
+    }
   };
 
   // Show loading state while checking configuration

@@ -128,11 +128,20 @@ export async function POST(request: NextRequest) {
     const sanitizedMessage = message.trim();
 
     // Get ID token from session (needed for Cognito credentials)
-    const { getCognitoIdToken, refreshCognitoTokens } = await import('@/lib/auth/session');
+    const { getCognitoIdToken, refreshCognitoTokens, deleteSession } = await import('@/lib/auth/session');
     let idToken = await getCognitoIdToken(sessionId);
     
     if (!idToken) {
-      throw new AuthenticationError('ID token not available in session');
+      // Session was invalidated (refresh token expired or no token available)
+      throw new AuthenticationError(
+        'Your session has expired. Please log in again.',
+        { 
+          userId, 
+          role,
+          code: 'SESSION_EXPIRED',
+          requiresLogin: true 
+        }
+      );
     }
 
     // Exchange ID token for AWS credentials via Cognito Identity Pool
@@ -155,11 +164,14 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       // Try token refresh if credential exchange fails
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('Token expired') || errorMessage.includes('NotAuthorizedException')) {
+      if (errorMessage.includes('Token expired') || 
+          errorMessage.includes('NotAuthorizedException') ||
+          errorMessage.includes('Invalid login token')) {
         ErrorLogger.info('Token expired during credential exchange, attempting refresh...', 'bedrock.auth.refresh');
         const refreshed = await refreshCognitoTokens(sessionId);
         
         if (refreshed) {
+          // Retry with new token
           credentials = await identityPoolService.getCredentialsForUser(
             refreshed.idToken,
             sessionId,
@@ -169,9 +181,16 @@ export async function POST(request: NextRequest) {
           idToken = refreshed.idToken;
           ErrorLogger.info('Successfully recovered from token expiration via refresh', 'bedrock.auth.refresh');
         } else {
+          // Refresh failed - invalidate session
+          await deleteSession(sessionId);
           throw new AuthenticationError(
-            'Your session has expired. Please refresh the page to continue.',
-            { userId, role }
+            'Your session has expired. Please log in again.',
+            { 
+              userId, 
+              role,
+              code: 'SESSION_EXPIRED',
+              requiresLogin: true 
+            }
           );
         }
       } else {
