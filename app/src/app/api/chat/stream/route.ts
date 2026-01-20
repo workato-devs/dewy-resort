@@ -126,6 +126,21 @@ export async function POST(request: NextRequest) {
 
     // Sanitize message
     const sanitizedMessage = message.trim();
+    
+    // Generate timestamp for this specific message
+    const messageTimestamp = new Date().toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short',
+    });
+    
+    // Prepend timestamp to user message for temporal context
+    const messageWithTimestamp = `[Current time: ${messageTimestamp}]\n\n${sanitizedMessage}`;
 
     // Get ID token from session (needed for Cognito credentials)
     const { getCognitoIdToken, refreshCognitoTokens, deleteSession } = await import('@/lib/auth/session');
@@ -220,11 +235,11 @@ export async function POST(request: NextRequest) {
       conversation = await conversationManager.createConversation(userId, role);
     }
 
-    // Add user message to conversation
+    // Add user message to conversation (with timestamp for LLM context)
     await conversationManager.addMessage(conversation.id, {
       id: `msg_${Date.now()}_user`,
       role: 'user',
-      content: sanitizedMessage,
+      content: messageWithTimestamp,
       timestamp: new Date(),
     }, userId);
 
@@ -263,6 +278,19 @@ export async function POST(request: NextRequest) {
       const toolsList = mcpTools.length > 0 
         ? mcpTools.map(t => t.name).join(', ')
         : 'None available';
+      
+      // Generate current timestamp with timezone
+      const now = new Date();
+      const currentDateTime = now.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short',
+      });
         
       const userContext = {
         userName: user?.name || 'User',
@@ -270,6 +298,7 @@ export async function POST(request: NextRequest) {
         userRole: role,
         roomNumber: user?.roomNumber || 'N/A',
         tools: toolsList,
+        currentDateTime,
       };
       
       systemPrompt = await promptManager.getPromptWithVariables(role, userContext);
