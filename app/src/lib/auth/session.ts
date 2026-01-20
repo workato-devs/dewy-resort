@@ -483,7 +483,7 @@ function isTokenExpired(token: string, bufferSeconds: number = 300): boolean {
  * 
  * @param sessionId - Session ID
  * @param autoRefresh - Whether to automatically refresh expired tokens (default: true)
- * @returns ID token or null if not found
+ * @returns ID token or null if not found or refresh failed
  */
 export async function getCognitoIdToken(sessionId: string, autoRefresh: boolean = true): Promise<string | null> {
   const session = executeQueryOne<SessionRow>(
@@ -506,9 +506,10 @@ export async function getCognitoIdToken(sessionId: string, autoRefresh: boolean 
       console.log('[Token Check] Successfully refreshed ID token');
       return refreshed.idToken;
     } else {
-      console.warn('[Token Check] Failed to refresh ID token, returning expired token');
-      // Return the expired token anyway - the caller will handle the error
-      return session.cognito_id_token;
+      // Refresh failed (likely refresh token expired) - invalidate session
+      console.error('[Token Check] Failed to refresh token, invalidating session');
+      await deleteSession(sessionId);
+      return null; // Return null instead of expired token
     }
   }
   

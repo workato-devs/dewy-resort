@@ -591,7 +591,8 @@ export class SalesforceClient {
     if (this.mockDataStore) {
       const serviceRequest = await this.mockDataStore.createServiceRequest(data);
       // Invalidate all service request cache entries (updated for new cache keys)
-      this.invalidateCacheByPrefix('searchCases:ServiceRequest:');
+      this.invalidateCacheByPrefix('searchCases:Housekeeping:');
+      this.invalidateCacheByPrefix('searchCases:Room Service:');
       return serviceRequest;
     }
 
@@ -602,7 +603,8 @@ export class SalesforceClient {
     );
 
     // Invalidate all service request cache entries (updated for new cache keys)
-    this.invalidateCacheByPrefix('searchCases:ServiceRequest:');
+    this.invalidateCacheByPrefix('searchCases:Housekeeping:');
+    this.invalidateCacheByPrefix('searchCases:Room Service:');
     
     return serviceRequest;
   }
@@ -612,7 +614,7 @@ export class SalesforceClient {
    * Implements caching with 60s TTL for search results
    * 
    * MIGRATION NOTE: Updated to use new /search-cases endpoint
-   * Always filters by type='Service Request'
+   * Searches for Housekeeping and Room Service case types (Salesforce picklist values)
    * Requires at least one additional filter parameter
    * Uses business identifiers (guest_email, not guest_id)
    * 
@@ -621,73 +623,106 @@ export class SalesforceClient {
    * @throws WorkatoSalesforceError if no filters provided
    */
   async searchServiceRequests(criteria: ServiceRequestSearch = {}): Promise<ServiceRequest[]> {
-    // Build case search criteria with type='Service Request'
-    const caseSearchCriteria: any = {
-      type: 'Service Request',
-      status: criteria.status,
-      room_number: criteria.room_number,
-      guest_email: criteria.guest_email || criteria.guest_id, // Support both for backward compatibility
-      limit: 1000,
-    };
-
-    // Check cache first
-    const cacheKey = this.getCacheKey('searchCases:ServiceRequest', caseSearchCriteria);
-    const cachedResult = this.getCachedResponse<ServiceRequest[]>(cacheKey);
-    
-    if (cachedResult !== null) {
-      return cachedResult;
-    }
-
     // Mock mode: use mock data store (no validation required)
     if (this.mockDataStore) {
+      const cacheKey = this.getCacheKey('searchCases:ServiceRequest', criteria);
+      const cachedResult = this.getCachedResponse<ServiceRequest[]>(cacheKey);
+      if (cachedResult !== null) {
+        return cachedResult;
+      }
+      
       const serviceRequests = await this.mockDataStore.getServiceRequests(criteria);
       this.setCachedResponse(cacheKey, serviceRequests, 60000); // 60s TTL
       return serviceRequests;
     }
 
-    // Validate that at least one filter is provided (type is always present, so this will pass)
-    this.validateSearchCriteria(
-      caseSearchCriteria,
-      ['type', 'status', 'room_number', 'guest_email'],
-      'searchServiceRequests'
-    );
-
-    // Real API call with retry logic
-    // Updated endpoint: /search-cases (API Collection)
-    const response = await this.retryWithBackoff(
-      () => this.makeRequest<{ cases: any[]; count: number; found: boolean }>(
-        'POST', 
-        '/search-cases', 
-        caseSearchCriteria
-      ),
-      this.config.retryAttempts
-    );
-
-    // Extract cases array from response
-    const cases = response.cases || [];
-
-    // Map cases to ServiceRequest format
-    const serviceRequests: ServiceRequest[] = cases.map((c: any) => ({
-      id: c.id,
-      guest_id: c.contact_id || '',
-      room_number: c.room_number || '',
-      type: this.mapServiceRequestType(c.subject),
-      priority: this.mapPriority(c.priority) as any,
-      description: c.description || '',
-      status: this.mapServiceRequestStatus(c.status) as any,
-      salesforce_ticket_id: c.case_number,
-      created_at: c.created_date,
-      updated_at: c.last_modified_date,
-    }));
-
-    // Cache the result
-    this.setCachedResponse(cacheKey, serviceRequests, 60000); // 60s TTL
+    // Real API: Search for Housekeeping and Room Service case types
+    // Since the API doesn't support OR queries, we need to make separate calls
+    const serviceTypes = ['Housekeeping', 'Room Service'];
+    const allServiceRequests: ServiceRequest[] = [];
     
-    return serviceRequests;
+    for (const caseType of serviceTypes) {
+      // Build case search criteria for this type
+      const caseSearchCriteria: any = {
+        type: caseType,
+        status: criteria.status,
+        room_number: criteria.room_number,
+        guest_email: criteria.guest_email || criteria.guest_id, // Support both for backward compatibility
+        limit: 1000,
+      };
+
+      // Check cache first
+      const cacheKey = this.getCacheKey(`searchCases:${caseType}`, caseSearchCriteria);
+      const cachedResult = this.getCachedResponse<ServiceRequest[]>(cacheKey);
+      
+      if (cachedResult !== null) {
+        allServiceRequests.push(...cachedResult);
+        continue;
+      }
+
+      try {
+        // Validate that at least one filter is provided (type is always present, so this will pass)
+        this.validateSearchCriteria(
+          caseSearchCriteria,
+          ['type', 'status', 'room_number', 'guest_email'],
+          'searchServiceRequests'
+        );
+
+        // Real API call with retry logic
+        const response = await this.retryWithBackoff(
+          () => this.makeRequest<{ cases: any[]; count: number; found: boolean }>(
+            'POST', 
+            '/search-cases', 
+            caseSearchCriteria
+          ),
+          this.config.retryAttempts
+        );
+
+        // Extract cases array from response
+        const cases = response.cases || [];
+
+        // Map cases to ServiceRequest format
+        const serviceRequests: ServiceRequest[] = cases.map((c: any) => ({
+          id: c.id,
+          guest_id: c.contact_id || '',
+          room_number: c.room_number || '',
+          type: this.mapCaseTypeToServiceRequestType(c.type),
+          priority: this.mapPriority(c.priority) as any,
+          description: c.description || '',
+          status: this.mapServiceRequestStatus(c.status) as any,
+          salesforce_ticket_id: c.case_number,
+          created_at: c.created_date,
+          updated_at: c.last_modified_date,
+        }));
+
+        // Cache the result for this type
+        this.setCachedResponse(cacheKey, serviceRequests, 60000); // 60s TTL
+        
+        allServiceRequests.push(...serviceRequests);
+      } catch (error) {
+        // If one type fails, continue with others
+        console.warn(`[SalesforceClient] Failed to fetch ${caseType} service requests: ${(error as Error).message}`);
+      }
+    }
+    
+    return allServiceRequests;
   }
 
   /**
-   * Helper: Map case subject to ServiceRequestType
+   * Helper: Map Salesforce Case Type to ServiceRequestType
+   */
+  private mapCaseTypeToServiceRequestType(caseType: string): any {
+    const mapping: Record<string, string> = {
+      'Housekeeping': 'housekeeping',
+      'Room Service': 'room_service',
+      'Maintenance': 'maintenance',
+      'Concierge': 'concierge',
+    };
+    return mapping[caseType] || 'concierge';
+  }
+
+  /**
+   * Helper: Map case subject to ServiceRequestType (legacy fallback)
    */
   private mapServiceRequestType(subject: string): any {
     // Try to extract type from subject
@@ -722,7 +757,8 @@ export class SalesforceClient {
         );
       }
       // Invalidate all service request cache entries (updated for new cache keys)
-      this.invalidateCacheByPrefix('searchCases:ServiceRequest:');
+      this.invalidateCacheByPrefix('searchCases:Housekeeping:');
+      this.invalidateCacheByPrefix('searchCases:Room Service:');
       return serviceRequest;
     }
 
@@ -733,7 +769,8 @@ export class SalesforceClient {
     );
 
     // Invalidate all service request cache entries (updated for new cache keys)
-    this.invalidateCacheByPrefix('searchCases:ServiceRequest:');
+    this.invalidateCacheByPrefix('searchCases:Housekeeping:');
+    this.invalidateCacheByPrefix('searchCases:Room Service:');
     
     return serviceRequest;
   }
@@ -772,6 +809,7 @@ export class SalesforceClient {
       const maintenanceTask = await this.mockDataStore.createMaintenanceTask(data);
       // Invalidate all maintenance task cache entries (updated for new cache keys)
       this.invalidateCacheByPrefix('searchCases:Maintenance:');
+      this.invalidateCacheByPrefix('searchCases:Facilities:');
       this.invalidateCacheByPrefix('getMaintenanceTask:');
       return maintenanceTask;
     }
@@ -784,6 +822,7 @@ export class SalesforceClient {
 
     // Invalidate all maintenance task cache entries (updated for new cache keys)
     this.invalidateCacheByPrefix('searchCases:Maintenance:');
+    this.invalidateCacheByPrefix('searchCases:Facilities:');
     this.invalidateCacheByPrefix('getMaintenanceTask:');
     
     return maintenanceTask;
@@ -794,7 +833,7 @@ export class SalesforceClient {
    * Implements caching with 60s TTL for search results
    * 
    * MIGRATION NOTE: Updated to use new /search-cases endpoint
-   * Always filters by type='Maintenance'
+   * Searches for Maintenance and Facilities case types (Salesforce picklist values)
    * Requires at least one additional filter parameter
    * Uses business identifiers (room_number, not room_id)
    * 
@@ -803,70 +842,90 @@ export class SalesforceClient {
    * @throws WorkatoSalesforceError if no filters provided
    */
   async searchMaintenanceTasks(criteria: MaintenanceTaskSearch = {}): Promise<MaintenanceTask[]> {
-    // Build case search criteria with type='Maintenance'
-    const caseSearchCriteria: any = {
-      type: 'Maintenance',
-      status: criteria.status,
-      priority: criteria.priority,
-      assigned_to: criteria.assigned_to,
-      room_number: criteria.room_number || criteria.room_id, // Support both for backward compatibility
-      limit: 1000,
-    };
-
-    // Check cache first
-    const cacheKey = this.getCacheKey('searchCases:Maintenance', caseSearchCriteria);
-    const cachedResult = this.getCachedResponse<MaintenanceTask[]>(cacheKey);
-    
-    if (cachedResult !== null) {
-      return cachedResult;
-    }
-
     // Mock mode: use mock data store (no validation required)
     if (this.mockDataStore) {
+      const cacheKey = this.getCacheKey('searchCases:Maintenance', criteria);
+      const cachedResult = this.getCachedResponse<MaintenanceTask[]>(cacheKey);
+      if (cachedResult !== null) {
+        return cachedResult;
+      }
+      
       const maintenanceTasks = await this.mockDataStore.getMaintenanceTasks(criteria);
       this.setCachedResponse(cacheKey, maintenanceTasks, 60000); // 60s TTL
       return maintenanceTasks;
     }
 
-    // Validate that at least one filter is provided (type is always present, so this will pass)
-    this.validateSearchCriteria(
-      caseSearchCriteria,
-      ['type', 'status', 'priority', 'room_number', 'assigned_to'],
-      'searchMaintenanceTasks'
-    );
-
-    // Real API call with retry logic
-    // Updated endpoint: /search-cases (API Collection)
-    const response = await this.retryWithBackoff(
-      () => this.makeRequest<{ cases: any[]; count: number; found: boolean }>(
-        'POST', 
-        '/search-cases', 
-        caseSearchCriteria
-      ),
-      this.config.retryAttempts
-    );
-
-    // Extract cases array from response
-    const cases = response.cases || [];
-
-    // Map cases to MaintenanceTask format
-    const maintenanceTasks: MaintenanceTask[] = cases.map((c: any) => ({
-      id: c.id,
-      room_id: c.room_id || '',
-      title: c.subject || '',
-      description: c.description || '',
-      priority: this.mapPriority(c.priority),
-      status: this.mapMaintenanceStatus(c.status),
-      assigned_to: c.owner_id || null,
-      created_by: c.owner_id || '',
-      created_at: c.created_date,
-      updated_at: c.last_modified_date,
-    }));
-
-    // Cache the result
-    this.setCachedResponse(cacheKey, maintenanceTasks, 60000); // 60s TTL
+    // Real API: Search for Maintenance and Facilities case types
+    // Since the API doesn't support OR queries, we need to make separate calls
+    const maintenanceTypes = ['Maintenance', 'Facilities'];
+    const allMaintenanceTasks: MaintenanceTask[] = [];
     
-    return maintenanceTasks;
+    for (const caseType of maintenanceTypes) {
+      // Build case search criteria for this type
+      const caseSearchCriteria: any = {
+        type: caseType,
+        status: criteria.status,
+        priority: criteria.priority,
+        assigned_to: criteria.assigned_to,
+        room_number: criteria.room_number || criteria.room_id, // Support both for backward compatibility
+        limit: 1000,
+      };
+
+      // Check cache first
+      const cacheKey = this.getCacheKey(`searchCases:${caseType}`, caseSearchCriteria);
+      const cachedResult = this.getCachedResponse<MaintenanceTask[]>(cacheKey);
+      
+      if (cachedResult !== null) {
+        allMaintenanceTasks.push(...cachedResult);
+        continue;
+      }
+
+      try {
+        // Validate that at least one filter is provided (type is always present, so this will pass)
+        this.validateSearchCriteria(
+          caseSearchCriteria,
+          ['type', 'status', 'priority', 'room_number', 'assigned_to'],
+          'searchMaintenanceTasks'
+        );
+
+        // Real API call with retry logic
+        const response = await this.retryWithBackoff(
+          () => this.makeRequest<{ cases: any[]; count: number; found: boolean }>(
+            'POST', 
+            '/search-cases', 
+            caseSearchCriteria
+          ),
+          this.config.retryAttempts
+        );
+
+        // Extract cases array from response
+        const cases = response.cases || [];
+
+        // Map cases to MaintenanceTask format
+        const maintenanceTasks: MaintenanceTask[] = cases.map((c: any) => ({
+          id: c.id,
+          room_id: c.room_id || '',
+          title: c.subject || '',
+          description: c.description || '',
+          priority: this.mapPriority(c.priority),
+          status: this.mapMaintenanceStatus(c.status),
+          assigned_to: c.owner_id || null,
+          created_by: c.owner_id || '',
+          created_at: c.created_date,
+          updated_at: c.last_modified_date,
+        }));
+
+        // Cache the result for this type
+        this.setCachedResponse(cacheKey, maintenanceTasks, 60000); // 60s TTL
+        
+        allMaintenanceTasks.push(...maintenanceTasks);
+      } catch (error) {
+        // If one type fails, continue with others
+        console.warn(`[SalesforceClient] Failed to fetch ${caseType} maintenance tasks: ${(error as Error).message}`);
+      }
+    }
+    
+    return allMaintenanceTasks;
   }
 
   /**

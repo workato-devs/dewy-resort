@@ -30,13 +30,13 @@ node scripts/verify-db.js
 ## Demo Credentials
 
 ### Managers
-- Email: `manager1@hotel.com` / Password: `password123`
-- Email: `manager2@hotel.com` / Password: `password123`
+- Email: `manager1@hotel.com` / Password: `Hotel2026!`
+- Email: `manager2@hotel.com` / Password: `Hotel2026!`
 
 ### Guests
-- Email: `guest1@email.com` / Password: `password123` (Room 101)
-- Email: `guest2@email.com` / Password: `password123` (Room 102)
-- Email: `guest3@email.com` / Password: `password123` (Room 103)
+- Email: `guest1@email.com` / Password: `Hotel2026!` (Room 101)
+- Email: `guest2@email.com` / Password: `Hotel2026!` (Room 102)
+- Email: `guest3@email.com` / Password: `Hotel2026!` (Room 103)
 - ... (guest4-10@email.com, Rooms 104-105, 201-205)
 
 ## Database Schema

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "db:setup": "node scripts/setup/setup-db.js",
     "db:init": "node scripts/setup/init-db.js",
     "db:seed": "node scripts/setup/seed-db.js",
     "db:migrate": "node scripts/migration/migrate-add-mock-flag.js",

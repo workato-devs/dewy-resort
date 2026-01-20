@@ -52,8 +52,8 @@ if (effectiveProvider === 'mock') {
   console.log('  📝 Authentication: Local SQLite (email/password)');
   console.log('  🔌 API Calls: Mocked responses');
   console.log('\n  Demo Credentials:');
-  console.log('    Guest:   guest1@hotel.com / password123');
-  console.log('    Manager: manager1@hotel.com / password123');
+  console.log('    Guest:   guest1@hotel.com / Hotel2026!');
+  console.log('    Manager: manager1@hotel.com / Hotel2026!');
 } else if (effectiveProvider === 'okta') {
   console.log('\n  🌐 REAL MODE: Enabled');
   console.log('  🔐 Authentication: Okta OAuth 2.0');

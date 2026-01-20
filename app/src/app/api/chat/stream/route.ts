@@ -126,13 +126,37 @@ export async function POST(request: NextRequest) {
 
     // Sanitize message
     const sanitizedMessage = message.trim();
+    
+    // Generate timestamp for this specific message
+    const messageTimestamp = new Date().toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short',
+    });
+    
+    // Prepend timestamp to user message for temporal context
+    const messageWithTimestamp = `[Current time: ${messageTimestamp}]\n\n${sanitizedMessage}`;
 
     // Get ID token from session (needed for Cognito credentials)
-    const { getCognitoIdToken, refreshCognitoTokens } = await import('@/lib/auth/session');
+    const { getCognitoIdToken, refreshCognitoTokens, deleteSession } = await import('@/lib/auth/session');
     let idToken = await getCognitoIdToken(sessionId);
     
     if (!idToken) {
-      throw new AuthenticationError('ID token not available in session');
+      // Session was invalidated (refresh token expired or no token available)
+      throw new AuthenticationError(
+        'Your session has expired. Please log in again.',
+        { 
+          userId, 
+          role,
+          code: 'SESSION_EXPIRED',
+          requiresLogin: true 
+        }
+      );
     }
 
     // Exchange ID token for AWS credentials via Cognito Identity Pool
@@ -155,11 +179,14 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       // Try token refresh if credential exchange fails
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('Token expired') || errorMessage.includes('NotAuthorizedException')) {
+      if (errorMessage.includes('Token expired') || 
+          errorMessage.includes('NotAuthorizedException') ||
+          errorMessage.includes('Invalid login token')) {
         ErrorLogger.info('Token expired during credential exchange, attempting refresh...', 'bedrock.auth.refresh');
         const refreshed = await refreshCognitoTokens(sessionId);
         
         if (refreshed) {
+          // Retry with new token
           credentials = await identityPoolService.getCredentialsForUser(
             refreshed.idToken,
             sessionId,
@@ -169,9 +196,16 @@ export async function POST(request: NextRequest) {
           idToken = refreshed.idToken;
           ErrorLogger.info('Successfully recovered from token expiration via refresh', 'bedrock.auth.refresh');
         } else {
+          // Refresh failed - invalidate session
+          await deleteSession(sessionId);
           throw new AuthenticationError(
-            'Your session has expired. Please refresh the page to continue.',
-            { userId, role }
+            'Your session has expired. Please log in again.',
+            { 
+              userId, 
+              role,
+              code: 'SESSION_EXPIRED',
+              requiresLogin: true 
+            }
           );
         }
       } else {
@@ -201,11 +235,11 @@ export async function POST(request: NextRequest) {
       conversation = await conversationManager.createConversation(userId, role);
     }
 
-    // Add user message to conversation
+    // Add user message to conversation (with timestamp for LLM context)
     await conversationManager.addMessage(conversation.id, {
       id: `msg_${Date.now()}_user`,
       role: 'user',
-      content: sanitizedMessage,
+      content: messageWithTimestamp,
       timestamp: new Date(),
     }, userId);
 
@@ -244,6 +278,19 @@ export async function POST(request: NextRequest) {
       const toolsList = mcpTools.length > 0 
         ? mcpTools.map(t => t.name).join(', ')
         : 'None available';
+      
+      // Generate current timestamp with timezone
+      const now = new Date();
+      const currentDateTime = now.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short',
+      });
         
       const userContext = {
         userName: user?.name || 'User',
@@ -251,6 +298,7 @@ export async function POST(request: NextRequest) {
         userRole: role,
         roomNumber: user?.roomNumber || 'N/A',
         tools: toolsList,
+        currentDateTime,
       };
       
       systemPrompt = await promptManager.getPromptWithVariables(role, userContext);

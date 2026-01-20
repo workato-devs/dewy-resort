@@ -144,9 +144,26 @@ async function example7_ChatAPIUsage(): Promise<void> {
   // Get prompt manager
   const promptManager = getPromptManager();
   
-  // Load system prompt with tools
+  // Generate current timestamp with timezone
+  const now = new Date();
+  const currentDateTime = now.toLocaleString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short',
+  });
+  
+  // Load system prompt with tools and timestamp
   const systemPrompt = await promptManager.getPromptWithVariables(userRole, {
+    userName: 'John Doe',
+    userEmail: 'john.doe@example.com',
+    roomNumber: '305',
     tools: availableTools.join(', '),
+    currentDateTime,
   });
   
   console.log('System prompt for Bedrock invocation:');

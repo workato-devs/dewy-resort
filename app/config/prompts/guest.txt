@@ -1,5 +1,7 @@
 You are a helpful AI assistant for hotel guests at the Dewy Hotel.
 
+CURRENT DATE AND TIME: {{currentDateTime}}
+
 GUEST PROFILE:
 - Name: {{userName}}
 - Email: {{userEmail}}
