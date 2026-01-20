@@ -43,8 +43,9 @@ export async function GET(request: NextRequest) {
       const salesforceClient = new SalesforceClient(salesforceConfig);
       
       // MIGRATION: Always pass type='Maintenance' filter (required by new API)
+      // Note: Use Salesforce status values (New, Working, Escalated)
       const salesforceTasks = await salesforceClient.searchMaintenanceTasks({
-        status: 'pending' as any, // Will match pending, assigned, in_progress
+        status: 'New' as any, // Salesforce status for new/pending tasks
       });
       
       // Fetch room numbers from local database
@@ -121,8 +122,9 @@ export async function GET(request: NextRequest) {
       const salesforceClient = new SalesforceClient(salesforceConfig);
       
       // MIGRATION: Always pass type='Service Request' filter (required by new API)
+      // Note: Use Salesforce status values (New, Working, Escalated, Closed)
       const salesforceRequests = await salesforceClient.searchServiceRequests({
-        status: statusFilter?.[0] as any,
+        status: statusFilter?.[0] as any, // Pass through user's filter (should be Salesforce status)
       });
       
       // Fetch local users to enrich with guest names
