@@ -22,7 +22,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Contact email for guest\"},{\"name\":\"status_filter\",\"label\":\"Status filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Open, Closed, or All (defaults to Open)\"},{\"name\":\"case_type_filter\",\"label\":\"Case type filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Type: Facilities, Service Request, Housekeeping\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results to return (default 10)\"}]"
+        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Contact email for guest\"},{\"name\":\"status_filter\",\"label\":\"Status filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Open, Closed, or All (defaults to Open)\"},{\"name\":\"case_type_filter\",\"label\":\"Case type filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Type: Facilities, Service Request, Housekeeping\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":true,\"hint\":\"Maximum results to return (default 10)\"}]"
       },
       "response": {
         "content_type": "json",
@@ -261,11 +261,11 @@
             "hint": "Case Type: Facilities, Service Request, Housekeeping"
           },
           {
-            "control_type": "number",
+            "control_type": "integer",
             "label": "Limit",
-            "parse_output": "float_conversion",
+            "parse_output": "integer_conversion",
             "name": "limit",
-            "type": "number",
+            "type": "integer",
             "optional": true,
             "hint": "Maximum results to return (default 10)"
           }

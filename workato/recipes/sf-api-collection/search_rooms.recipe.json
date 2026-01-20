@@ -22,7 +22,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Room status filter (Vacant, Occupied, Cleaning, Maintenance, Out of Service)\"},{\"name\":\"floor\",\"label\":\"Floor\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Floor number filter\"},{\"name\":\"type\",\"label\":\"Type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Room type filter\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
+        "schema": "[{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Room status filter (Vacant, Occupied, Cleaning, Maintenance, Out of Service)\"},{\"name\":\"floor\",\"label\":\"Floor\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":true,\"hint\":\"Floor number filter\"},{\"name\":\"type\",\"label\":\"Type\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Room type filter\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":true,\"hint\":\"Maximum results (default 50)\"}]"
       },
       "response": {
         "content_type": "json",
@@ -245,11 +245,11 @@
             "hint": "Room status filter (Vacant, Occupied, Cleaning, Maintenance, Out of Service)"
           },
           {
-            "control_type": "number",
+            "control_type": "integer",
             "label": "Floor",
-            "parse_output": "float_conversion",
+            "parse_output": "integer_conversion",
             "name": "floor",
-            "type": "number",
+            "type": "integer",
             "optional": true,
             "hint": "Floor number filter"
           },
@@ -262,11 +262,11 @@
             "hint": "Room type filter"
           },
           {
-            "control_type": "number",
+            "control_type": "integer",
             "label": "Limit",
-            "parse_output": "float_conversion",
+            "parse_output": "integer_conversion",
             "name": "limit",
-            "type": "number",
+            "type": "integer",
             "optional": true,
             "hint": "Maximum results (default 50)"
           }
