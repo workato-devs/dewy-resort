@@ -22,7 +22,7 @@
     "input": {
       "request": {
         "content_type": "json",
-        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"For filtering by Contact.Email on case\"},{\"name\":\"status_filter\",\"label\":\"Status filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Status: New, In Progress, Closed\"},{\"name\":\"priority_filter\",\"label\":\"Priority filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Priority: Low, Medium, High, Urgent\"},{\"name\":\"case_type_filter\",\"label\":\"Case type filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Type: Maintenance, Facilities, Service Request, Housekeeping\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by room number\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"number\",\"control_type\":\"number\",\"optional\":true,\"hint\":\"Maximum results to return (default 50)\"}]"
+        "schema": "[{\"name\":\"guest_email\",\"label\":\"Guest email\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"For filtering by Contact.Email on case\"},{\"name\":\"status_filter\",\"label\":\"Status filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Status: New, In Progress, Closed\"},{\"name\":\"priority_filter\",\"label\":\"Priority filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Priority: Low, Medium, High, Urgent\"},{\"name\":\"case_type_filter\",\"label\":\"Case type filter\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Case Type: Maintenance, Facilities, Service Request, Housekeeping\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Filter by room number\"},{\"name\":\"limit\",\"label\":\"Limit\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":true,\"hint\":\"Maximum results to return (default 50)\"}]"
       },
       "response": {
         "content_type": "json",
@@ -277,11 +277,11 @@
             "hint": "Filter by room number"
           },
           {
-            "control_type": "number",
+            "control_type": "integer",
             "label": "Limit",
-            "parse_output": "float_conversion",
+            "parse_output": "integer_conversion",
             "name": "limit",
-            "type": "number",
+            "type": "integer",
             "optional": true,
             "hint": "Maximum results to return (default 50)"
           }
