@@ -26,10 +26,10 @@ export async function GET(request: NextRequest) {
       if (searchParams.get('assigned_to')) criteria.assigned_to = searchParams.get('assigned_to');
       
       // MIGRATION: Ensure at least one filter is provided
-      // If no filters, default to all statuses to show all tasks
+      // If no filters, default to New status to show active tasks
       // Note: Use Salesforce status values (New, Working, Escalated, Closed)
       if (!criteria.status && !criteria.priority && !criteria.room_id && !criteria.assigned_to) {
-        criteria.status = 'New,Working,Escalated';
+        criteria.status = 'New';
       }
       
       console.log('[Maintenance API] Searching with criteria:', criteria);
