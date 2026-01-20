@@ -113,7 +113,7 @@ async function testLocalAuthentication() {
     // Test login endpoint
     const loginData = JSON.stringify({
       email: 'guest@hotel.com',
-      password: 'password123',
+      password: 'Hotel2026!',
     });
     
     const response = await makeRequest(`${APP_URL}/api/auth/login`, {

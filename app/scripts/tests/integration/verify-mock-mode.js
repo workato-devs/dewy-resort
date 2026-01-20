@@ -61,8 +61,8 @@ if (mockMode === 'true') {
   console.log('   API Calls: Mocked responses');
   console.log('   Okta: Disabled');
   console.log('\n   Demo Credentials:');
-  console.log('   - Guest: guest1@hotel.com / password123');
-  console.log('   - Manager: manager1@hotel.com / password123');
+  console.log('   - Guest: guest1@hotel.com / Hotel2026!');
+  console.log('   - Manager: manager1@hotel.com / Hotel2026!');
   
   // Check if Okta vars are set (they're optional in mock mode)
   const hasOktaVars = env.OKTA_DOMAIN && env.OKTA_CLIENT_ID && env.OKTA_CLIENT_SECRET;
