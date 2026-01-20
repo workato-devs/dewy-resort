@@ -10,12 +10,18 @@ const DB_PATH = path.join(process.cwd(), 'var', 'hotel.db');
 
 let db: Database.Database | null = null;
 
+// Debug logging flag
+const DEBUG_DB = process.env.DEBUG_DB === 'true' || process.env.NEXT_PUBLIC_DEBUG_DB === 'true';
+
 /**
  * Get database connection (singleton pattern)
  */
 export function getDatabase(): Database.Database {
   if (!db) {
     try {
+      if (DEBUG_DB) {
+        console.log('[DB] Connecting to database:', DB_PATH);
+      }
       db = new Database(DB_PATH);
       
       // Enable foreign keys
@@ -23,6 +29,17 @@ export function getDatabase(): Database.Database {
       
       // Enable WAL mode for better concurrency
       db.pragma('journal_mode = WAL');
+      
+      if (DEBUG_DB) {
+        console.log('[DB] Database connected successfully');
+        // Log table info
+        const tables = db.prepare(`
+          SELECT name FROM sqlite_master 
+          WHERE type='table' 
+          ORDER BY name
+        `).all();
+        console.log('[DB] Available tables:', tables.map((t: any) => t.name).join(', '));
+      }
       
     } catch (error) {
       throw new DatabaseError('Failed to connect to database', error);
@@ -83,9 +100,34 @@ export function executeUpdate(
 ): Database.RunResult {
   try {
     const database = getDatabase();
+    
+    if (DEBUG_DB) {
+      console.log('[DB] Executing update:', query);
+      console.log('[DB] Parameters:', params);
+      
+      // Check if table and columns exist for INSERT/UPDATE queries
+      const tableMatch = query.match(/(?:INSERT INTO|UPDATE)\s+(\w+)/i);
+      if (tableMatch) {
+        const tableName = tableMatch[1];
+        const columns = database.prepare(`PRAGMA table_info(${tableName})`).all();
+        console.log(`[DB] Table '${tableName}' columns:`, columns.map((c: any) => c.name).join(', '));
+      }
+    }
+    
     const stmt = database.prepare(query);
-    return stmt.run(params);
+    const result = stmt.run(params);
+    
+    if (DEBUG_DB) {
+      console.log('[DB] Update result:', { changes: result.changes, lastInsertRowid: result.lastInsertRowid });
+    }
+    
+    return result;
   } catch (error) {
+    if (DEBUG_DB) {
+      console.error('[DB] Update failed:', error);
+      console.error('[DB] Query was:', query);
+      console.error('[DB] Params were:', params);
+    }
     throw new DatabaseError('Update execution failed', error);
   }
 }

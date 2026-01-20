@@ -289,9 +289,10 @@ SALESFORCE_API_AUTH_TOKEN=your_token_from_step_3
 **Initialize local database** (for hotel app sessions, UI state):
 
 ```bash
-npm run db:init
-npm run db:seed
+npm run db:setup
 ```
+
+This single command creates the database, applies the schema, runs all migrations, and seeds demo data.
 
 **Note:** The local SQLite database stores hotel app-specific data (user sessions, device states). Backend data (bookings, rooms, cases) lives in Salesforce and is accessed via Workato recipes exposed as REST API endpoints.
 
