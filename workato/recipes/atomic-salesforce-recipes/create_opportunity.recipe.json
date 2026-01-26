@@ -716,7 +716,7 @@
             "number": 6,
             "provider": "workato_recipe_function",
             "name": "return_result",
-            "as": "41164565",
+            "as": "return_null_result",
             "keyword": "action",
             "input": {
               "result": {

@@ -305,7 +305,7 @@
             "number": 2,
             "provider": "workato_recipe_function",
             "name": "call_recipe",
-            "as": "ffe207ce",
+            "as": "call_search_contact",
             "keyword": "action",
             "dynamicPickListSelection": {
               "flow_id": "Search contact by email"

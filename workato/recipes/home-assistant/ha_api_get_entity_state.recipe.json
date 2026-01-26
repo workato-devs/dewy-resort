@@ -8,7 +8,7 @@
     "number": 0,
     "provider": "workato_api_platform",
     "name": "receive_request",
-    "as": "05a31061",
+    "as": "trigger",
     "keyword": "trigger",
     "input": {
       "request": {
@@ -125,11 +125,11 @@
         "number": 1,
         "provider": "logger",
         "name": "log_message",
-        "as": "985bc797",
+        "as": "log_request",
         "keyword": "action",
         "input": {
           "user_logs_enabled": true,
-          "message": "Guest =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Name\"]}') requesting entity state for =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"request\",\"entity_id\"]}')",
+          "message": "Guest =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}') requesting entity state for =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}')",
           "log_level": "INFO"
         },
         "extended_input_schema": [
@@ -182,10 +182,10 @@
             "number": 3,
             "provider": "nabu_casa_home_assistant_cloud__connector_2100002083_1768260720",
             "name": "get_entity_state",
-            "as": "c639cda2",
+            "as": "get_ha_entity_state",
             "keyword": "action",
             "input": {
-              "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"request\",\"entity_id\"]}')"
+              "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}')"
             },
             "uuid": "get-entity-state-001"
           },
@@ -199,11 +199,11 @@
               "http_status_code": "200",
               "response": {
                 "success": "true",
-                "data": "=_dp('{\"pill_type\":\"output\",\"provider\":\"nabu_casa_home_assistant_cloud__connector_2100002083_1768260720\",\"line\":\"c639cda2\",\"path\":[]}')",
+                "data": "=_dp('{\"pill_type\":\"output\",\"provider\":\"nabu_casa_home_assistant_cloud__connector_2100002083_1768260720\",\"line\":\"get_ha_entity_state\",\"path\":[]}')",
                 "guest_context": {
-                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
                 }
               }
             },
@@ -340,9 +340,9 @@
                         "success": "false",
                         "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
                         "guest_context": {
-                          "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                          "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                          "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                          "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                          "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                          "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
                         }
                       }
                     },
@@ -432,9 +432,9 @@
                                 "success": "false",
                                 "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
                                 "guest_context": {
-                                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
                                 }
                               }
                             },
@@ -518,9 +518,9 @@
                                         "success": "false",
                                         "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
                                         "guest_context": {
-                                          "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                                          "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                                          "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                                          "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                                          "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                                          "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
                                         }
                                       }
                                     },
@@ -581,9 +581,9 @@
                                             "success": "false",
                                             "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
                                             "guest_context": {
-                                              "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                                              "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                                              "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                                              "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                                              "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                                              "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
                                             }
                                           }
                                         },
