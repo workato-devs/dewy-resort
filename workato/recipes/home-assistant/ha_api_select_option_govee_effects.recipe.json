@@ -8,7 +8,7 @@
     "number": 0,
     "provider": "workato_api_platform",
     "name": "receive_request",
-    "as": "05a31061",
+    "as": "trigger",
     "keyword": "trigger",
     "toggleCfg": {
       "response.responses.0.http_status_code": true,
@@ -276,7 +276,7 @@
         "keyword": "action",
         "input": {
           "user_logs_enabled": true,
-          "message": "Guest =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"headers\",\"X-Guest-Name\"]}') setting effect =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"request\",\"option\"]}') on =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"request\",\"entity_id\"]}')",
+          "message": "Guest =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}') setting effect =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"option\"]}') on =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}')",
           "log_level": "INFO"
         },
         "extended_input_schema": [
@@ -335,8 +335,8 @@
               "domain": "select",
               "service": "select_option",
               "service_data": {
-                "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"request\",\"entity_id\"]}')",
-                "option": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"request\",\"option\"]}')"
+                "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}')",
+                "option": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"option\"]}')"
               }
             },
             "uuid": "call-service-001"
@@ -348,7 +348,7 @@
             "as": "get-state-001",
             "keyword": "action",
             "input": {
-              "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"request\",\"entity_id\"]}')"
+              "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}')"
             },
             "uuid": "get-state-001"
           },
@@ -363,7 +363,7 @@
               "response": {
                 "success": "true",
                 "data": "=_dp('{\"pill_type\":\"output\",\"provider\":\"nabu_casa_home_assistant_cloud__connector_2100002083_1768260720\",\"line\":\"get-state-001\",\"path\":[]}')",
-                "effect_applied": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"05a31061\",\"path\":[\"request\",\"option\"]}')",
+                "effect_applied": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"option\"]}')",
                 "guest_context": {
                   "name": "",
                   "email": "",
