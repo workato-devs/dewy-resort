@@ -8,7 +8,7 @@
     "number": 0,
     "provider": "workato_api_platform",
     "name": "receive_request",
-    "as": "05a31061",
+    "as": "trigger",
     "keyword": "trigger",
     "input": {
       "request": {

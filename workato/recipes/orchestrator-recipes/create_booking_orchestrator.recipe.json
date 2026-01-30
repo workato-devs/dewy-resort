@@ -646,7 +646,7 @@
                 "number": 6,
                 "provider": "workato_recipe_function",
                 "name": "call_recipe",
-                "as": "2a511209",
+                "as": "call_create_contact",
                 "keyword": "action",
                 "dynamicPickListSelection": {
                   "flow_id": "Create contact"
@@ -788,7 +788,7 @@
                     "number": 8,
                     "provider": "workato_api_platform",
                     "name": "return_response",
-                    "as": "a9d0c738",
+                    "as": "return_contact_error",
                     "keyword": "action",
                     "toggleCfg": {
                       "response.success": true
@@ -1673,7 +1673,7 @@
             "number": 16,
             "provider": "logger",
             "name": "log_message",
-            "as": "edeafce3",
+            "as": "log_opportunity_info",
             "keyword": "action",
             "input": {
               "user_logs_enabled": "false",
@@ -1714,7 +1714,7 @@
                 "number": 18,
                 "provider": "workato_api_platform",
                 "name": "return_response",
-                "as": "903a72a9",
+                "as": "return_opportunity_error",
                 "keyword": "action",
                 "toggleCfg": {
                   "response.success": true
@@ -2089,7 +2089,7 @@
                 "number": 21,
                 "provider": "workato_api_platform",
                 "name": "return_response",
-                "as": "e2d69693",
+                "as": "return_booking_error",
                 "keyword": "action",
                 "toggleCfg": {
                   "response.success": true
