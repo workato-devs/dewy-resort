@@ -59,8 +59,7 @@ npm install
 ### 1.4 Initialize and Seed Local Database
 
 ```bash
-npm run db:init
-npm run db:seed
+npm run db:setup
 ```
 
 **Expected Output:**
@@ -165,14 +164,21 @@ bin/sf org open --target-org myDevOrg
 ### 4.1 Get Workato API Token
 
 1. Log in to your Workato Developer Edition
-2. Go to **Settings -> API Keys & Clients**
-3. Click **Create API Key**
+2. Go to **Workspace Admin -> API Clients -> Client roles** [https://app.trial.workato.com/members/api/clients]
+3. Click **Create Client Role** tab
 4. Set permissions:
-   - Projects -> Project Assets (all)
-   - Projects -> Recipe Lifecycle Management (all)
-   - Tools -> API Platform (all except OpenAPI)
-   - Admin -> Workspace Details (all)
-5. **Copy the token** (you won't see it again)
+   - Projects tab -> Project Assets (select all)
+   - Projects tab -> Recipe Lifecycle Management (select all)
+   - Tools tab -> API Platform (select all)
+   - Admin tab -> Workspace Details (all)
+5. Click **Save Changes**
+6. Click **API Clients** tab [https://app.trial.workato.com/members/api/roles]
+7. Click **Create API Client** button
+8. Enter "Dewy Resort App" in the Name field
+9. Select "New client role" from the Client Role dropdown
+10. Select "All Projects" in the Project Access drop-down menu
+11. Click **Create Client**
+12. **Copy the token** (you won't see it again)
 
 ### 4.2 Add Token to Environment
 
