@@ -53,6 +53,21 @@ parent: Workshop Units
 - VS Code or preferred IDE
 - Terminal access (iTerm2, Terminal.app, Windows Terminal)
 
+### MacOS
+
+- Homebrew is recommended for installing most dependencies (python, node, git, make) [Homebrew](https://brew.sh/)
+- X-Code (if installed) provides some tools (make, git)
+- UV can be used to create a virtual environment to run Python if needed to avoid conflicts (optional)
+
+### Windows
+
+- Install [Python 3.11+](https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe)
+- Install [Node.js 20+](https://nodejs.org/en/download)
+- Install [Git](https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.1/Git-2.53.0-64-bit.exe)
+- Add the Python "Scripts" folder to your $PATH Environment Variable (System -> Advanced -> Environment Variables -> Path -> Edit)
+- Example: `C:\Users\YourName\AppData\Local\Programs\Python\Python311\Scripts`
+
+
 ---
 
 ## Optional (Enhanced Experience)
@@ -81,7 +96,7 @@ All emails go to your main inbox. Register each alias as a separate contact in S
 
 ---
 
-## Pre-Workshop Verification Script
+## Pre-Workshop Verification Script (MacOS/Linux, Windows use Git Bash or WSL with Ubuntu/Bash)
 
 Run this script to verify your environment:
 
