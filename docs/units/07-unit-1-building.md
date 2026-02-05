@@ -67,7 +67,7 @@ When creating API Collections, you'll select from the **orchestrator-recipes** f
 
 ### 1.1 Navigate to API Platform
 
-1. In Workato, navigate to **Tools → API Platform → API Collections**
+1. In Workato, navigate to **Platform → API Platform → API Collections**
 2. Click **Create Collection**
 
 ### 1.2 Select Guest Recipes
@@ -313,7 +313,7 @@ This script activates each endpoint so they're ready to be used by MCP servers.
 
 ### 4.1 Navigate to MCP Servers
 
-1. In **API Platform**, click **MCP Servers** in the left sidebar
+1. In **AI Hub**, click **MCP Servers** in the menu
 2. Click **Create MCP Server**
 
 ### 4.2 Configure the Guest Server
