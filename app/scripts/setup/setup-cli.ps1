@@ -32,17 +32,28 @@ if (-not (Test-Path $ToolScript)) {
     exit 1
 }
 
-# Check if wrapper already exists (skip if already installed)
+# Check if wrapper already exists OR global command available (skip if already installed)
 $WrapperScripts = @{
     "workato" = Join-Path $ProjectRoot "bin\workato.ps1"
     "salesforce" = Join-Path $ProjectRoot "bin\sf.ps1"
 }
 
-$WrapperScript = $WrapperScripts[$Tool]
+$GlobalCommands = @{
+    "workato" = "workato"
+    "salesforce" = "sf"
+}
 
-if (Test-Path $WrapperScript) {
+$WrapperScript = $WrapperScripts[$Tool]
+$GlobalCmd = $GlobalCommands[$Tool]
+$globalAvailable = Get-Command $GlobalCmd -ErrorAction SilentlyContinue
+
+if ((Test-Path $WrapperScript) -or $globalAvailable) {
     Write-Host "[WARN] $Tool CLI appears to be already installed" -ForegroundColor Yellow
-    Write-Host "Wrapper found at: $WrapperScript"
+    if ($globalAvailable) {
+        Write-Host "Global command '$GlobalCmd' is available"
+    } else {
+        Write-Host "Wrapper found at: $WrapperScript"
+    }
     Write-Host ""
     
     $reply = Read-Host "Reinstall anyway? [y/N]"
@@ -69,18 +80,26 @@ try {
     Pop-Location
 }
 
-# Verify installation
-if (Test-Path $WrapperScript) {
+# Verify installation - check for wrapper script OR global command
+$globalAvailable = Get-Command $GlobalCmd -ErrorAction SilentlyContinue
+
+if ((Test-Path $WrapperScript) -or $globalAvailable) {
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Green
     Write-Host "[OK] $Tool CLI successfully installed!" -ForegroundColor Green
     Write-Host "========================================" -ForegroundColor Green
     Write-Host ""
-    Write-Host "To verify installation:"
-    Write-Host "  .\bin\$Tool.ps1 --version"
+    
+    if ($globalAvailable) {
+        Write-Host "Installed globally. To verify:"
+        Write-Host "  $GlobalCmd --version"
+    } else {
+        Write-Host "To verify installation:"
+        Write-Host "  .\bin\$Tool.ps1 --version"
+    }
     Write-Host ""
     exit 0
 } else {
-    Write-Host "[ERROR] Installation failed: Wrapper script not created" -ForegroundColor Red
+    Write-Host "[ERROR] Installation failed: CLI not available" -ForegroundColor Red
     exit 1
 }
