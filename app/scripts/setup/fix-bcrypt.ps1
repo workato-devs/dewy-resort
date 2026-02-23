@@ -21,4 +21,4 @@ Write-Host "4. Rebuilding bcrypt for current architecture..."
 npm rebuild bcrypt --build-from-source
 
 Write-Host ""
-Write-Host "✅ Done! Try starting the server again." -ForegroundColor Green
+Write-Host "[OK] Done! Try starting the server again." -ForegroundColor Green

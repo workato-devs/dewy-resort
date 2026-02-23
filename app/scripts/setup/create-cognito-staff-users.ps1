@@ -13,8 +13,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 function Write-Info { param([string]$Message) Write-Host "[INFO] $Message" -ForegroundColor Green }
-function Write-Error { param([string]$Message) Write-Host "[ERROR] $Message" -ForegroundColor Red }
-function Write-Warning { param([string]$Message) Write-Host "[WARNING] $Message" -ForegroundColor Yellow }
+function Write-Err { param([string]$Message) Write-Host "[ERROR] $Message" -ForegroundColor Red }
+function Write-Warn { param([string]$Message) Write-Host "[WARNING] $Message" -ForegroundColor Yellow }
 function Write-Section { param([string]$Message) 
     Write-Host "========================================" -ForegroundColor Blue
     Write-Host $Message -ForegroundColor Blue
@@ -23,7 +23,7 @@ function Write-Section { param([string]$Message)
 
 function Test-AwsCli {
     if (-not (Get-Command aws -ErrorAction SilentlyContinue)) {
-        Write-Error "AWS CLI is not installed. Please install it first."
+        Write-Err "AWS CLI is not installed. Please install it first."
         Write-Host "Visit: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
         exit 1
     }
@@ -36,7 +36,7 @@ function Test-AwsCredentials {
         Write-Info "AWS Account: $($identity.Account)"
         Write-Info "AWS Identity: $($identity.Arn)"
     } catch {
-        Write-Error "AWS credentials are not configured or invalid."
+        Write-Err "AWS credentials are not configured or invalid."
         Write-Host "Run 'aws configure' to set up your credentials."
         exit 1
     }
@@ -64,7 +64,7 @@ function New-CognitoUser {
     Write-Info "Creating $Role user: $Email"
     
     if (Test-UserExists -PoolId $PoolId -Username $Email) {
-        Write-Warning "User $Email already exists, skipping"
+        Write-Warn "User $Email already exists, skipping"
         return $true
     }
     
@@ -77,14 +77,14 @@ function New-CognitoUser {
             --message-action SUPPRESS `
             --output json | Out-Null
         
-        Write-Info "✓ Created user: $Email"
+        Write-Info "[OK] Created user: $Email"
         Write-Host "  Name: $Name"
         Write-Host "  Role: $Role"
         Write-Host "  Temporary Password: $TempPassword"
         Write-Host "  Note: User must change password on first login"
         return $true
     } catch {
-        Write-Error "Failed to create user: $Email"
+        Write-Err "Failed to create user: $Email"
         return $false
     }
 }
@@ -106,10 +106,10 @@ function Set-PermanentPassword {
             --permanent `
             --output json | Out-Null
         
-        Write-Info "✓ Password set for: $Username"
+        Write-Info "[OK] Password set for: $Username"
         return $true
     } catch {
-        Write-Error "Failed to set password for: $Username"
+        Write-Err "Failed to set password for: $Username"
         return $false
     }
 }
@@ -120,7 +120,7 @@ Write-Host ""
 
 # Validate User Pool ID format
 if ($UserPoolId -notmatch '^[a-z0-9-]+_[a-zA-Z0-9]+$') {
-    Write-Error "Invalid User Pool ID format. Expected format: region_id (e.g., us-west-2_abc123)"
+    Write-Err "Invalid User Pool ID format. Expected format: region_id (e.g., us-west-2_abc123)"
     exit 1
 }
 
@@ -172,7 +172,7 @@ if ($setPermanent) {
     Write-Info "Permanent passwords set"
 } else {
     Write-Info "Skipping permanent password setup"
-    Write-Warning "Users will need to change their password on first login"
+    Write-Warn "Users will need to change their password on first login"
 }
 
 Write-Host ""

@@ -21,19 +21,19 @@ try {
             }
         }
     } else {
-        Write-Host "Warning: .env file not found at $EnvFile" -ForegroundColor Yellow
+        Write-Host "[WARN] .env file not found at $EnvFile" -ForegroundColor Yellow
         Write-Host "Please create app\.env with WORKATO_API_TOKEN and WORKATO_HOST"
         exit 1
     }
 
     # Validate required environment variables
     if (-not $env:WORKATO_HOST) {
-        Write-Host "Error: WORKATO_HOST is not set in app\.env" -ForegroundColor Red
+        Write-Host "[ERROR] WORKATO_HOST is not set in app\.env" -ForegroundColor Red
         exit 1
     }
 
     if (-not $env:WORKATO_API_TOKEN) {
-        Write-Host "Error: WORKATO_API_TOKEN is not set in app\.env" -ForegroundColor Red
+        Write-Host "[ERROR] WORKATO_API_TOKEN is not set in app\.env" -ForegroundColor Red
         exit 1
     }
 
@@ -68,16 +68,16 @@ try {
                 Pop-Location
             }
         } else {
-            Write-Host "Warning: No recipes found at $recipesPath" -ForegroundColor Yellow
+            Write-Host "[WARN] No recipes found at $recipesPath" -ForegroundColor Yellow
         }
         
         # Create folder via API
         $body = @{ name = $folder } | ConvertTo-Json
         try {
             Invoke-RestMethod -Uri "$env:WORKATO_HOST/api/folders" -Headers $headers -Method Post -Body $body | Out-Null
-            Write-Host "Created $folder" -ForegroundColor Green
+            Write-Host "[OK] Created $folder" -ForegroundColor Green
         } catch {
-            Write-Host "Note: Folder $folder may already exist" -ForegroundColor Yellow
+            Write-Host "[INFO] Folder $folder may already exist" -ForegroundColor Yellow
         }
     }
 } finally {

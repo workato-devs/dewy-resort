@@ -40,12 +40,12 @@ if (Test-Path $EnvFile) {
         }
     }
 } else {
-    Write-Host "Error: .env file not found at $EnvFile" -ForegroundColor Red
+    Write-Host "[ERROR] .env file not found at $EnvFile" -ForegroundColor Red
     exit 1
 }
 
 if (-not $env:WORKATO_API_TOKEN) {
-    Write-Host "Error: WORKATO_API_TOKEN not set" -ForegroundColor Red
+    Write-Host "[ERROR] WORKATO_API_TOKEN not set" -ForegroundColor Red
     exit 1
 }
 
@@ -60,14 +60,14 @@ Write-Host "Step 1: Finding API collection..." -ForegroundColor Yellow
 try {
     $collectionsResponse = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/api_collections?per_page=100" -Headers $headers -Method Get
 } catch {
-    Write-Host "Error: Failed to fetch API collections" -ForegroundColor Red
+    Write-Host "[ERROR] Failed to fetch API collections" -ForegroundColor Red
     exit 1
 }
 
 $collection = $collectionsResponse | Where-Object { $_.name -eq $CollectionName }
 
 if (-not $collection) {
-    Write-Host "Error: Collection '$CollectionName' not found" -ForegroundColor Red
+    Write-Host "[ERROR] Collection '$CollectionName' not found" -ForegroundColor Red
     Write-Host ""
     Write-Host "Available collections:" -ForegroundColor Yellow
     $collectionsResponse | ForEach-Object { Write-Host "  - $($_.name) (ID: $($_.id))" }
@@ -75,7 +75,7 @@ if (-not $collection) {
 }
 
 $collectionId = $collection.id
-Write-Host "✓ Found collection (ID: $collectionId)" -ForegroundColor Green
+Write-Host "[OK] Found collection (ID: $collectionId)" -ForegroundColor Green
 Write-Host ""
 
 # Step 2: Check if API Platform client already exists
@@ -90,7 +90,7 @@ try {
     $existingClient = $clientsResponse.data | Where-Object { $_.name -eq $ClientName }
     
     if ($existingClient) {
-        Write-Host "⚠️  API Platform client '$ClientName' already exists (ID: $($existingClient.id))" -ForegroundColor Yellow
+        Write-Host "[WARN] API Platform client '$ClientName' already exists (ID: $($existingClient.id))" -ForegroundColor Yellow
         Write-Host "Using existing client..." -ForegroundColor Yellow
         $clientId = $existingClient.id
         
@@ -107,13 +107,13 @@ try {
                 $apiToken = $refreshResponse.data.auth_token
                 if (-not $apiToken) { $apiToken = $refreshResponse.data.token }
                 if (-not $apiToken) { $apiToken = $refreshResponse.data.secret }
-                Write-Host "✓ Refreshed API key" -ForegroundColor Green
+                Write-Host "[OK] Refreshed API key" -ForegroundColor Green
             }
         } catch { }
     }
 } catch {
     if ($_.Exception.Message -match "message") {
-        Write-Host "Error: Make sure your WORKATO_API_TOKEN has API Platform scopes enabled" -ForegroundColor Yellow
+        Write-Host "[WARN] Make sure your WORKATO_API_TOKEN has API Platform scopes enabled" -ForegroundColor Yellow
     }
 }
 
@@ -134,9 +134,9 @@ if (-not $clientId) {
     try {
         $createResponse = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/v2/api_clients" -Headers $headers -Method Post -Body ($requestBody | ConvertTo-Json)
         $clientId = $createResponse.data.id
-        Write-Host "✓ Created API Platform client (ID: $clientId)" -ForegroundColor Green
+        Write-Host "[OK] Created API Platform client (ID: $clientId)" -ForegroundColor Green
     } catch {
-        Write-Host "Error: Failed to create API Platform client" -ForegroundColor Red
+        Write-Host "[ERROR] Failed to create API Platform client" -ForegroundColor Red
         Write-Host $_.Exception.Message
         exit 1
     }
@@ -158,9 +158,9 @@ if (-not $apiToken) {
         $apiToken = $keyResponse.data.auth_token
         if (-not $apiToken) { $apiToken = $keyResponse.data.token }
         if (-not $apiToken) { $apiToken = $keyResponse.data.secret }
-        Write-Host "✓ Created API key" -ForegroundColor Green
+        Write-Host "[OK] Created API key" -ForegroundColor Green
     } catch {
-        Write-Host "Error: Failed to create API key" -ForegroundColor Red
+        Write-Host "[ERROR] Failed to create API key" -ForegroundColor Red
         Write-Host $_.Exception.Message
         exit 1
     }
@@ -181,7 +181,7 @@ Write-Host ""
 Write-Host "API Token:" -ForegroundColor Cyan
 Write-Host $apiToken -ForegroundColor Yellow
 Write-Host ""
-Write-Host "⚠️  IMPORTANT: This token will only be shown once!" -ForegroundColor Red
+Write-Host "[IMPORTANT] This token will only be shown once!" -ForegroundColor Red
 Write-Host "   Save it now in a secure location." -ForegroundColor Red
 Write-Host ""
 
@@ -191,11 +191,6 @@ $apiUrl = $collection.url
 if ($apiUrl) {
     Write-Host "API Base URL:" -ForegroundColor Cyan
     Write-Host $apiUrl -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "Example Usage:" -ForegroundColor Cyan
-    Write-Host "  Invoke-RestMethod -Uri '$apiUrl/search-cases' ``"
-    Write-Host "    -Headers @{'API-TOKEN'='$apiToken'} ``"
-    Write-Host "    -Method Post -Body '{`"status`": `"New`"}'"
     Write-Host ""
 }
 
@@ -208,25 +203,25 @@ if (Test-Path $EnvFile) {
     # Update or add SALESFORCE_API_COLLECTION_URL
     if ($envContent -match "SALESFORCE_API_COLLECTION_URL=") {
         $envContent = $envContent -replace "SALESFORCE_API_COLLECTION_URL=.*", "SALESFORCE_API_COLLECTION_URL=$apiUrl"
-        Write-Host "✓ Updated SALESFORCE_API_COLLECTION_URL" -ForegroundColor Green
+        Write-Host "[OK] Updated SALESFORCE_API_COLLECTION_URL" -ForegroundColor Green
     } else {
         $envContent += "`n# Workato API Collection Configuration`nSALESFORCE_API_COLLECTION_URL=$apiUrl`n"
-        Write-Host "✓ Added SALESFORCE_API_COLLECTION_URL" -ForegroundColor Green
+        Write-Host "[OK] Added SALESFORCE_API_COLLECTION_URL" -ForegroundColor Green
     }
     
     # Update or add SALESFORCE_API_AUTH_TOKEN
     if ($envContent -match "SALESFORCE_API_AUTH_TOKEN=") {
         $envContent = $envContent -replace "SALESFORCE_API_AUTH_TOKEN=.*", "SALESFORCE_API_AUTH_TOKEN=$apiToken"
-        Write-Host "✓ Updated SALESFORCE_API_AUTH_TOKEN" -ForegroundColor Green
+        Write-Host "[OK] Updated SALESFORCE_API_AUTH_TOKEN" -ForegroundColor Green
     } else {
         $envContent += "SALESFORCE_API_AUTH_TOKEN=$apiToken`n"
-        Write-Host "✓ Added SALESFORCE_API_AUTH_TOKEN" -ForegroundColor Green
+        Write-Host "[OK] Added SALESFORCE_API_AUTH_TOKEN" -ForegroundColor Green
     }
     
     $envContent | Out-File -FilePath $EnvFile -Encoding UTF8 -NoNewline
-    Write-Host "✓ app\.env file updated successfully" -ForegroundColor Green
+    Write-Host "[OK] app\.env file updated successfully" -ForegroundColor Green
 } else {
-    Write-Host "⚠️  app\.env file not found, skipping update" -ForegroundColor Yellow
+    Write-Host "[WARN] app\.env file not found, skipping update" -ForegroundColor Yellow
 }
 
 Write-Host ""

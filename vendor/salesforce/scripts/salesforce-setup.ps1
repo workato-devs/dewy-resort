@@ -1,8 +1,8 @@
 # Salesforce CLI Setup for Windows
 $ErrorActionPreference = "Stop"
 
-Write-Host "🔧 Salesforce CLI Setup" -ForegroundColor Cyan
-Write-Host "========================" -ForegroundColor Cyan
+Write-Host "Salesforce CLI Setup" -ForegroundColor Cyan
+Write-Host "====================" -ForegroundColor Cyan
 Write-Host ""
 
 # Detect architecture
@@ -20,7 +20,7 @@ Write-Host "Checking for required tools..."
 # Check if tar is available (Windows 10 1803+ has built-in tar)
 $tarAvailable = Get-Command tar -ErrorAction SilentlyContinue
 if (-not $tarAvailable) {
-    Write-Host "❌ tar is not available. Windows 10 version 1803 or later is required." -ForegroundColor Red
+    Write-Host "[ERROR] tar is not available. Windows 10 version 1803 or later is required." -ForegroundColor Red
     Write-Host ""
     Write-Host "Alternative installation methods:" -ForegroundColor Yellow
     Write-Host "  Option 1: Using npm (recommended)"
@@ -31,7 +31,7 @@ if (-not $tarAvailable) {
     exit 1
 }
 
-Write-Host "✓ Required tools available" -ForegroundColor Green
+Write-Host "[OK] Required tools available" -ForegroundColor Green
 Write-Host ""
 
 # Create tools directory
@@ -56,9 +56,9 @@ try {
     # Download the file
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -Uri $downloadUrl -OutFile $downloadFile -UseBasicParsing
-    Write-Host "✓ Download complete" -ForegroundColor Green
+    Write-Host "[OK] Download complete" -ForegroundColor Green
 } catch {
-    Write-Host "❌ Download failed: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "[ERROR] Download failed: $($_.Exception.Message)" -ForegroundColor Red
     Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
     exit 1
 }
@@ -78,7 +78,7 @@ try {
 # Clean up temp files
 Remove-Item -Recurse -Force $tempDir
 
-Write-Host "✓ Salesforce CLI extracted" -ForegroundColor Green
+Write-Host "[OK] Salesforce CLI extracted" -ForegroundColor Green
 Write-Host ""
 
 # Create bin directory
@@ -98,7 +98,7 @@ $ProjectRoot = Split-Path -Parent $ScriptDir
 $SfCli = Join-Path $ProjectRoot "tools\sf-cli\bin\sf.cmd"
 
 if (-not (Test-Path $SfCli)) {
-    Write-Host "❌ Salesforce CLI installation not found." -ForegroundColor Red
+    Write-Host "[ERROR] Salesforce CLI installation not found." -ForegroundColor Red
     Write-Host "Please run '.\setup-cli.ps1 -Tool salesforce' to install the Salesforce CLI."
     exit 1
 }
@@ -117,14 +117,14 @@ powershell -ExecutionPolicy Bypass -File "%~dp0sf.ps1" %*
 "@
 $batchContent | Out-File -FilePath "bin\sf.cmd" -Encoding ASCII
 
-Write-Host "✓ Wrapper scripts created" -ForegroundColor Green
+Write-Host "[OK] Wrapper scripts created" -ForegroundColor Green
 Write-Host ""
 
 # Verify installation
 Write-Host "Verifying installation..."
 try {
     $version = & "bin\sf.ps1" --version 2>&1
-    Write-Host "✓ Salesforce CLI successfully installed!" -ForegroundColor Green
+    Write-Host "[OK] Salesforce CLI successfully installed!" -ForegroundColor Green
     Write-Host ""
     Write-Host $version
     Write-Host ""
@@ -139,6 +139,6 @@ try {
     Write-Host "  .\bin\sf.ps1 org list"
     Write-Host ""
 } catch {
-    Write-Host "❌ Installation verification failed" -ForegroundColor Red
+    Write-Host "[ERROR] Installation verification failed" -ForegroundColor Red
     exit 1
 }

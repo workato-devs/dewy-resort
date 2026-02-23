@@ -25,7 +25,7 @@ Write-Host ""
 $psVersion = $PSVersionTable.PSVersion
 Write-Host "PowerShell Version: $psVersion"
 if ($psVersion.Major -lt 5) {
-    Write-Host "Warning: PowerShell 5.0 or later is recommended" -ForegroundColor Yellow
+    Write-Host "[WARN] PowerShell 5.0 or later is recommended" -ForegroundColor Yellow
 }
 Write-Host ""
 

@@ -68,7 +68,7 @@ if (Test-Path "var") {
     Copy-Item -Path "var" -Destination $DestDir -Recurse -Force
 }
 
-Write-Host "Export complete!" -ForegroundColor Green
+Write-Host "[OK] Export complete!" -ForegroundColor Green
 Write-Host "Destination: $DestDir"
 Write-Host ""
 Write-Host "Next steps:"

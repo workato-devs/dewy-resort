@@ -24,7 +24,7 @@ $ToolScript = $ToolScripts[$Tool]
 
 # Check if tool-specific setup script exists
 if (-not (Test-Path $ToolScript)) {
-    Write-Host "❌ Error: Unknown tool '$Tool'" -ForegroundColor Red
+    Write-Host "[ERROR] Unknown tool '$Tool'" -ForegroundColor Red
     Write-Host ""
     Write-Host "Available tools:"
     Write-Host "  - workato (workato\scripts\cli\workato-setup.ps1)"
@@ -41,7 +41,7 @@ $WrapperScripts = @{
 $WrapperScript = $WrapperScripts[$Tool]
 
 if (Test-Path $WrapperScript) {
-    Write-Host "⚠️  $Tool CLI appears to be already installed" -ForegroundColor Yellow
+    Write-Host "[WARN] $Tool CLI appears to be already installed" -ForegroundColor Yellow
     Write-Host "Wrapper found at: $WrapperScript"
     Write-Host ""
     
@@ -70,13 +70,13 @@ try {
 if (Test-Path $WrapperScript) {
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Green
-    Write-Host "✓ $Tool CLI successfully installed!" -ForegroundColor Green
+    Write-Host "[OK] $Tool CLI successfully installed!" -ForegroundColor Green
     Write-Host "========================================" -ForegroundColor Green
     Write-Host ""
     Write-Host "To verify installation:"
     Write-Host "  .\bin\$Tool.ps1 --version"
     Write-Host ""
 } else {
-    Write-Host "❌ Installation failed: Wrapper script not created" -ForegroundColor Red
+    Write-Host "[ERROR] Installation failed: Wrapper script not created" -ForegroundColor Red
     exit 1
 }

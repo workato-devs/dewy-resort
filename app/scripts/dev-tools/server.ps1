@@ -71,9 +71,9 @@ function Stop-Port3001 {
         
         $stillInUse = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
         if ($stillInUse) {
-            Write-Host "Warning: Port $port still has listening process" -ForegroundColor Red
+            Write-Host "[WARN] Port $port still has listening process" -ForegroundColor Red
         } else {
-            Write-Host "Port $port cleared" -ForegroundColor Green
+            Write-Host "[OK] Port $port cleared" -ForegroundColor Green
         }
     }
 }
@@ -97,7 +97,7 @@ function Start-Server {
     try {
         # Check for .env file
         if (-not (Test-Path "$ProjectRoot\.env")) {
-            Write-Host "Error: .env file not found at $ProjectRoot\.env" -ForegroundColor Red
+            Write-Host "[ERROR] .env file not found at $ProjectRoot\.env" -ForegroundColor Red
             exit 1
         }
         
@@ -147,11 +147,11 @@ function Start-Server {
         # Wait a moment and check if it's still running
         Start-Sleep -Seconds 2
         if (Test-ServerRunning) {
-            Write-Host "Server started successfully (PID: $(Get-Content $PidFile))" -ForegroundColor Green
-            Write-Host "➜  Local:   http://localhost:3001" -ForegroundColor Green
+            Write-Host "[OK] Server started successfully (PID: $(Get-Content $PidFile))" -ForegroundColor Green
+            Write-Host "->  Local:   http://localhost:3001" -ForegroundColor Green
             Write-Host "Tail logs with: Get-Content $LogFile -Wait -Tail 20"
         } else {
-            Write-Host "Server failed to start. Check logs: $LogFile" -ForegroundColor Red
+            Write-Host "[ERROR] Server failed to start. Check logs: $LogFile" -ForegroundColor Red
             exit 1
         }
     } finally {
@@ -197,7 +197,7 @@ function Stop-Server {
     }
     
     if ($stopped) {
-        Write-Host "Server stopped" -ForegroundColor Green
+        Write-Host "[OK] Server stopped" -ForegroundColor Green
     } else {
         Write-Host "Server is not running" -ForegroundColor Yellow
     }
@@ -206,10 +206,10 @@ function Stop-Server {
 function Show-Status {
     if (Test-ServerRunning) {
         $pid = Get-Content $PidFile
-        Write-Host "Server is running" -ForegroundColor Green
+        Write-Host "[OK] Server is running" -ForegroundColor Green
         Write-Host "PID: $pid"
         Write-Host "Environment: $Environment"
-        Write-Host "➜  Local:   http://localhost:3001" -ForegroundColor Green
+        Write-Host "->  Local:   http://localhost:3001" -ForegroundColor Green
         Write-Host "Log file: $LogFile"
         Write-Host ""
         Write-Host "Recent logs:"

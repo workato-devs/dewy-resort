@@ -34,14 +34,14 @@ if (Test-Path $EnvFile) {
         }
     }
 } else {
-    Write-Host "Error: .env file not found at $EnvFile" -ForegroundColor Red
+    Write-Host "[ERROR] .env file not found at $EnvFile" -ForegroundColor Red
     Write-Host "Please create app\.env with WORKATO_API_TOKEN"
     exit 1
 }
 
 # Check for required environment variables
 if (-not $env:WORKATO_API_TOKEN) {
-    Write-Host "Error: WORKATO_API_TOKEN not set" -ForegroundColor Red
+    Write-Host "[ERROR] WORKATO_API_TOKEN not set" -ForegroundColor Red
     Write-Host "Please set WORKATO_API_TOKEN in your app\.env file"
     exit 1
 }
@@ -57,7 +57,7 @@ $headers = @{
 try {
     $recipesResponse = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/recipes?per_page=100" -Headers $headers -Method Get
 } catch {
-    Write-Host "Error: Failed to fetch recipes from Workato API" -ForegroundColor Red
+    Write-Host "[ERROR] Failed to fetch recipes from Workato API" -ForegroundColor Red
     Write-Host $_.Exception.Message
     exit 1
 }
@@ -71,7 +71,7 @@ if (-not $recipes -or $recipes.Count -eq 0) {
 }
 
 $totalRecipes = $recipes.Count
-Write-Host "Found $totalRecipes recipes" -ForegroundColor Green
+Write-Host "[OK] Found $totalRecipes recipes" -ForegroundColor Green
 Write-Host ""
 
 # Counters
@@ -89,7 +89,7 @@ foreach ($recipe in $recipes) {
     
     # Check if recipe is already stopped
     if ($recipeRunning -eq $false) {
-        Write-Host "  ⚠️  Already stopped, skipping..." -ForegroundColor Yellow
+        Write-Host "  [WARN] Already stopped, skipping..." -ForegroundColor Yellow
         $alreadyStopped++
         Write-Host ""
         continue
@@ -100,11 +100,11 @@ foreach ($recipe in $recipes) {
         $stopResponse = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/recipes/$recipeId/stop" -Headers $headers -Method Put
         
         if ($stopResponse.success -eq $true -or $null -eq $stopResponse.success) {
-            Write-Host "  ✓ Stopped successfully" -ForegroundColor Green
+            Write-Host "  [OK] Stopped successfully" -ForegroundColor Green
             $stopped++
         } elseif ($stopResponse.success -eq $false) {
             $errorMsg = if ($stopResponse.message) { $stopResponse.message } else { "Unknown error" }
-            Write-Host "  ✗ Failed to stop: $errorMsg" -ForegroundColor Red
+            Write-Host "  [ERROR] Failed to stop: $errorMsg" -ForegroundColor Red
             $failed++
             
             if (-not $SkipFailed) {
@@ -115,12 +115,12 @@ foreach ($recipe in $recipes) {
                 exit 1
             }
         } else {
-            Write-Host "  ✓ Stopped successfully" -ForegroundColor Green
+            Write-Host "  [OK] Stopped successfully" -ForegroundColor Green
             $stopped++
         }
     } catch {
         $errorMsg = $_.Exception.Message
-        Write-Host "  ✗ Failed to stop: $errorMsg" -ForegroundColor Red
+        Write-Host "  [ERROR] Failed to stop: $errorMsg" -ForegroundColor Red
         $failed++
         
         if (-not $SkipFailed) {
@@ -149,7 +149,7 @@ Write-Host "Failed: $failed" -ForegroundColor Red
 Write-Host ""
 
 if ($failed -gt 0) {
-    Write-Host "⚠️  Some recipes failed to stop" -ForegroundColor Yellow
+    Write-Host "[WARN] Some recipes failed to stop" -ForegroundColor Yellow
     Write-Host "Common reasons:" -ForegroundColor Yellow
     Write-Host "  - Recipe has pending jobs that need to complete" -ForegroundColor Yellow
     Write-Host "  - API rate limiting or temporary errors" -ForegroundColor Yellow
@@ -163,7 +163,7 @@ if ($failed -gt 0) {
 }
 
 if ($stopped -gt 0) {
-    Write-Host "✓ Successfully stopped $stopped recipe(s)" -ForegroundColor Green
+    Write-Host "[OK] Successfully stopped $stopped recipe(s)" -ForegroundColor Green
 }
 
 if ($failed -gt 0) {

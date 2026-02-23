@@ -26,7 +26,7 @@ $BackupFile = "$BackupDir\hotel_$Timestamp.db"
 
 # Check if database exists
 if (-not (Test-Path $DbPath)) {
-    Write-Host "❌ Error: Database not found at $DbPath" -ForegroundColor Red
+    Write-Host "[ERROR] Database not found at $DbPath" -ForegroundColor Red
     exit 1
 }
 
@@ -34,7 +34,7 @@ if (-not (Test-Path $DbPath)) {
 New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
 
 # Create backup using SQLite's backup command
-Write-Host "📦 Creating database backup..."
+Write-Host "Creating database backup..."
 Write-Host "   Source: $DbPath"
 Write-Host "   Destination: $BackupFile"
 
@@ -51,18 +51,18 @@ if ($sqlite3) {
 if (Test-Path $BackupFile) {
     $backupSize = (Get-Item $BackupFile).Length
     $backupSizeFormatted = "{0:N2} KB" -f ($backupSize / 1KB)
-    Write-Host "✅ Backup created successfully!" -ForegroundColor Green
+    Write-Host "[OK] Backup created successfully!" -ForegroundColor Green
     Write-Host "   Size: $backupSizeFormatted"
     Write-Host "   Location: $BackupFile"
     
     # Show recent backups
     Write-Host ""
-    Write-Host "📋 Recent backups:"
+    Write-Host "Recent backups:"
     Get-ChildItem $BackupDir -Filter "*.db" | Sort-Object LastWriteTime -Descending | Select-Object -First 5 | ForEach-Object {
         $size = "{0:N2} KB" -f ($_.Length / 1KB)
         Write-Host "   $($_.Name) - $size - $($_.LastWriteTime)"
     }
 } else {
-    Write-Host "❌ Error: Backup failed" -ForegroundColor Red
+    Write-Host "[ERROR] Backup failed" -ForegroundColor Red
     exit 1
 }

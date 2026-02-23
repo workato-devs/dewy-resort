@@ -34,14 +34,14 @@ if (Test-Path $EnvFile) {
         }
     }
 } else {
-    Write-Host "Error: .env file not found at $EnvFile" -ForegroundColor Red
+    Write-Host "[ERROR] .env file not found at $EnvFile" -ForegroundColor Red
     Write-Host "Please create app\.env with WORKATO_API_TOKEN"
     exit 1
 }
 
 # Check for required environment variables
 if (-not $env:WORKATO_API_TOKEN) {
-    Write-Host "Error: WORKATO_API_TOKEN not set" -ForegroundColor Red
+    Write-Host "[ERROR] WORKATO_API_TOKEN not set" -ForegroundColor Red
     Write-Host "Please set WORKATO_API_TOKEN in your app\.env file"
     exit 1
 }
@@ -57,7 +57,7 @@ $headers = @{
 try {
     $recipesResponse = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/recipes?per_page=100" -Headers $headers -Method Get
 } catch {
-    Write-Host "Error: Failed to fetch recipes from Workato API" -ForegroundColor Red
+    Write-Host "[ERROR] Failed to fetch recipes from Workato API" -ForegroundColor Red
     Write-Host $_.Exception.Message
     exit 1
 }
@@ -70,7 +70,7 @@ if (-not $recipes -or $recipes.Count -eq 0) {
 }
 
 $totalRecipes = $recipes.Count
-Write-Host "Found $totalRecipes recipes" -ForegroundColor Green
+Write-Host "[OK] Found $totalRecipes recipes" -ForegroundColor Green
 Write-Host ""
 
 # Counters
@@ -88,7 +88,7 @@ foreach ($recipe in $recipes) {
     
     # Check if recipe is already running
     if ($recipeRunning -eq $true) {
-        Write-Host "  ⚠️  Already running, skipping..." -ForegroundColor Yellow
+        Write-Host "  [WARN] Already running, skipping..." -ForegroundColor Yellow
         $alreadyRunning++
         Write-Host ""
         continue
@@ -99,16 +99,16 @@ foreach ($recipe in $recipes) {
         $startResponse = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/recipes/$recipeId/start" -Headers $headers -Method Put
         
         if ($startResponse.success -eq $true) {
-            Write-Host "  ✓ Started successfully" -ForegroundColor Green
+            Write-Host "  [OK] Started successfully" -ForegroundColor Green
             $started++
         } elseif ($startResponse.success -eq $false) {
             if ($startResponse.config_errors -and $startResponse.config_errors.Count -gt 0) {
-                Write-Host "  ✗ Cannot start: Connection not configured" -ForegroundColor Red
+                Write-Host "  [ERROR] Cannot start: Connection not configured" -ForegroundColor Red
                 Write-Host "     Configure connections in Workato UI: https://app.trial.workato.com" -ForegroundColor Red
             } elseif ($startResponse.code_errors -and $startResponse.code_errors.Count -gt 0) {
-                Write-Host "  ✗ Failed to start: Code errors detected" -ForegroundColor Red
+                Write-Host "  [ERROR] Failed to start: Code errors detected" -ForegroundColor Red
             } else {
-                Write-Host "  ✗ Failed to start: Unknown configuration issue" -ForegroundColor Red
+                Write-Host "  [ERROR] Failed to start: Unknown configuration issue" -ForegroundColor Red
             }
             $failed++
             
@@ -121,12 +121,12 @@ foreach ($recipe in $recipes) {
             }
         } else {
             # No success field - assume it started
-            Write-Host "  ✓ Started successfully" -ForegroundColor Green
+            Write-Host "  [OK] Started successfully" -ForegroundColor Green
             $started++
         }
     } catch {
         $errorMsg = $_.Exception.Message
-        Write-Host "  ✗ Failed to start: $errorMsg" -ForegroundColor Red
+        Write-Host "  [ERROR] Failed to start: $errorMsg" -ForegroundColor Red
         $failed++
         
         if (-not $SkipFailed) {
@@ -155,7 +155,7 @@ Write-Host "Failed: $failed" -ForegroundColor Red
 Write-Host ""
 
 if ($failed -gt 0) {
-    Write-Host "⚠️  Some recipes failed to start" -ForegroundColor Yellow
+    Write-Host "[WARN] Some recipes failed to start" -ForegroundColor Yellow
     Write-Host "Common reasons:" -ForegroundColor Yellow
     Write-Host "  - Connections not configured in Workato UI" -ForegroundColor Yellow
     Write-Host "  - Missing required fields or configuration" -ForegroundColor Yellow
@@ -170,7 +170,7 @@ if ($failed -gt 0) {
 }
 
 if ($started -gt 0) {
-    Write-Host "✓ Successfully started $started recipe(s)" -ForegroundColor Green
+    Write-Host "[OK] Successfully started $started recipe(s)" -ForegroundColor Green
 }
 
 if ($failed -gt 0) {

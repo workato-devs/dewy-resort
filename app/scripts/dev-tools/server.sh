@@ -45,7 +45,7 @@ is_running() {
 
 # Function to check if any server is already running on the port
 is_port_in_use() {
-    local PORT=3000
+    local PORT=3001
     # Check for listening processes only, not connected clients
     if lsof -ti:$PORT -sTCP:LISTEN > /dev/null 2>&1; then
         return 0
@@ -68,11 +68,11 @@ get_npm_command() {
     esac
 }
 
-# Function to kill any process on port 3000
-kill_port_3000() {
-    local PORT=3000
+# Function to kill any process on port 3001
+kill_port_3001() {
+    local PORT=3001
     
-    # Get only LISTENING processes on port 3000 (not connected clients like Chrome)
+    # Get only LISTENING processes on port 3001 (not connected clients like Chrome)
     # Using -sTCP:LISTEN to filter for listening sockets only
     local LISTENING_PIDS=$(lsof -ti:$PORT -sTCP:LISTEN 2>/dev/null || true)
     
@@ -99,8 +99,8 @@ kill_port_3000() {
 
 # Function to start the server
 start_server() {
-    # Always kill anything on port 3000 first
-    kill_port_3000
+    # Always kill anything on port 3001 first
+    kill_port_3001
     
     # Check if server is already running via PID file
     if is_running; then
@@ -142,7 +142,7 @@ start_server() {
     sleep 2
     if is_running; then
         echo -e "${GREEN}Server started successfully (PID: $(cat "$PID_FILE"))${NC}"
-        echo -e "${GREEN}➜${NC}  Local:   \033]8;;http://localhost:3000\033\\http://localhost:3000\033]8;;\033\\"
+        echo -e "${GREEN}➜${NC}  Local:   \033]8;;http://localhost:3001\033\\http://localhost:3001\033]8;;\033\\"
         echo "Tail logs with: tail -f $LOG_FILE"
     else
         echo -e "${RED}Server failed to start. Check logs: $LOG_FILE${NC}"
@@ -213,7 +213,7 @@ show_status() {
         echo -e "${GREEN}Server is running${NC}"
         echo "PID: $PID"
         echo "Environment: $ENV"
-        echo -e "${GREEN}➜${NC}  Local:   \033]8;;http://localhost:3000\033\\http://localhost:3000\033]8;;\033\\"
+        echo -e "${GREEN}➜${NC}  Local:   \033]8;;http://localhost:3001\033\\http://localhost:3001\033]8;;\033\\"
         echo "Log file: $LOG_FILE"
         echo ""
         echo "Recent logs:"

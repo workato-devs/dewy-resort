@@ -1,5 +1,5 @@
 # Test Environment Variable Isolation
-# This script verifies that the server only uses .env variables and doesn't inherit shell variables
+# This script verifies that the server only uses .env variables
 
 $ErrorActionPreference = "Stop"
 

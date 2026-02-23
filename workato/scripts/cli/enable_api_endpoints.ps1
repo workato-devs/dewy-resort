@@ -34,13 +34,13 @@ if (Test-Path $EnvFile) {
         }
     }
 } else {
-    Write-Host "Error: .env file not found at $EnvFile" -ForegroundColor Red
+    Write-Host "[ERROR] .env file not found at $EnvFile" -ForegroundColor Red
     Write-Host "Please create app\.env with WORKATO_API_TOKEN"
     exit 1
 }
 
 if (-not $env:WORKATO_API_TOKEN) {
-    Write-Host "Error: WORKATO_API_TOKEN not set" -ForegroundColor Red
+    Write-Host "[ERROR] WORKATO_API_TOKEN not set" -ForegroundColor Red
     Write-Host "Please set WORKATO_API_TOKEN in your app\.env file"
     exit 1
 }
@@ -56,7 +56,7 @@ Write-Host "Fetching API collections..." -ForegroundColor Yellow
 try {
     $collectionsResponse = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/api_collections?per_page=100" -Headers $headers -Method Get
 } catch {
-    Write-Host "Error: Failed to fetch API collections from Workato API" -ForegroundColor Red
+    Write-Host "[ERROR] Failed to fetch API collections from Workato API" -ForegroundColor Red
     exit 1
 }
 
@@ -64,7 +64,7 @@ try {
 if ($CollectionName) {
     $collections = $collectionsResponse | Where-Object { $_.name -eq $CollectionName }
     if (-not $collections -or $collections.Count -eq 0) {
-        Write-Host "Error: Collection '$CollectionName' not found" -ForegroundColor Red
+        Write-Host "[ERROR] Collection '$CollectionName' not found" -ForegroundColor Red
         Write-Host ""
         Write-Host "Available collections:" -ForegroundColor Yellow
         $collectionsResponse | ForEach-Object { Write-Host "  - $($_.name) (ID: $($_.id))" }
@@ -80,7 +80,7 @@ if (-not $collections -or $collections.Count -eq 0) {
 }
 
 $totalCollections = @($collections).Count
-Write-Host "Found $totalCollections collection(s)" -ForegroundColor Green
+Write-Host "[OK] Found $totalCollections collection(s)" -ForegroundColor Green
 Write-Host ""
 
 # Counters
@@ -100,7 +100,7 @@ foreach ($collection in $collections) {
     try {
         $endpointsResponse = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/api_endpoints?api_collection_id=$collectionId&per_page=100" -Headers $headers -Method Get
     } catch {
-        Write-Host "  Error fetching endpoints" -ForegroundColor Red
+        Write-Host "  [ERROR] fetching endpoints" -ForegroundColor Red
         continue
     }
     
@@ -124,7 +124,7 @@ foreach ($collection in $collections) {
         
         # Check if already enabled
         if ($endpointActive -eq $true) {
-            Write-Host "    ⚠️  Already enabled" -ForegroundColor Yellow
+            Write-Host "    [WARN] Already enabled" -ForegroundColor Yellow
             $alreadyEnabled++
             continue
         }
@@ -134,7 +134,7 @@ foreach ($collection in $collections) {
             try {
                 $recipeInfo = Invoke-RestMethod -Uri "https://app.trial.workato.com/api/recipes/$recipeId" -Headers $headers -Method Get
                 if ($recipeInfo.running -ne $true) {
-                    Write-Host "    ✗ Cannot enable: Recipe not started (ID: $recipeId)" -ForegroundColor Red
+                    Write-Host "    [ERROR] Cannot enable: Recipe not started (ID: $recipeId)" -ForegroundColor Red
                     Write-Host "      Run start_workato_recipes.ps1 first" -ForegroundColor Yellow
                     $recipeNotStarted++
                     continue
@@ -145,11 +145,11 @@ foreach ($collection in $collections) {
         # Enable the endpoint
         try {
             Invoke-RestMethod -Uri "https://app.trial.workato.com/api/api_endpoints/$endpointId/enable" -Headers $headers -Method Put | Out-Null
-            Write-Host "    ✓ Enabled successfully" -ForegroundColor Green
+            Write-Host "    [OK] Enabled successfully" -ForegroundColor Green
             $enabled++
         } catch {
             $errorMsg = $_.Exception.Message
-            Write-Host "    ✗ Failed to enable: $errorMsg" -ForegroundColor Red
+            Write-Host "    [ERROR] Failed to enable: $errorMsg" -ForegroundColor Red
             $failed++
         }
         
@@ -171,7 +171,7 @@ Write-Host "Failed: $failed" -ForegroundColor Red
 Write-Host ""
 
 if ($recipeNotStarted -gt 0) {
-    Write-Host "⚠️  Some endpoints could not be enabled because their recipes are not started" -ForegroundColor Yellow
+    Write-Host "[WARN] Some endpoints could not be enabled because their recipes are not started" -ForegroundColor Yellow
     Write-Host "Next steps:" -ForegroundColor Blue
     Write-Host "  1. Run: .\start_workato_recipes.ps1"
     Write-Host "  2. Run: .\enable_api_endpoints.ps1"
@@ -179,7 +179,7 @@ if ($recipeNotStarted -gt 0) {
 }
 
 if ($enabled -gt 0) {
-    Write-Host "✓ Successfully enabled $enabled endpoint(s)" -ForegroundColor Green
+    Write-Host "[OK] Successfully enabled $enabled endpoint(s)" -ForegroundColor Green
 }
 
 if ($failed -gt 0) {

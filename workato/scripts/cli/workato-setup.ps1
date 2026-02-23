@@ -1,8 +1,8 @@
 # Workato CLI Setup for Windows
 $ErrorActionPreference = "Stop"
 
-Write-Host "🔧 Workato CLI Setup" -ForegroundColor Cyan
-Write-Host "====================" -ForegroundColor Cyan
+Write-Host "Workato CLI Setup" -ForegroundColor Cyan
+Write-Host "==================" -ForegroundColor Cyan
 Write-Host ""
 
 # Check Python version
@@ -19,7 +19,7 @@ foreach ($cmd in @("python", "python3", "py")) {
 }
 
 if (-not $pythonCmd) {
-    Write-Host "❌ Python 3 is not installed. Please install Python 3.8 or higher." -ForegroundColor Red
+    Write-Host "[ERROR] Python 3 is not installed. Please install Python 3.8 or higher." -ForegroundColor Red
     exit 1
 }
 
@@ -28,18 +28,18 @@ $requiredVersion = [version]"3.8"
 $currentVersion = [version]$pythonVersion
 
 if ($currentVersion -lt $requiredVersion) {
-    Write-Host "❌ Python $pythonVersion found, but Python 3.8 or higher is required." -ForegroundColor Red
+    Write-Host "[ERROR] Python $pythonVersion found, but Python 3.8 or higher is required." -ForegroundColor Red
     exit 1
 }
 
-Write-Host "✓ Python $pythonVersion detected" -ForegroundColor Green
+Write-Host "[OK] Python $pythonVersion detected" -ForegroundColor Green
 Write-Host ""
 
 # Install workato-platform-cli using pip
 Write-Host "Installing workato-platform-cli using pip..."
 & $pythonCmd -m pip install --user workato-platform-cli
 
-Write-Host "✓ workato-platform-cli installed" -ForegroundColor Green
+Write-Host "[OK] workato-platform-cli installed" -ForegroundColor Green
 Write-Host ""
 
 # Find the workato executable
@@ -83,35 +83,35 @@ New-Item -ItemType Directory -Force -Path $binDir | Out-Null
 # Create wrapper script
 Write-Host "Creating wrapper script at bin\workato.ps1..."
 
-$wrapperContent = @"
+$wrapperContent = @'
 # Workato CLI wrapper script (pip installation)
-`$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 # Try to find workato in PATH first
-`$workatoCmd = Get-Command workato -ErrorAction SilentlyContinue
-if (`$workatoCmd) {
+$workatoCmd = Get-Command workato -ErrorAction SilentlyContinue
+if ($workatoCmd) {
     & workato @args
-    exit `$LASTEXITCODE
+    exit $LASTEXITCODE
 }
 
 # Check known locations
-`$possiblePaths = @(
-    "`$env:APPDATA\Python\Scripts\workato.exe",
-    "`$env:LOCALAPPDATA\Programs\Python\Scripts\workato.exe",
-    "`$env:USERPROFILE\.local\bin\workato.exe"
+$possiblePaths = @(
+    "$env:APPDATA\Python\Scripts\workato.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Scripts\workato.exe",
+    "$env:USERPROFILE\.local\bin\workato.exe"
 )
 
-foreach (`$path in `$possiblePaths) {
-    if (Test-Path `$path) {
-        & `$path @args
-        exit `$LASTEXITCODE
+foreach ($path in $possiblePaths) {
+    if (Test-Path $path) {
+        & $path @args
+        exit $LASTEXITCODE
     }
 }
 
-Write-Host "❌ Workato CLI not found." -ForegroundColor Red
+Write-Host "[ERROR] Workato CLI not found." -ForegroundColor Red
 Write-Host "Please run '.\setup-cli.ps1 -Tool workato' to install the Workato CLI."
 exit 1
-"@
+'@
 
 $wrapperContent | Out-File -FilePath "bin\workato.ps1" -Encoding UTF8
 
@@ -122,14 +122,14 @@ powershell -ExecutionPolicy Bypass -File "%~dp0workato.ps1" %*
 "@
 $batchContent | Out-File -FilePath "bin\workato.cmd" -Encoding ASCII
 
-Write-Host "✓ Wrapper scripts created" -ForegroundColor Green
+Write-Host "[OK] Wrapper scripts created" -ForegroundColor Green
 Write-Host ""
 
 # Verify installation
 Write-Host "Verifying installation..."
 try {
     $version = & "bin\workato.ps1" --version 2>&1
-    Write-Host "✓ Workato CLI successfully installed!" -ForegroundColor Green
+    Write-Host "[OK] Workato CLI successfully installed!" -ForegroundColor Green
     Write-Host ""
     Write-Host $version
     Write-Host ""
@@ -140,7 +140,7 @@ try {
     Write-Host "To authenticate, set your API key in .env or run:"
     Write-Host "  .\bin\workato.ps1 login"
 } catch {
-    Write-Host "❌ Installation verification failed" -ForegroundColor Red
+    Write-Host "[ERROR] Installation verification failed" -ForegroundColor Red
     Write-Host "You may need to add Python Scripts to your PATH"
     exit 1
 }
