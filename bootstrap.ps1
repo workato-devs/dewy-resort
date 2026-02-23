@@ -130,14 +130,14 @@ function Install-Git {
 function Clone-Repository {
     param(
         [string]$Url,
-        [string]$Branch,
+        [string]$BranchName,
         [string]$Target
     )
     
     Write-Host ""
     Write-Host "Cloning repository..." -ForegroundColor Yellow
     Write-Host "  URL: $Url"
-    Write-Host "  Branch: $Branch"
+    Write-Host "  Branch: $BranchName"
     Write-Host "  Target: $Target"
     Write-Host ""
     
@@ -154,7 +154,8 @@ function Clone-Repository {
     }
     
     try {
-        git clone --branch $Branch $Url $Target
+        Write-Host "Running: git clone --branch $BranchName $Url $Target" -ForegroundColor Gray
+        & git clone --branch $BranchName $Url $Target
         if ($LASTEXITCODE -ne 0) {
             throw "git clone failed with exit code $LASTEXITCODE"
         }
@@ -209,7 +210,7 @@ if (-not $TargetDir) {
     $TargetDir = Join-Path (Get-Location) "dewy-resort"
 }
 
-$clonedPath = Clone-Repository -Url $RepoUrl -Branch $Branch -Target $TargetDir
+$clonedPath = Clone-Repository -Url $RepoUrl -BranchName $Branch -Target $TargetDir
 
 if (-not $clonedPath) {
     Write-Host ""
