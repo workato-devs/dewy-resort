@@ -43,11 +43,17 @@ Write-Host ""
 Write-Host "Installing workato-platform-cli using pip..."
 Write-Host ""
 
-# Capture output but don't fail on warnings
-$pipOutput = & $pythonCmd -m pip install --user workato-platform-cli 2>&1
+# Temporarily allow errors so pip warnings don't terminate the script
+$ErrorActionPreference = "Continue"
+
+# Capture output - redirect stderr to stdout to capture warnings
+$pipOutput = & $pythonCmd -m pip install --user workato-platform-cli 2>&1 | Out-String
+
+# Restore error handling
+$ErrorActionPreference = "Stop"
 
 # Display output
-$pipOutput | ForEach-Object { Write-Host $_ }
+Write-Host $pipOutput
 
 # Check if workato was actually installed (pip warnings about PATH are not failures)
 $installSuccess = $false
