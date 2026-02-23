@@ -10,32 +10,32 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Get project root directory
+# Get project root directory (go up from app/scripts/setup to project root)
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ProjectRoot = (Get-Item "$ScriptDir\..\..\..").FullName
+$ProjectRoot = Resolve-Path (Join-Path $ScriptDir "..\..\..") | Select-Object -ExpandProperty Path
 
 # Map tool names to their setup script locations
 $ToolScripts = @{
-    "workato" = "$ProjectRoot\workato\scripts\cli\workato-setup.ps1"
-    "salesforce" = "$ProjectRoot\vendor\salesforce\scripts\salesforce-setup.ps1"
+    "workato" = Join-Path $ProjectRoot "workato\scripts\cli\workato-setup.ps1"
+    "salesforce" = Join-Path $ProjectRoot "vendor\salesforce\scripts\salesforce-setup.ps1"
 }
 
 $ToolScript = $ToolScripts[$Tool]
 
 # Check if tool-specific setup script exists
 if (-not (Test-Path $ToolScript)) {
-    Write-Host "[ERROR] Unknown tool '$Tool'" -ForegroundColor Red
+    Write-Host "[ERROR] Setup script not found: $ToolScript" -ForegroundColor Red
     Write-Host ""
     Write-Host "Available tools:"
-    Write-Host "  - workato (workato\scripts\cli\workato-setup.ps1)"
-    Write-Host "  - salesforce (vendor\salesforce\scripts\salesforce-setup.ps1)"
+    Write-Host "  - workato"
+    Write-Host "  - salesforce"
     exit 1
 }
 
 # Check if wrapper already exists (skip if already installed)
 $WrapperScripts = @{
-    "workato" = "$ProjectRoot\bin\workato.ps1"
-    "salesforce" = "$ProjectRoot\bin\sf.ps1"
+    "workato" = Join-Path $ProjectRoot "bin\workato.ps1"
+    "salesforce" = Join-Path $ProjectRoot "bin\sf.ps1"
 }
 
 $WrapperScript = $WrapperScripts[$Tool]
@@ -47,8 +47,7 @@ if (Test-Path $WrapperScript) {
     
     $reply = Read-Host "Reinstall anyway? [y/N]"
     if ($reply -notmatch '^[Yy]$') {
-        Write-Host "Skipping installation. To force reinstall:"
-        Write-Host "  Remove-Item $WrapperScript; .\setup-cli.ps1 -Tool $Tool"
+        Write-Host "Skipping installation."
         exit 0
     }
 }
@@ -62,6 +61,10 @@ Write-Host ""
 Push-Location $ProjectRoot
 try {
     & $ToolScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[ERROR] Setup script failed with exit code $LASTEXITCODE" -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
 } finally {
     Pop-Location
 }
@@ -76,6 +79,7 @@ if (Test-Path $WrapperScript) {
     Write-Host "To verify installation:"
     Write-Host "  .\bin\$Tool.ps1 --version"
     Write-Host ""
+    exit 0
 } else {
     Write-Host "[ERROR] Installation failed: Wrapper script not created" -ForegroundColor Red
     exit 1

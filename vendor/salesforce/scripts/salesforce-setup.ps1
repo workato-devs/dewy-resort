@@ -35,7 +35,9 @@ Write-Host "[OK] Required tools available" -ForegroundColor Green
 Write-Host ""
 
 # Create tools directory
-New-Item -ItemType Directory -Force -Path "tools" | Out-Null
+if (-not (Test-Path "tools")) {
+    New-Item -ItemType Directory -Path "tools" | Out-Null
+}
 
 # Remove existing installation if present
 if (Test-Path $sfInstallDir) {
@@ -49,13 +51,21 @@ Write-Host "  $downloadUrl"
 Write-Host ""
 Write-Host "This may take a few minutes..."
 
-$tempDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
+# Create temp directory
+$tempDir = Join-Path $env:TEMP "sf-cli-install-$(Get-Random)"
+New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 $downloadFile = Join-Path $tempDir "sf-cli.tar.xz"
 
 try {
     # Download the file
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest -Uri $downloadUrl -OutFile $downloadFile -UseBasicParsing
+    
+    if (-not (Test-Path $downloadFile)) {
+        throw "Download file not created"
+    }
+    
     Write-Host "[OK] Download complete" -ForegroundColor Green
 } catch {
     Write-Host "[ERROR] Download failed: $($_.Exception.Message)" -ForegroundColor Red
@@ -65,32 +75,50 @@ try {
 
 Write-Host ""
 Write-Host "Extracting Salesforce CLI to $sfInstallDir..."
-New-Item -ItemType Directory -Force -Path $sfInstallDir | Out-Null
 
-# Extract using tar (handles .tar.xz on Windows 10+)
-Push-Location $sfInstallDir
+# Create the install directory
+New-Item -ItemType Directory -Path $sfInstallDir -Force | Out-Null
+
+# Get absolute paths for tar (avoid path issues)
+$absoluteDownloadFile = Resolve-Path $downloadFile | Select-Object -ExpandProperty Path
+$absoluteInstallDir = Resolve-Path $sfInstallDir | Select-Object -ExpandProperty Path
+
+# Extract using tar
 try {
-    tar -xf $downloadFile --strip-components=1
-} finally {
-    Pop-Location
+    # Change to install directory and extract
+    Push-Location $absoluteInstallDir
+    try {
+        # Use forward slashes for tar compatibility
+        $tarFile = $absoluteDownloadFile -replace '\\', '/'
+        & tar -xf $tarFile --strip-components=1 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            throw "tar extraction failed with exit code $LASTEXITCODE"
+        }
+    } finally {
+        Pop-Location
+    }
+    Write-Host "[OK] Salesforce CLI extracted" -ForegroundColor Green
+} catch {
+    Write-Host "[ERROR] Extraction failed: $($_.Exception.Message)" -ForegroundColor Red
+    Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
+    exit 1
 }
 
 # Clean up temp files
-Remove-Item -Recurse -Force $tempDir
+Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
 
-Write-Host "[OK] Salesforce CLI extracted" -ForegroundColor Green
 Write-Host ""
 
 # Create bin directory
-New-Item -ItemType Directory -Force -Path "bin" | Out-Null
+if (-not (Test-Path "bin")) {
+    New-Item -ItemType Directory -Path "bin" | Out-Null
+}
 
 # Create wrapper script
 Write-Host "Creating wrapper script at bin\sf.ps1..."
 
 $wrapperContent = @'
 # Salesforce CLI wrapper script
-# This script executes the Salesforce CLI from the isolated installation
-
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -99,11 +127,10 @@ $SfCli = Join-Path $ProjectRoot "tools\sf-cli\bin\sf.cmd"
 
 if (-not (Test-Path $SfCli)) {
     Write-Host "[ERROR] Salesforce CLI installation not found." -ForegroundColor Red
-    Write-Host "Please run '.\setup-cli.ps1 -Tool salesforce' to install the Salesforce CLI."
+    Write-Host "Please run '.\setup.ps1 -Tool salesforce' to install."
     exit 1
 }
 
-# Execute sf CLI with all arguments
 & $SfCli @args
 exit $LASTEXITCODE
 '@
@@ -122,23 +149,26 @@ Write-Host ""
 
 # Verify installation
 Write-Host "Verifying installation..."
-try {
-    $version = & "bin\sf.ps1" --version 2>&1
-    Write-Host "[OK] Salesforce CLI successfully installed!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host $version
-    Write-Host ""
-    Write-Host "You can now use the CLI via:"
-    Write-Host "  - .\bin\sf.ps1 <command>"
-    Write-Host "  - bin\sf <command> (from cmd.exe)"
-    Write-Host ""
-    Write-Host "To authenticate to a Salesforce org:"
-    Write-Host "  .\bin\sf.ps1 org login web --alias myDevOrg"
-    Write-Host ""
-    Write-Host "To list authenticated orgs:"
-    Write-Host "  .\bin\sf.ps1 org list"
-    Write-Host ""
-} catch {
-    Write-Host "[ERROR] Installation verification failed" -ForegroundColor Red
+$sfExe = Join-Path $sfInstallDir "bin\sf.cmd"
+if (Test-Path $sfExe) {
+    try {
+        $version = & $sfExe --version 2>&1
+        Write-Host "[OK] Salesforce CLI successfully installed!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host $version
+        Write-Host ""
+        Write-Host "You can now use the CLI via:"
+        Write-Host "  .\bin\sf.ps1 <command>"
+        Write-Host ""
+        Write-Host "To authenticate to a Salesforce org:"
+        Write-Host "  .\bin\sf.ps1 org login web --alias myDevOrg"
+        Write-Host ""
+        exit 0
+    } catch {
+        Write-Host "[ERROR] Installation verification failed: $($_.Exception.Message)" -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "[ERROR] sf.cmd not found at expected location: $sfExe" -ForegroundColor Red
     exit 1
 }

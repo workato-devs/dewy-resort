@@ -5,86 +5,65 @@ Write-Host "Workato CLI Setup" -ForegroundColor Cyan
 Write-Host "==================" -ForegroundColor Cyan
 Write-Host ""
 
-# Check Python version
+# Check Python version (require 3.11+)
 Write-Host "Checking Python version..."
 $pythonCmd = $null
+$pythonVersion = $null
+
 foreach ($cmd in @("python", "python3", "py")) {
     try {
-        $version = & $cmd --version 2>&1
-        if ($version -match "Python (\d+\.\d+)") {
-            $pythonCmd = $cmd
-            break
+        $versionOutput = & $cmd --version 2>&1
+        if ($versionOutput -match "Python (\d+)\.(\d+)") {
+            $major = [int]$matches[1]
+            $minor = [int]$matches[2]
+            if ($major -ge 3 -and $minor -ge 11) {
+                $pythonCmd = $cmd
+                $pythonVersion = "$major.$minor"
+                break
+            }
         }
     } catch { }
 }
 
 if (-not $pythonCmd) {
-    Write-Host "[ERROR] Python 3 is not installed. Please install Python 3.8 or higher." -ForegroundColor Red
+    Write-Host "[ERROR] Python 3.11 or higher is required but not found." -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Please install Python 3.11+ using one of these methods:" -ForegroundColor Yellow
+    Write-Host "  winget install Python.Python.3.11"
+    Write-Host "  Or download from: https://www.python.org/downloads/"
+    Write-Host ""
+    Write-Host "After installing, restart PowerShell and run setup again."
     exit 1
 }
 
-$pythonVersion = & $pythonCmd -c "import sys; print('.'.join(map(str, sys.version_info[:2])))"
-$requiredVersion = [version]"3.8"
-$currentVersion = [version]$pythonVersion
-
-if ($currentVersion -lt $requiredVersion) {
-    Write-Host "[ERROR] Python $pythonVersion found, but Python 3.8 or higher is required." -ForegroundColor Red
-    exit 1
-}
-
-Write-Host "[OK] Python $pythonVersion detected" -ForegroundColor Green
+Write-Host "[OK] Python $pythonVersion detected (using '$pythonCmd')" -ForegroundColor Green
 Write-Host ""
 
 # Install workato-platform-cli using pip
 Write-Host "Installing workato-platform-cli using pip..."
-& $pythonCmd -m pip install --user workato-platform-cli
+try {
+    & $pythonCmd -m pip install --user workato-platform-cli 2>&1 | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        throw "pip install failed with exit code $LASTEXITCODE"
+    }
+    Write-Host "[OK] workato-platform-cli installed" -ForegroundColor Green
+} catch {
+    Write-Host "[ERROR] Failed to install workato-platform-cli: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
 
-Write-Host "[OK] workato-platform-cli installed" -ForegroundColor Green
 Write-Host ""
 
-# Find the workato executable
-$workatoPath = $null
-$possiblePaths = @(
-    "$env:APPDATA\Python\Python$($pythonVersion -replace '\.', '')\Scripts\workato.exe",
-    "$env:LOCALAPPDATA\Programs\Python\Python$($pythonVersion -replace '\.', '')\Scripts\workato.exe",
-    "$env:USERPROFILE\.local\bin\workato.exe",
-    "$env:USERPROFILE\AppData\Roaming\Python\Scripts\workato.exe"
-)
-
-# Also check PATH
-$pathWorkato = Get-Command workato -ErrorAction SilentlyContinue
-if ($pathWorkato) {
-    $workatoPath = $pathWorkato.Source
-} else {
-    foreach ($path in $possiblePaths) {
-        if (Test-Path $path) {
-            $workatoPath = $path
-            break
-        }
-    }
-}
-
-if (-not $workatoPath) {
-    # Try to find it using pip show
-    $pipShow = & $pythonCmd -m pip show workato-platform-cli 2>&1
-    if ($pipShow -match "Location: (.+)") {
-        $location = $matches[1].Trim()
-        $scriptsPath = Join-Path (Split-Path $location -Parent) "Scripts\workato.exe"
-        if (Test-Path $scriptsPath) {
-            $workatoPath = $scriptsPath
-        }
-    }
-}
-
 # Create bin directory
-$binDir = "bin"
-New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+if (-not (Test-Path "bin")) {
+    New-Item -ItemType Directory -Path "bin" | Out-Null
+}
 
 # Create wrapper script
 Write-Host "Creating wrapper script at bin\workato.ps1..."
 
 $wrapperContent = @'
-# Workato CLI wrapper script (pip installation)
+# Workato CLI wrapper script
 $ErrorActionPreference = "Stop"
 
 # Try to find workato in PATH first
@@ -97,7 +76,8 @@ if ($workatoCmd) {
 # Check known locations
 $possiblePaths = @(
     "$env:APPDATA\Python\Scripts\workato.exe",
-    "$env:LOCALAPPDATA\Programs\Python\Scripts\workato.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts\workato.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts\workato.exe",
     "$env:USERPROFILE\.local\bin\workato.exe"
 )
 
@@ -109,7 +89,7 @@ foreach ($path in $possiblePaths) {
 }
 
 Write-Host "[ERROR] Workato CLI not found." -ForegroundColor Red
-Write-Host "Please run '.\setup-cli.ps1 -Tool workato' to install the Workato CLI."
+Write-Host "Please run '.\setup.ps1 -Tool workato' to install."
 exit 1
 '@
 
@@ -127,20 +107,51 @@ Write-Host ""
 
 # Verify installation
 Write-Host "Verifying installation..."
-try {
-    $version = & "bin\workato.ps1" --version 2>&1
-    Write-Host "[OK] Workato CLI successfully installed!" -ForegroundColor Green
+
+# Try to find workato executable
+$workatoExe = Get-Command workato -ErrorAction SilentlyContinue
+if (-not $workatoExe) {
+    # Check common pip install locations
+    $possiblePaths = @(
+        "$env:APPDATA\Python\Scripts\workato.exe",
+        "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts\workato.exe",
+        "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts\workato.exe"
+    )
+    
+    foreach ($path in $possiblePaths) {
+        if (Test-Path $path) {
+            $workatoExe = $path
+            break
+        }
+    }
+}
+
+if ($workatoExe) {
+    try {
+        if ($workatoExe -is [System.Management.Automation.CommandInfo]) {
+            $version = & workato --version 2>&1
+        } else {
+            $version = & $workatoExe --version 2>&1
+        }
+        Write-Host "[OK] Workato CLI successfully installed!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host $version
+        Write-Host ""
+        Write-Host "You can now use the CLI via:"
+        Write-Host "  .\bin\workato.ps1 <command>"
+        Write-Host ""
+        Write-Host "To authenticate, set your API key in app\.env or run:"
+        Write-Host "  .\bin\workato.ps1 login"
+        exit 0
+    } catch {
+        Write-Host "[WARN] Installation completed but verification failed" -ForegroundColor Yellow
+        Write-Host "You may need to restart PowerShell for the PATH to update."
+        exit 0
+    }
+} else {
+    Write-Host "[WARN] Installation completed but workato not found in PATH" -ForegroundColor Yellow
+    Write-Host "You may need to restart PowerShell for the PATH to update."
     Write-Host ""
-    Write-Host $version
-    Write-Host ""
-    Write-Host "You can now use the CLI via:"
-    Write-Host "  - .\bin\workato.ps1 <command>"
-    Write-Host "  - bin\workato <command> (from cmd.exe)"
-    Write-Host ""
-    Write-Host "To authenticate, set your API key in .env or run:"
-    Write-Host "  .\bin\workato.ps1 login"
-} catch {
-    Write-Host "[ERROR] Installation verification failed" -ForegroundColor Red
-    Write-Host "You may need to add Python Scripts to your PATH"
-    exit 1
+    Write-Host "After restarting, verify with: .\bin\workato.ps1 --version"
+    exit 0
 }
