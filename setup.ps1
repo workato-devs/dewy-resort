@@ -89,6 +89,122 @@ function Install-Winget {
     return $false
 }
 
+function Get-PythonScriptsPath {
+    # Find Python Scripts directory
+    $possiblePaths = @(
+        "$env:LOCALAPPDATA\Programs\Python\Python313\Scripts",
+        "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts",
+        "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts",
+        "$env:APPDATA\Python\Python313\Scripts",
+        "$env:APPDATA\Python\Python312\Scripts",
+        "$env:APPDATA\Python\Python311\Scripts",
+        "$env:USERPROFILE\AppData\Local\Programs\Python\Python311\Scripts"
+    )
+    
+    foreach ($path in $possiblePaths) {
+        if (Test-Path $path) {
+            return $path
+        }
+    }
+    return $null
+}
+
+function Test-PathContains {
+    param([string]$Directory)
+    
+    $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $fullPath = "$machinePath;$currentPath"
+    
+    return $fullPath -split ';' | Where-Object { $_ -eq $Directory }
+}
+
+function Add-ToUserPath {
+    param([string]$Directory)
+    
+    Write-Host "Adding to user PATH: $Directory" -ForegroundColor Yellow
+    
+    try {
+        $currentUserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+        if ($currentUserPath) {
+            $newPath = "$currentUserPath;$Directory"
+        } else {
+            $newPath = $Directory
+        }
+        
+        [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+        
+        # Also update current session
+        $env:Path = "$env:Path;$Directory"
+        
+        Write-Host "[OK] Added to user PATH" -ForegroundColor Green
+        return $true
+    } catch {
+        Write-Host "[ERROR] Failed to update user PATH: $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Add-ToMachinePath {
+    param([string]$Directory)
+    
+    # This requires elevation - spawn a new elevated process
+    Write-Host "Adding to system PATH requires Administrator privileges..." -ForegroundColor Yellow
+    
+    $scriptBlock = @"
+        `$currentPath = [Environment]::GetEnvironmentVariable('Path', 'Machine')
+        `$newPath = "`$currentPath;$Directory"
+        [Environment]::SetEnvironmentVariable('Path', `$newPath, 'Machine')
+        Write-Host '[OK] Added to system PATH' -ForegroundColor Green
+"@
+    
+    try {
+        Start-Process powershell -Verb RunAs -ArgumentList "-Command", $scriptBlock -Wait
+        
+        # Refresh current session PATH
+        $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+        
+        return $true
+    } catch {
+        Write-Host "[ERROR] Failed to elevate privileges: $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Ensure-PythonInPath {
+    $scriptsPath = Get-PythonScriptsPath
+    
+    if (-not $scriptsPath) {
+        Write-Host "[WARN] Could not find Python Scripts directory" -ForegroundColor Yellow
+        return $true  # Continue anyway, might work
+    }
+    
+    if (Test-PathContains -Directory $scriptsPath) {
+        Write-Host "[OK] Python Scripts directory already in PATH" -ForegroundColor Green
+        return $true
+    }
+    
+    Write-Host ""
+    Write-Host "Python Scripts directory not in PATH: $scriptsPath" -ForegroundColor Yellow
+    Write-Host ""
+    
+    # Try user PATH first (no admin required)
+    if (Add-ToUserPath -Directory $scriptsPath) {
+        return $true
+    }
+    
+    # If user PATH failed, offer to try machine PATH (requires admin)
+    Write-Host ""
+    $reply = Read-Host "Try adding to system PATH? (requires Administrator) [y/N]"
+    if ($reply -match '^[Yy]$') {
+        return Add-ToMachinePath -Directory $scriptsPath
+    }
+    
+    Write-Host "[WARN] Python Scripts not in PATH. You may need to add it manually:" -ForegroundColor Yellow
+    Write-Host "  $scriptsPath" -ForegroundColor Yellow
+    return $true  # Continue anyway
+}
+
 function Install-Python {
     Write-Host ""
     Write-Host "Checking for Python 3.11+..." -ForegroundColor Yellow
@@ -104,6 +220,9 @@ function Install-Python {
                 if ($major -ge 3 -and $minor -ge 11) {
                     $pythonCmd = $cmd
                     Write-Host "[OK] Python $major.$minor detected (using '$cmd')" -ForegroundColor Green
+                    
+                    # Ensure Scripts directory is in PATH
+                    Ensure-PythonInPath | Out-Null
                     return $true
                 } else {
                     Write-Host "[INFO] Python $major.$minor found but 3.11+ required" -ForegroundColor Yellow
@@ -120,11 +239,17 @@ function Install-Python {
             throw "winget install failed with exit code $LASTEXITCODE"
         }
         
-        # Refresh PATH
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+        # Refresh PATH from registry
+        $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
         
         Write-Host "[OK] Python 3.11 installed successfully" -ForegroundColor Green
-        Write-Host "[INFO] You may need to restart PowerShell for Python to be available in PATH" -ForegroundColor Yellow
+        
+        # Ensure Scripts directory is in PATH
+        if (-not (Ensure-PythonInPath)) {
+            Write-Host "[WARN] Could not add Python Scripts to PATH automatically" -ForegroundColor Yellow
+            Write-Host "You may need to restart PowerShell or add it manually" -ForegroundColor Yellow
+        }
+        
         return $true
     } catch {
         Write-Host "[ERROR] Failed to install Python: $($_.Exception.Message)" -ForegroundColor Red
