@@ -199,6 +199,17 @@ if ($LASTEXITCODE -ne 0) {
 }
 ```
 
+### 10. Salesforce CLI Installation Hanging
+
+**Problem:** The Salesforce CLI installation via tar extraction would hang indefinitely on Windows. The `.tar.xz` format combined with Windows' built-in tar and stderr redirection caused buffering issues.
+
+**Solution:** Restructured the installation to:
+1. Use npm as the primary installation method (more reliable on Windows)
+2. Support 7-Zip as a fallback for extraction (better xz support)
+3. Run tar as a background job with a 5-minute timeout
+4. Remove stderr capture that caused buffering issues
+5. Provide clear fallback instructions if extraction fails
+
 ## Prerequisite Auto-Installation
 
 The setup scripts automatically install missing prerequisites via **winget**:
@@ -206,6 +217,7 @@ The setup scripts automatically install missing prerequisites via **winget**:
 1. **winget** - Windows Package Manager (attempts to install if missing)
 2. **Git** - `winget install Git.Git`
 3. **Python 3.11** - `winget install Python.Python.3.11`
+4. **Node.js v20 LTS** - `winget install OpenJS.NodeJS.LTS` (required for Salesforce CLI and app)
 
 ## Usage
 

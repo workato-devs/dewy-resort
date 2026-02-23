@@ -291,6 +291,90 @@ function Install-Git {
     }
 }
 
+function Install-NodeJS {
+    Write-Host ""
+    Write-Host "Checking for Node.js v20..." -ForegroundColor Yellow
+    
+    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+    if ($nodeCmd) {
+        try {
+            $versionOutput = & node --version 2>&1
+            if ($versionOutput -match "v(\d+)\.(\d+)") {
+                $major = [int]$matches[1]
+                $minor = [int]$matches[2]
+                
+                if ($major -eq 20) {
+                    Write-Host "[OK] Node.js v$major.$minor detected" -ForegroundColor Green
+                    
+                    # Also verify npm is available
+                    $npmCmd = Get-Command npm -ErrorAction SilentlyContinue
+                    if ($npmCmd) {
+                        $npmVersion = & npm --version 2>&1
+                        Write-Host "[OK] npm v$npmVersion detected" -ForegroundColor Green
+                    }
+                    return $true
+                } elseif ($major -gt 20) {
+                    Write-Host "[WARN] Node.js v$major.$minor detected, but v20.x is required" -ForegroundColor Yellow
+                    Write-Host "[INFO] Some features may not work correctly with newer versions" -ForegroundColor Yellow
+                    Write-Host ""
+                    $reply = Read-Host "Install Node.js v20 alongside existing version? [y/N]"
+                    if ($reply -notmatch '^[Yy]') {
+                        Write-Host "[WARN] Continuing with Node.js v$major (not recommended)" -ForegroundColor Yellow
+                        return $true
+                    }
+                } else {
+                    Write-Host "[INFO] Node.js v$major.$minor found but v20.x required" -ForegroundColor Yellow
+                }
+            }
+        } catch {
+            Write-Host "[WARN] Could not determine Node.js version" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "Node.js not found." -ForegroundColor Yellow
+    }
+    
+    Write-Host "Installing Node.js v20 LTS via winget..." -ForegroundColor Yellow
+    
+    try {
+        # Install Node.js 20 LTS specifically
+        winget install OpenJS.NodeJS.LTS --version "20.19.2" --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -ne 0) {
+            # Try without specific version if exact version not available
+            Write-Host "[INFO] Specific version not available, trying latest v20 LTS..." -ForegroundColor Yellow
+            winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
+            if ($LASTEXITCODE -ne 0) {
+                throw "winget install failed with exit code $LASTEXITCODE"
+            }
+        }
+        
+        # Refresh PATH from registry
+        $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+        
+        # Verify installation
+        $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+        if ($nodeCmd) {
+            $versionOutput = & node --version 2>&1
+            Write-Host "[OK] Node.js $versionOutput installed successfully" -ForegroundColor Green
+            
+            $npmVersion = & npm --version 2>&1
+            Write-Host "[OK] npm v$npmVersion available" -ForegroundColor Green
+        } else {
+            Write-Host "[WARN] Node.js installed but not in PATH yet" -ForegroundColor Yellow
+            Write-Host "[INFO] You may need to restart PowerShell for Node.js to be available" -ForegroundColor Yellow
+        }
+        
+        return $true
+    } catch {
+        Write-Host "[ERROR] Failed to install Node.js: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Alternative installation methods:" -ForegroundColor Yellow
+        Write-Host "  1. Download from: https://nodejs.org/en/download/ (choose v20 LTS)"
+        Write-Host "  2. Using nvm-windows: https://github.com/coreybutler/nvm-windows"
+        Write-Host ""
+        return $false
+    }
+}
+
 function Install-Prerequisites {
     Write-Host "========================================" -ForegroundColor Cyan
     Write-Host "  Checking Prerequisites" -ForegroundColor Cyan
@@ -315,6 +399,13 @@ function Install-Prerequisites {
     if (-not (Install-Python)) {
         Write-Host ""
         Write-Host "[ERROR] Cannot proceed without Python 3.11+" -ForegroundColor Red
+        return $false
+    }
+    
+    # Step 4: Check/Install Node.js v20
+    if (-not (Install-NodeJS)) {
+        Write-Host ""
+        Write-Host "[ERROR] Cannot proceed without Node.js v20" -ForegroundColor Red
         return $false
     }
     

@@ -4,11 +4,15 @@ This guide covers setting up the Dewy Resort workshop environment on Windows.
 
 ## Prerequisites
 
-- Windows 10 version 1803 or later (for built-in `tar` support)
+The setup script will automatically install missing prerequisites via **winget**:
+
+- Windows 10 version 1803 or later
 - PowerShell 5.0 or later (included with Windows 10)
-- Node.js 18+ (download from https://nodejs.org)
-- Python 3.8+ (for Workato CLI - download from https://python.org)
-- Git (download from https://git-scm.com)
+- **Node.js v20 LTS** (auto-installed if missing)
+- **Python 3.11+** (auto-installed if missing) - for Workato CLI
+- **Git** (auto-installed if missing)
+
+> **Note:** Node.js v20 is specifically required. Other versions (v18, v21, v22) may cause compatibility issues.
 
 ## Quick Start
 
@@ -137,9 +141,21 @@ If not found, reinstall Python and check "Add Python to PATH" during installatio
 
 ### Salesforce CLI Download Issues
 
-If the automatic download fails, install manually:
+If the automatic download fails, the setup will try npm installation automatically. If that also fails, install manually:
 ```powershell
 npm install --global @salesforce/cli
+```
+
+### Node.js Version Issues
+
+Node.js v20 is required. Check your version:
+```powershell
+node --version
+```
+
+If you have a different version, install v20 via winget:
+```powershell
+winget install OpenJS.NodeJS.LTS
 ```
 
 ## Differences from Mac/Linux
