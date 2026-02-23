@@ -224,20 +224,25 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Change to the cloned directory and run setup
-Push-Location $clonedPath
-try {
-    Write-Host "Running setup.ps1..." -ForegroundColor Yellow
+Set-Location $clonedPath
+Write-Host "Changed directory to: $(Get-Location)" -ForegroundColor Yellow
+Write-Host ""
+
+$setupScript = Join-Path $clonedPath "setup.ps1"
+if (-not (Test-Path $setupScript)) {
+    Write-Host "[ERROR] setup.ps1 not found at: $setupScript" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Running setup.ps1..." -ForegroundColor Yellow
+Write-Host ""
+
+& $setupScript
+
+if ($LASTEXITCODE -ne 0) {
     Write-Host ""
-    
-    & ".\setup.ps1"
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host ""
-        Write-Host "[ERROR] Setup failed with exit code $LASTEXITCODE" -ForegroundColor Red
-        exit $LASTEXITCODE
-    }
-} finally {
-    Pop-Location
+    Write-Host "[ERROR] Setup failed with exit code $LASTEXITCODE" -ForegroundColor Red
+    exit $LASTEXITCODE
 }
 
 Write-Host ""
