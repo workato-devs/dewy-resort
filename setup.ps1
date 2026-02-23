@@ -90,14 +90,17 @@ function Install-Winget {
 }
 
 function Get-PythonScriptsPath {
-    # Find Python Scripts directory
+    # Find Python Scripts directory - check both Roaming and Local
     $possiblePaths = @(
-        "$env:LOCALAPPDATA\Programs\Python\Python313\Scripts",
-        "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts",
-        "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts",
         "$env:APPDATA\Python\Python313\Scripts",
         "$env:APPDATA\Python\Python312\Scripts",
         "$env:APPDATA\Python\Python311\Scripts",
+        "$env:LOCALAPPDATA\Programs\Python\Python313\Scripts",
+        "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts",
+        "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts",
+        "$env:USERPROFILE\AppData\Roaming\Python\Python313\Scripts",
+        "$env:USERPROFILE\AppData\Roaming\Python\Python312\Scripts",
+        "$env:USERPROFILE\AppData\Roaming\Python\Python311\Scripts",
         "$env:USERPROFILE\AppData\Local\Programs\Python\Python311\Scripts"
     )
     

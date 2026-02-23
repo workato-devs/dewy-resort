@@ -41,16 +41,48 @@ Write-Host ""
 
 # Install workato-platform-cli using pip
 Write-Host "Installing workato-platform-cli using pip..."
-try {
-    & $pythonCmd -m pip install --user workato-platform-cli 2>&1 | Out-Host
-    if ($LASTEXITCODE -ne 0) {
-        throw "pip install failed with exit code $LASTEXITCODE"
+Write-Host ""
+
+# Capture output but don't fail on warnings
+$pipOutput = & $pythonCmd -m pip install --user workato-platform-cli 2>&1
+
+# Display output
+$pipOutput | ForEach-Object { Write-Host $_ }
+
+# Check if workato was actually installed (pip warnings about PATH are not failures)
+$installSuccess = $false
+if ($pipOutput -match "Successfully installed.*workato-platform-cli") {
+    $installSuccess = $true
+} elseif ($pipOutput -match "Requirement already satisfied.*workato-platform-cli") {
+    $installSuccess = $true
+}
+
+# Also check if the executable exists
+$possibleExePaths = @(
+    "$env:APPDATA\Python\Python311\Scripts\workato.exe",
+    "$env:APPDATA\Python\Python312\Scripts\workato.exe",
+    "$env:APPDATA\Python\Python313\Scripts\workato.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts\workato.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts\workato.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Python313\Scripts\workato.exe"
+)
+
+foreach ($exePath in $possibleExePaths) {
+    if (Test-Path $exePath) {
+        $installSuccess = $true
+        $workatoExePath = $exePath
+        break
     }
-    Write-Host "[OK] workato-platform-cli installed" -ForegroundColor Green
-} catch {
-    Write-Host "[ERROR] Failed to install workato-platform-cli: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+if (-not $installSuccess) {
+    Write-Host ""
+    Write-Host "[ERROR] Failed to install workato-platform-cli" -ForegroundColor Red
     exit 1
 }
+
+Write-Host ""
+Write-Host "[OK] workato-platform-cli installed" -ForegroundColor Green
 
 Write-Host ""
 
@@ -73,12 +105,17 @@ if ($workatoCmd) {
     exit $LASTEXITCODE
 }
 
-# Check known locations
+# Check known locations (both Roaming and Local)
 $possiblePaths = @(
-    "$env:APPDATA\Python\Scripts\workato.exe",
+    "$env:APPDATA\Python\Python311\Scripts\workato.exe",
+    "$env:APPDATA\Python\Python312\Scripts\workato.exe",
+    "$env:APPDATA\Python\Python313\Scripts\workato.exe",
     "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts\workato.exe",
     "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts\workato.exe",
-    "$env:USERPROFILE\.local\bin\workato.exe"
+    "$env:LOCALAPPDATA\Programs\Python\Python313\Scripts\workato.exe",
+    "$env:USERPROFILE\AppData\Roaming\Python\Python311\Scripts\workato.exe",
+    "$env:USERPROFILE\AppData\Roaming\Python\Python312\Scripts\workato.exe",
+    "$env:USERPROFILE\AppData\Roaming\Python\Python313\Scripts\workato.exe"
 )
 
 foreach ($path in $possiblePaths) {
@@ -106,19 +143,32 @@ Write-Host "[OK] Wrapper scripts created" -ForegroundColor Green
 Write-Host ""
 
 # Verify installation
+Write-Host ""
 Write-Host "Verifying installation..."
 
 # Try to find workato executable
-$workatoExe = Get-Command workato -ErrorAction SilentlyContinue
+$workatoExe = $null
+
+# Check if already found during install
+if ($workatoExePath -and (Test-Path $workatoExePath)) {
+    $workatoExe = $workatoExePath
+}
+
+# Otherwise search common locations
 if (-not $workatoExe) {
-    # Check common pip install locations
-    $possiblePaths = @(
-        "$env:APPDATA\Python\Scripts\workato.exe",
+    $searchPaths = @(
+        "$env:APPDATA\Python\Python311\Scripts\workato.exe",
+        "$env:APPDATA\Python\Python312\Scripts\workato.exe",
+        "$env:APPDATA\Python\Python313\Scripts\workato.exe",
         "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts\workato.exe",
-        "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts\workato.exe"
+        "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts\workato.exe",
+        "$env:LOCALAPPDATA\Programs\Python\Python313\Scripts\workato.exe",
+        "$env:USERPROFILE\AppData\Roaming\Python\Python311\Scripts\workato.exe",
+        "$env:USERPROFILE\AppData\Roaming\Python\Python312\Scripts\workato.exe",
+        "$env:USERPROFILE\AppData\Roaming\Python\Python313\Scripts\workato.exe"
     )
     
-    foreach ($path in $possiblePaths) {
+    foreach ($path in $searchPaths) {
         if (Test-Path $path) {
             $workatoExe = $path
             break
@@ -126,16 +176,22 @@ if (-not $workatoExe) {
     }
 }
 
+# Also check PATH
+if (-not $workatoExe) {
+    $pathCmd = Get-Command workato -ErrorAction SilentlyContinue
+    if ($pathCmd) {
+        $workatoExe = $pathCmd.Source
+    }
+}
+
 if ($workatoExe) {
     try {
-        if ($workatoExe -is [System.Management.Automation.CommandInfo]) {
-            $version = & workato --version 2>&1
-        } else {
-            $version = & $workatoExe --version 2>&1
-        }
+        $version = & $workatoExe --version 2>&1
         Write-Host "[OK] Workato CLI successfully installed!" -ForegroundColor Green
         Write-Host ""
         Write-Host $version
+        Write-Host ""
+        Write-Host "Executable location: $workatoExe"
         Write-Host ""
         Write-Host "You can now use the CLI via:"
         Write-Host "  .\bin\workato.ps1 <command>"
@@ -145,11 +201,12 @@ if ($workatoExe) {
         exit 0
     } catch {
         Write-Host "[WARN] Installation completed but verification failed" -ForegroundColor Yellow
+        Write-Host "Executable found at: $workatoExe"
         Write-Host "You may need to restart PowerShell for the PATH to update."
         exit 0
     }
 } else {
-    Write-Host "[WARN] Installation completed but workato not found in PATH" -ForegroundColor Yellow
+    Write-Host "[WARN] Installation completed but workato.exe not found" -ForegroundColor Yellow
     Write-Host "You may need to restart PowerShell for the PATH to update."
     Write-Host ""
     Write-Host "After restarting, verify with: .\bin\workato.ps1 --version"
