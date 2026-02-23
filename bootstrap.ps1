@@ -14,7 +14,7 @@
 
 param(
     [string]$RepoUrl = "https://github.com/workato-devs/dewy-resort.git",
-    [string]$Branch = "main",
+    [string]$Branch = "feature/windows-powershell-scripts",
     [string]$TargetDir = ""
 )
 
