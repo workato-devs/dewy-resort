@@ -210,8 +210,24 @@ Techniques demonstrated:
 
 ## Quick Start
 
+### One-Line Install (Recommended)
+
+**Mac/Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/workato-devs/dewy-resort/main/bootstrap.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+iwr -useb https://raw.githubusercontent.com/workato-devs/dewy-resort/main/bootstrap.ps1 | iex
+```
+
+The bootstrap script automatically installs all dependencies (Node.js v20, Python 3.11+, Git) and sets up the project.
+
+### Manual Setup
+
 **Prerequisites:**
-- Node.js 20+, Python 3.8+
+- Node.js 20+, Python 3.11+
 - [Workato Developer sandbox](https://www.workato.com/sandbox) (free Developer sandbox)
 - [Salesforce Developer org](https://developer.salesforce.com/signup) (free Developer Edition)
 - [Stripe Developer account](https://dashboard.stripe.com/register) (Stripe Developer sign up)
