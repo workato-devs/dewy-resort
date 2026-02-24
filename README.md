@@ -237,22 +237,24 @@ The bootstrap script automatically installs all dependencies (Node.js v20, Pytho
 ```bash
 git clone <repo-url>
 cd dewy-resort
-npm install
+./setup.sh
 ```
+
+Or use the one-liner bootstrap which does this automatically.
 
 ### 2. Deploy Salesforce Metadata ⭐
 
 Salesforce is the system of record - deploy it first.
 
 ```bash
-# Install CLI
-make setup tool=salesforce
+# Install CLI (if not done via setup.sh)
+./setup.sh --tool=salesforce
 
 # Authenticate
 bin/sf org login web --alias myDevOrg
 
 # Deploy metadata and seed data
-make sf-deploy org=myDevOrg
+./vendor/salesforce/scripts/deploy.sh myDevOrg
 ```
 
 **📚 See:** [docs/SALESFORCE_SETUP.md](./docs/SALESFORCE_SETUP.md)
@@ -262,20 +264,20 @@ make sf-deploy org=myDevOrg
 Workato implements the enterprise MCP architecture.
 
 ```bash
-# Install CLI
-make setup tool=workato
+# Install CLI (if not done via setup.sh)
+./setup.sh --tool=workato
 
 # Add API token to .env (see guide for how to generate token)
 WORKATO_API_TOKEN=your_token
 WORKATO_API_EMAIL=your_email
 
-# Deploy all recipes
-make workato-init
+# Initialize Workato folders
+./workato/scripts/cli/create_workato_folders.sh
 
 # Configure connections in Workato UI (see guide)
 
 # Start recipes
-make start-recipes
+./workato/scripts/cli/start_workato_recipes.sh
 ```
 
 **⚠️ IMPORTANT:** 4 recipes require manual activation in Workato UI (SOQL query configuration). See detailed guide.
@@ -416,19 +418,22 @@ dewy-resort/
 
 ```bash
 # Setup
-make setup                        # Install all CLIs
-make setup tool=workato          # Install Workato CLI only
-make setup tool=salesforce       # Install Salesforce CLI only
+./setup.sh                        # Install all CLIs + prerequisites
+./setup.sh --tool=workato         # Install Workato CLI only
+./setup.sh --tool=salesforce      # Install Salesforce CLI only
+./setup.sh --skip-deps            # Skip prerequisite checks
 
 # Workato (MCP Server)
-make workato-init                # Deploy all recipes
-make start-recipes               # Start recipes (automated)
+./workato/scripts/cli/create_workato_folders.sh    # Initialize folders
+./workato/scripts/cli/start_workato_recipes.sh     # Start recipes
+./workato/scripts/cli/stop_workato_recipes.sh      # Stop recipes
 
 # Salesforce (Backend)
-make sf-deploy org=<alias>       # Deploy metadata and seed data
+./vendor/salesforce/scripts/deploy.sh <org-alias>  # Deploy metadata
 
-# Status
-make status                      # Check all CLIs
+# Legacy (Makefile still works)
+make setup                        # Install all CLIs
+make status                       # Check all CLIs
 ```
 
 ---
