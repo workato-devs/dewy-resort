@@ -6,8 +6,38 @@ Write-Host "Salesforce CLI Setup" -ForegroundColor Cyan
 Write-Host "====================" -ForegroundColor Cyan
 Write-Host ""
 
-# Check for npm (required for installation)
-$npmAvailable = Get-Command npm -ErrorAction SilentlyContinue
+# Helper function to refresh PATH and find Node.js
+function Find-NodeJS {
+    # First refresh PATH from registry
+    $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+    
+    # Check if npm is now available
+    $npmCmd = Get-Command npm -ErrorAction SilentlyContinue
+    if ($npmCmd) {
+        return $true
+    }
+    
+    # Node.js installs to Program Files by default - add explicitly if not in PATH
+    $nodePaths = @(
+        "$env:ProgramFiles\nodejs",
+        "${env:ProgramFiles(x86)}\nodejs",
+        "$env:LOCALAPPDATA\Programs\nodejs"
+    )
+    
+    foreach ($nodePath in $nodePaths) {
+        if ((Test-Path $nodePath) -and ($env:Path -notlike "*$nodePath*")) {
+            $env:Path = "$env:Path;$nodePath"
+            Write-Host "[INFO] Added $nodePath to current session PATH" -ForegroundColor Yellow
+        }
+    }
+    
+    # Check again
+    $npmCmd = Get-Command npm -ErrorAction SilentlyContinue
+    return ($null -ne $npmCmd)
+}
+
+# Try to find npm
+$npmAvailable = Find-NodeJS
 
 if (-not $npmAvailable) {
     Write-Host "[ERROR] npm is not available." -ForegroundColor Red
