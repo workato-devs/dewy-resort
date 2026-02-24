@@ -27,9 +27,7 @@ NC='\033[0m'
 
 # Defaults
 REPO_URL="https://github.com/workato-devs/dewy-resort.git"
-# TODO: Change back to "main" after merging feature/unix-bootstrap-script
-# BRANCH="main"
-BRANCH="feature/unix-bootstrap-script"
+BRANCH="main"
 TARGET_DIR=""
 SKIP_DEPS=false
 
