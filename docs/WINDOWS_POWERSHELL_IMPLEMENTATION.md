@@ -199,16 +199,47 @@ if ($LASTEXITCODE -ne 0) {
 }
 ```
 
-### 10. Salesforce CLI Installation Hanging
+### 10. Salesforce CLI Installation Hanging / Symlink Errors
 
-**Problem:** The Salesforce CLI installation via tar extraction would hang indefinitely on Windows. The `.tar.xz` format combined with Windows' built-in tar and stderr redirection caused buffering issues.
+**Problem:** The Salesforce CLI installation via tar extraction would hang indefinitely on Windows, or fail with symlink errors (`Can't create '\\?\C:\...\sfdx': Invalid argument`). The `.tar.xz` archive contains symlinks which Windows tar cannot create without admin privileges.
 
-**Solution:** Restructured the installation to:
-1. Use npm as the primary installation method (more reliable on Windows)
-2. Support 7-Zip as a fallback for extraction (better xz support)
-3. Run tar as a background job with a 5-minute timeout
-4. Remove stderr capture that caused buffering issues
-5. Provide clear fallback instructions if extraction fails
+**Solution:** Removed tar extraction entirely. Salesforce CLI is now installed exclusively via npm:
+```powershell
+npm install --global @salesforce/cli
+```
+This is more reliable on Windows and Node.js v20 is now a prerequisite anyway.
+
+### 11. PATH Not Refreshing After winget Install
+
+**Problem:** After winget installs Node.js (or other tools), the PATH environment variable is updated in the registry but the current PowerShell session doesn't see the change. Commands like `node` and `npm` fail even though installation succeeded.
+
+**Solution:** After winget install, explicitly:
+1. Refresh PATH from registry: `$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")`
+2. Add default install locations directly to current session PATH
+3. If still not found, return `$false` and prompt user to restart PowerShell
+
+```powershell
+# Node.js installs to Program Files by default - add explicitly
+$nodePaths = @(
+    "$env:ProgramFiles\nodejs",
+    "${env:ProgramFiles(x86)}\nodejs"
+)
+foreach ($nodePath in $nodePaths) {
+    if ((Test-Path $nodePath) -and ($env:Path -notlike "*$nodePath*")) {
+        $env:Path = "$env:Path;$nodePath"
+    }
+}
+```
+
+### 12. Global npm Install vs Local Wrapper Scripts
+
+**Problem:** When Salesforce CLI is installed globally via npm, no local wrapper script (`bin\sf.ps1`) is created. The setup-cli.ps1 verification step failed because it only checked for local wrappers.
+
+**Solution:** Updated setup-cli.ps1 to check for both:
+1. Local wrapper scripts (`bin\sf.ps1`)
+2. Global commands available in PATH (`sf`)
+
+If either exists, installation is considered successful.
 
 ## Prerequisite Auto-Installation
 
@@ -244,7 +275,7 @@ iwr -useb "https://raw.githubusercontent.com/workato-devs/dewy-resort/feature/wi
 | `make stop-recipes` | `.\workato\scripts\cli\stop_workato_recipes.ps1` |
 | `make sf-deploy org=myOrg` | `.\vendor\salesforce\scripts\deploy.ps1 -TargetOrg myOrg` |
 | `bin/workato` | `.\bin\workato.ps1` |
-| `bin/sf` | `.\bin\sf.ps1` |
+| `bin/sf` | `sf` (global command via npm) |
 
 ## Future Considerations
 

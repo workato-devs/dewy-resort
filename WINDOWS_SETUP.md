@@ -158,6 +158,13 @@ If you have a different version, install v20 via winget:
 winget install OpenJS.NodeJS.LTS
 ```
 
+### Node.js/npm Not Found After Installation
+
+If winget installed Node.js but `node` or `npm` commands aren't found, restart PowerShell to refresh the PATH. Alternatively, manually add Node.js to your current session:
+```powershell
+$env:Path = "$env:Path;$env:ProgramFiles\nodejs"
+```
+
 ## Differences from Mac/Linux
 
 | Mac/Linux | Windows |
@@ -168,7 +175,7 @@ winget install OpenJS.NodeJS.LTS
 | `make stop-recipes` | `.\workato\scripts\cli\stop_workato_recipes.ps1` |
 | `make sf-deploy org=myOrg` | `.\vendor\salesforce\scripts\deploy.ps1 -TargetOrg myOrg` |
 | `bin/workato` | `.\bin\workato.ps1` or `bin\workato` (cmd) |
-| `bin/sf` | `.\bin\sf.ps1` or `bin\sf` (cmd) |
+| `bin/sf` | `sf` (global command via npm) |
 
 ## Using from Command Prompt (cmd.exe)
 
