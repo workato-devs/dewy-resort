@@ -8,9 +8,10 @@ The setup script will automatically install missing prerequisites via **winget**
 
 - Windows 10 version 1803 or later
 - PowerShell 5.0 or later (included with Windows 10)
+- **Git** (auto-installed if missing)
+- **make** (auto-installed if missing) - for workshop Makefile commands
 - **Node.js v20 LTS** (auto-installed if missing)
 - **Python 3.11+** (auto-installed if missing) - for Workato CLI
-- **Git** (auto-installed if missing)
 
 > **Note:** Node.js v20 is specifically required. Other versions (v18, v21, v22) may cause compatibility issues.
 

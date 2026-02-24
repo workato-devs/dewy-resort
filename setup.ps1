@@ -291,6 +291,76 @@ function Install-Git {
     }
 }
 
+function Install-Make {
+    Write-Host ""
+    Write-Host "Checking for make..." -ForegroundColor Yellow
+    
+    $makeCmd = Get-Command make -ErrorAction SilentlyContinue
+    if ($makeCmd) {
+        $makeVersion = & make --version 2>&1 | Select-Object -First 1
+        Write-Host "[OK] $makeVersion" -ForegroundColor Green
+        return $true
+    }
+    
+    Write-Host "make not found. Installing via winget..." -ForegroundColor Yellow
+    
+    try {
+        winget install -e --id GnuWin32.Make --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -ne 0) {
+            throw "winget install failed with exit code $LASTEXITCODE"
+        }
+        
+        # GnuWin32 Make installs to C:\Program Files (x86)\GnuWin32\bin
+        $makePath = "${env:ProgramFiles(x86)}\GnuWin32\bin"
+        
+        # Refresh PATH from registry
+        $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+        
+        # Check if make is now available
+        $makeCmd = Get-Command make -ErrorAction SilentlyContinue
+        if (-not $makeCmd) {
+            # Add GnuWin32 to PATH if not already there
+            if (Test-Path $makePath) {
+                Write-Host "Adding GnuWin32 to system PATH..." -ForegroundColor Yellow
+                
+                $currentMachinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+                if ($currentMachinePath -notlike "*$makePath*") {
+                    # Need admin to modify machine PATH
+                    if (Test-Administrator) {
+                        $newPath = "$currentMachinePath;$makePath"
+                        [Environment]::SetEnvironmentVariable("Path", $newPath, "Machine")
+                        $env:Path = "$env:Path;$makePath"
+                        Write-Host "[OK] Added $makePath to system PATH" -ForegroundColor Green
+                    } else {
+                        # Try user PATH instead
+                        $currentUserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+                        $newUserPath = "$currentUserPath;$makePath"
+                        [Environment]::SetEnvironmentVariable("Path", $newUserPath, "User")
+                        $env:Path = "$env:Path;$makePath"
+                        Write-Host "[OK] Added $makePath to user PATH" -ForegroundColor Green
+                    }
+                }
+            }
+        }
+        
+        # Verify
+        $makeCmd = Get-Command make -ErrorAction SilentlyContinue
+        if ($makeCmd) {
+            Write-Host "[OK] make installed successfully" -ForegroundColor Green
+            return $true
+        } else {
+            Write-Host "[WARN] make installed but not in PATH yet" -ForegroundColor Yellow
+            Write-Host "[INFO] You may need to restart PowerShell for make to be available" -ForegroundColor Yellow
+            return $true
+        }
+    } catch {
+        Write-Host "[ERROR] Failed to install make: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Alternative: Install Chocolatey and run: choco install make" -ForegroundColor Yellow
+        return $false
+    }
+}
+
 function Install-NodeJS {
     Write-Host ""
     Write-Host "Checking for Node.js v20..." -ForegroundColor Yellow
@@ -418,14 +488,21 @@ function Install-Prerequisites {
         return $false
     }
     
-    # Step 3: Check/Install Python
+    # Step 3: Check/Install make
+    if (-not (Install-Make)) {
+        Write-Host ""
+        Write-Host "[WARN] make installation failed, some workshop commands may not work" -ForegroundColor Yellow
+        # Don't fail - make is optional for basic setup
+    }
+    
+    # Step 4: Check/Install Python
     if (-not (Install-Python)) {
         Write-Host ""
         Write-Host "[ERROR] Cannot proceed without Python 3.11+" -ForegroundColor Red
         return $false
     }
     
-    # Step 4: Check/Install Node.js v20
+    # Step 5: Check/Install Node.js v20
     if (-not (Install-NodeJS)) {
         Write-Host ""
         Write-Host "[ERROR] Cannot proceed without Node.js v20" -ForegroundColor Red

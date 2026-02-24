@@ -247,8 +247,9 @@ The setup scripts automatically install missing prerequisites via **winget**:
 
 1. **winget** - Windows Package Manager (attempts to install if missing)
 2. **Git** - `winget install Git.Git`
-3. **Python 3.11** - `winget install Python.Python.3.11`
-4. **Node.js v20 LTS** - `winget install OpenJS.NodeJS.LTS` (required for Salesforce CLI and app)
+3. **make** - `winget install -e --id GnuWin32.Make` (for workshop Makefile commands)
+4. **Python 3.11** - `winget install Python.Python.3.11`
+5. **Node.js v20 LTS** - `winget install OpenJS.NodeJS.LTS` (required for Salesforce CLI and app)
 
 ## Usage
 
