@@ -118,8 +118,9 @@ ruby --version
 # If missing on Linux:
 sudo apt install ruby-full
 
-# Re-run setup
-make setup tool=workato
+# Re-run the setup script
+./setup.sh          # Mac/Linux
+.\setup.ps1         # Windows
 ```
 
 ### Issue: API Token Not Working
@@ -183,8 +184,9 @@ mkdir -p ~/.npm-global
 npm config set prefix '~/.npm-global'
 export PATH=~/.npm-global/bin:$PATH
 
-# Re-run setup
-make setup tool=salesforce
+# Re-run the setup script
+./setup.sh          # Mac/Linux
+.\setup.ps1         # Windows
 ```
 
 ### Issue: "sf: command not found" after install
