@@ -167,6 +167,46 @@ install_git() {
     echo -e "${GREEN}✓${NC} Git installed"
 }
 
+# Install make
+install_make() {
+    if command_exists make; then
+        echo -e "${GREEN}✓${NC} make already installed: $(make --version | head -1)"
+        return 0
+    fi
+    
+    echo -e "${YELLOW}Installing make...${NC}"
+    
+    case "$OS" in
+        macos)
+            # make comes with Xcode Command Line Tools
+            xcode-select --install 2>/dev/null || true
+            # If that doesn't work, install via Homebrew
+            if ! command_exists make; then
+                brew install make
+            fi
+            ;;
+        linux)
+            case "$DISTRO" in
+                ubuntu|debian|pop)
+                    sudo apt-get update && sudo apt-get install -y make
+                    ;;
+                fedora|rhel|centos)
+                    sudo dnf install -y make || sudo yum install -y make
+                    ;;
+                arch|manjaro)
+                    sudo pacman -S --noconfirm make
+                    ;;
+                *)
+                    echo -e "${RED}Please install make manually${NC}"
+                    exit 1
+                    ;;
+            esac
+            ;;
+    esac
+    
+    echo -e "${GREEN}✓${NC} make installed"
+}
+
 # Install Node.js v20
 install_node() {
     local need_install=false
@@ -352,6 +392,7 @@ main() {
         fi
         
         install_git
+        install_make
         install_node
         install_python
         
