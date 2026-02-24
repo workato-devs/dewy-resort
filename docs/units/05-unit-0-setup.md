@@ -20,45 +20,41 @@ parent: Workshop Units
 
 ---
 
-## Pre-Requisites Check (5 min)
+## Step 1: Run the Setup Script (15 min)
 
-**Run these checks before proceeding:**
+Copy and paste the appropriate command for your operating system. The script clones the repository, checks for required prerequisites, installs any that are missing, sets up the local application, and installs the Salesforce and Workato CLIs.
+
+#### Mac/Linux
 
 ```bash
-node --version     # Should be 20+
-git --version      # Any recent version
-python3 --version  # Should be 3.11+
+curl -fsSL https://raw.githubusercontent.com/workato-devs/dewy-resort/main/bootstrap.sh | bash
 ```
 
-**If any check fails:** See [Pre-Workshop Setup](01-pre-workshop.html) for installation instructions.
+#### Windows
 
----
+```powershell
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (curl https://raw.githubusercontent.com/workato-devs/dewy-resort/main/bootstrap.ps1 -UseBasicParsing)"
+```
 
-## Step 1: Clone and Initial Setup (10 min)
-
-### 1.1 Clone the Repository
+Once the script completes, change into the project directory:
 
 ```bash
-git clone https://github.com/workato-devs/dewy-resort.git
 cd dewy-resort
 ```
 
-### 1.2 Copy Environment Template
+Watch for any errors and flag a facilitator or assistant for help.
+
+**CHECKPOINT:** `make status` shows all prerequisites and CLIs installed
+
+---
+
+## Step 2: Initialize App & Deploy Salesforce Metadata (10 min)
+
+### 2.1 Initialize Local Database
 
 ```bash
 cd app
-cp .env.example .env
-```
-
-### 1.3 Install Node Dependencies
-
-```bash
 npm install
-```
-
-### 1.4 Initialize and Seed Local Database
-
-```bash
 npm run db:setup
 ```
 
@@ -68,60 +64,11 @@ Database initialized successfully
 Tables created: users, conversations, messages, devices...
 ```
 
-### 1.5 Return to Parent Directory
-
 ```bash
 cd ..
 ```
 
-**CHECKPOINT:** Database initialized message appears
-
----
-
-## Step 2: Install CLIs (10 min)
-
-### 2.1 Install Both Salesforce and Workato CLIs
-
-```bash
-make setup
-```
-
-**Expected Output:**
-```
-Setting up all vendor CLIs...
-[x] Installed Salesforce CLI to bin/sf
-[x] Installed Workato CLI to bin/workato
-```
-
-### Troubleshooting: Python Issues
-
-If Workato CLI fails with Python errors:
-
-```bash
-# Check Python version
-python3 --version
-
-# If Python 3.11 not found, install via Homebrew
-brew install python@3.11
-
-# Retry Workato setup only
-make setup tool=workato
-```
-
-### Troubleshooting: Permission Issues
-
-```bash
-# If "permission denied" on bin/workato or bin/sf
-chmod +x bin/workato bin/sf
-```
-
-**CHECKPOINT:** Both `bin/sf --version` and `bin/workato --version` return version info
-
----
-
-## Step 3: Deploy Salesforce Metadata (10 min)
-
-### 3.1 Authenticate to Salesforce
+### 2.2 Authenticate to Salesforce
 
 ```bash
 bin/sf org login web --alias myDevOrg
@@ -131,7 +78,7 @@ A browser window will open. Log in to your Salesforce Developer Edition org.
 
 > **Tip:** If you have multiple Salesforce accounts, make sure to use the correct username for your Developer Edition org (the one you noted during pre-workshop setup).
 
-### 3.2 Deploy Metadata + Seed Data
+### 2.3 Deploy Metadata + Seed Data
 
 ```bash
 make sf-deploy org=myDevOrg
@@ -146,7 +93,7 @@ Deploying Salesforce metadata to myDevOrg...
 [x] Imported seed data (23 accounts, 24 contacts, 10 rooms)
 ```
 
-### 3.3 Verify in Salesforce
+### 2.4 Verify in Salesforce
 
 ```bash
 bin/sf org open --target-org myDevOrg
@@ -163,18 +110,20 @@ bin/sf org open --target-org myDevOrg
 
 ---
 
-## Step 4: Configure Workato (10 min)
+## Step 3: Configure Workato (10 min)
 
-### 4.1 Get Workato API Token
+### 3.1 Get Workato API Token
 
 1. Log in to your Workato Developer Edition
 2. Go to **Workspace Admin -> API Clients -> Client roles** [https://app.trial.workato.com/members/api/clients]
 3. Click **Create Client Role** tab
 4. Set permissions:
-   - Projects tab -> Project Assets (select all)
-   - Projects tab -> Recipe Lifecycle Management (select all)
-   - Tools tab -> API Platform (select all)
-   - Admin tab -> Workspace Details (all)
+   - Projects tab -> Project Assets — select: Projects & folders, Connections, Recipes, Skills, MCP servers, Recipe Versions, Jobs
+   - Projects tab -> Recipe Lifecycle Management — select: Recipe lifecycle management, Export manifests
+   - Tools tab -> Workspace data — select: Environment properties
+   - Tools tab -> API Platform — select: API portal, Collections & endpoints, Clients & access profiles
+   - Admin tab -> Workspace Details — select: Workspace details
+   - Admin tab -> Developer API clients — select: API Clients, API client roles
 5. Click **Save Changes**
 6. Click **API Clients** tab [https://app.trial.workato.com/members/api/roles]
 7. Click **Create API Client** button
@@ -184,7 +133,7 @@ bin/sf org open --target-org myDevOrg
 11. Click **Create Client**
 12. **Copy the token** (you won't see it again)
 
-### 4.2 Add Token to Environment
+### 3.2 Add Token to Environment
 
 Edit `app/.env` file:
 
@@ -192,13 +141,13 @@ Edit `app/.env` file:
 WORKATO_API_TOKEN=your_token_here
 ```
 
-### 4.3 Deploy Recipes
+### 3.3 Deploy Recipes
 
 ```bash
 make workato-init
 ```
 
-### 4.4 Configure Salesforce Connector in Workato
+### 3.4 Configure Salesforce Connector in Workato
 
 1. Go to **Projects → Workspace Connections**
 2. Click the **Salesforce** connection
@@ -206,7 +155,7 @@ make workato-init
 4. Authenticate to your Salesforce Developer Edition org
 5. **WARNING: DO NOT rename the connection**
 
-### 4.5 Manual Activation (Required)
+### 3.5 Manual Activation (Required)
 
 Four recipes need manual activation due to SOQL metadata caching:
 
@@ -226,7 +175,7 @@ Four recipes need manual activation due to SOQL metadata caching:
    - Click **Save**
    - Click **Exit**
 
-### 4.6 Configure Stripe Connection (Optional)
+### 3.6 Configure Stripe Connection (Optional)
 
 1. Go to **Projects → Workspace Connections**
 2. Click the **Stripe** connection
@@ -250,7 +199,7 @@ Four recipes need manual activation due to SOQL metadata caching:
 {: .warning }
 > Always use **test mode** keys for workshop environments. Never use live/production keys (`sk_live_`).
 
-### 4.7 Start Recipes
+### 3.7 Start Recipes
 
 ```bash
 make start-recipes
@@ -273,7 +222,7 @@ All recipes should show as started with 0 failed.
 
 **CHECKPOINT:** All Salesforce recipes showing "Running" status
 
-### 4.8 Enable API Endpoints
+### 3.8 Enable API Endpoints
 
 ```bash
 make enable-api-endpoints
@@ -281,7 +230,7 @@ make enable-api-endpoints
 
 This enables the endpoints on all API collections in your Workato account.
 
-### 4.9 Create API Client
+### 3.9 Create API Client
 
 ```bash
 make create-api-client
@@ -293,15 +242,15 @@ This creates an API Client for the Salesforce API Collection.
 
 ---
 
-## Step 5: Verify End-to-End (5 min)
+## Step 4: Verify End-to-End (5 min)
 
-### 5.1 Start the Application
+### 4.1 Start the Application
 
 ```bash
 app/scripts/dev-tools/server.sh start
 ```
 
-### 5.2 Verify the Dashboard
+### 4.2 Verify the Dashboard
 
 1. Open [http://localhost:3000](http://localhost:3000){:target="_blank"}
 2. All indicators should show **Mock Mode enabled**
@@ -323,12 +272,44 @@ You now have:
 |-------|----------|
 | Python version mismatch | Run `brew install python@3.11` |
 | Salesforce login timeout | Re-run `bin/sf org login web --alias myDevOrg` |
-| Recipes won't start | Manual activation (Step 4.7) |
+| Recipes won't start | Manual activation (Step 3.7) |
 | "Connection not configured" | Verify Workspace Connections authenticated |
 | API Collection 401 | Check WORKATO_API_TOKEN in .env |
 | Room search returns empty | Verify SF seed data imported |
 | API call fails silently | Check **Tools → Logs** in Workato for error details |
 | Recipe returns error | Expand the job in Logs to see error message and code |
+| Workato CLI command errors | Ensure API client scopes match guidance in Step 3.1 |
+
+### Manual Verification Script
+
+Run this script to quickly check your environment (Mac/Linux):
+
+```bash
+#!/bin/bash
+echo "=== Pre-Workshop Environment Check ==="
+
+# Node.js
+echo -n "Node.js: "
+node --version 2>/dev/null || echo "NOT INSTALLED"
+
+# Python
+echo -n "Python: "
+python3 --version 2>/dev/null || echo "NOT INSTALLED"
+
+# Git
+echo -n "Git: "
+git --version 2>/dev/null || echo "NOT INSTALLED"
+
+# Network (can reach Workato)
+echo -n "Network (Workato): "
+curl -s -o /dev/null -w "%{http_code}" https://app.trial.workato.com/users/sign_in_trial | grep -q "200" && echo "OK" || echo "BLOCKED"
+
+# Network (can reach Salesforce)
+echo -n "Network (Salesforce): "
+curl -s -o /dev/null -w "%{http_code}" https://login.salesforce.com | grep -q "200" && echo "OK" || echo "BLOCKED"
+
+echo "=== Check Complete ==="
+```
 
 ---
 

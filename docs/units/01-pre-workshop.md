@@ -45,6 +45,7 @@ parent: Workshop Units
 
 | Software | Minimum Version | Check Command |
 |----------|-----------------|---------------|
+| Xcode Command Line Tools (macOS only) | Any | `xcode-select -p` |
 | Node.js | 20+ | `node --version` |
 | Git | Any recent | `git --version` |
 | Python | 3.11+ | `python3 --version` |
@@ -55,26 +56,21 @@ parent: Workshop Units
 
 ### MacOS
 
-- Homebrew is recommended for installing most dependencies (python, node, git, make) [Homebrew](https://brew.sh/)
-- X-Code (if installed) provides some tools (make, git)
-- UV can be used to create a virtual environment to run Python if needed to avoid conflicts (optional)
+- **Xcode Command Line Tools** (required): Run `xcode-select --install` and follow the GUI prompt, or look for the "down arrow icon" in Launcher. This provides Git, make, and the compiler toolchain.
+- The setup script will install Homebrew (if needed) and handle all remaining prerequisites automatically
 
 ### Windows
 
-- Install [Python 3.11+](https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe)
-- Install [Node.js 20+](https://nodejs.org/en/download)
-- Install [Git](https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.1/Git-2.53.0-64-bit.exe)
-- Add the Python "Scripts" folder to your $PATH Environment Variable (System -> Advanced -> Environment Variables -> Path -> Edit)
-- Example: `C:\Users\YourName\AppData\Local\Programs\Python\Python311\Scripts`
+- The setup script will handle prerequisite installation automatically
 
 
 ---
 
 ## Optional (Enhanced Experience)
 
-### MCP Desktop Client (Backup Testing Option)
+### MCP Desktop Client
 
-If the LLM setup in the hotel app has issues, you can test your MCP servers directly using a desktop client:
+Another way to test MCP functionality is with a desktop client that connects directly to your MCP servers:
 
 - **Claude Desktop:** [claude.ai/download](https://claude.ai/download) (requires Claude Pro)
 - **ChatGPT Desktop:** [openai.com/chatgpt/desktop](https://openai.com/chatgpt/desktop) (requires ChatGPT Plus)
@@ -85,7 +81,7 @@ Configuration instructions are provided in Unit 1 after you create your MCP serv
 
 ## Testing Multiple Personas with Gmail Aliases
 
-To test both guest and manager personas using a single Gmail account, use the `+` alias feature:
+The Dewy Hotel app provides both manager and guest login experiences. To test both personas using a single Gmail account, use the `+` alias feature:
 
 | Persona | Email Format | Example |
 |---------|-------------|---------|
@@ -93,39 +89,6 @@ To test both guest and manager personas using a single Gmail account, use the `+
 | Manager | `yourname+manager@gmail.com` | `john.doe+manager@gmail.com` |
 
 All emails go to your main inbox. Register each alias as a separate contact in Salesforce with the appropriate contact type (Guest or Manager).
-
----
-
-## Pre-Workshop Verification Script (MacOS/Linux, Windows use Git Bash or WSL with Ubuntu/Bash)
-
-Run this script to verify your environment:
-
-```bash
-#!/bin/bash
-echo "=== Pre-Workshop Environment Check ==="
-
-# Node.js
-echo -n "Node.js: "
-node --version 2>/dev/null || echo "NOT INSTALLED"
-
-# Python
-echo -n "Python: "
-python3 --version 2>/dev/null || echo "NOT INSTALLED"
-
-# Git
-echo -n "Git: "
-git --version 2>/dev/null || echo "NOT INSTALLED"
-
-# Network (can reach Workato)
-echo -n "Network (Workato): "
-curl -s -o /dev/null -w "%{http_code}" https://app.trial.workato.com/users/sign_in_trial | grep -q "200" && echo "OK" || echo "BLOCKED"
-
-# Network (can reach Salesforce)
-echo -n "Network (Salesforce): "
-curl -s -o /dev/null -w "%{http_code}" https://login.salesforce.com | grep -q "200" && echo "OK" || echo "BLOCKED"
-
-echo "=== Check Complete ==="
-```
 
 ---
 
@@ -169,49 +132,6 @@ See you there!
 ```
 
 </div>
-
----
-
-## Troubleshooting Common Pre-Workshop Issues
-
-### Python Version Issues
-
-**Problem:** `python3 --version` shows version < 3.11
-
-**Solution using Homebrew:**
-```bash
-# Install Python 3.11 using Homebrew
-brew install python@3.11
-
-# Verify installation
-python3.11 --version
-
-# If python3 still points to old version, add to PATH:
-export PATH="/opt/homebrew/opt/python@3.11/bin:$PATH"
-```
-
-### Node.js Version Issues
-
-**Problem:** `node --version` shows version < 20
-
-**Solution using nvm:**
-```bash
-# Install nvm (if not installed)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-
-# Restart shell, then install Node 20
-nvm install 20
-nvm use 20
-```
-
-### Network/Firewall Issues
-
-**Problem:** Curl tests return "BLOCKED"
-
-**Solutions:**
-1. Check corporate VPN settings
-2. Try from personal network/hotspot
-3. Contact IT to whitelist: `app.trial.workato.com`, `login.salesforce.com`
 
 ---
 

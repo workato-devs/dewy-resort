@@ -89,13 +89,14 @@ You'll recognize good and bad MCP tool design when you see it.
 2. **Help your best friend** - If you finish early, check in on your buddy
 3. **It's okay to fall behind** - Materials are self-paced friendly
 4. **Breaks are real breaks** - Step away, refresh, come back ready
+5. **Don't let AI coding assistants modify provided scripts** - The setup scripts and code samples are tested as-is; letting Copilot, Cursor, or similar tools auto-edit them can introduce subtle issues that are hard to debug
 
 ---
 
 ## Logistics Reminders (2 min)
 
 - **Wifi:** [network name] / [password]
-- **Restrooms:** [location]
+- **Restrooms:** 3 restrooms (2 next to the workshop area, 1 in the hallway to the left)
 - **Breaks:** 15 min after demo, 15 min after Unit 1
 - **Lunch:** [if applicable]
 
