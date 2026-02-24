@@ -350,6 +350,19 @@ function Install-NodeJS {
         # Refresh PATH from registry
         $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
         
+        # Node.js installs to Program Files by default - add explicitly if not in PATH
+        $nodePaths = @(
+            "$env:ProgramFiles\nodejs",
+            "${env:ProgramFiles(x86)}\nodejs",
+            "$env:LOCALAPPDATA\Programs\nodejs"
+        )
+        foreach ($nodePath in $nodePaths) {
+            if ((Test-Path $nodePath) -and ($env:Path -notlike "*$nodePath*")) {
+                $env:Path = "$env:Path;$nodePath"
+                Write-Host "[INFO] Added $nodePath to current session PATH" -ForegroundColor Yellow
+            }
+        }
+        
         # Verify installation
         $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
         if ($nodeCmd) {
@@ -359,8 +372,18 @@ function Install-NodeJS {
             $npmVersion = & npm --version 2>&1
             Write-Host "[OK] npm v$npmVersion available" -ForegroundColor Green
         } else {
-            Write-Host "[WARN] Node.js installed but not in PATH yet" -ForegroundColor Yellow
-            Write-Host "[INFO] You may need to restart PowerShell for Node.js to be available" -ForegroundColor Yellow
+            # Still not found - provide manual path info
+            Write-Host "[WARN] Node.js installed but not found in PATH" -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "Please restart PowerShell and run setup.ps1 again." -ForegroundColor Yellow
+            Write-Host "Or manually add Node.js to your PATH:" -ForegroundColor Yellow
+            foreach ($nodePath in $nodePaths) {
+                if (Test-Path $nodePath) {
+                    Write-Host "  $nodePath" -ForegroundColor Cyan
+                }
+            }
+            Write-Host ""
+            return $false
         }
         
         return $true
