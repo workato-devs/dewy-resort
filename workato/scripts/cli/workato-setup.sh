@@ -14,14 +14,33 @@ NC='\033[0m'
 # Detect OS
 OS="$(uname -s)"
 
+# On macOS, prioritize Homebrew Python in PATH
+if [ "$OS" = "Darwin" ]; then
+    # Add Homebrew Python libexec to PATH (contains unversioned python3/pip3)
+    for pyver in python@3.13 python@3.12 python@3.11; do
+        libexec_path="/opt/homebrew/opt/$pyver/libexec/bin"
+        if [ -d "$libexec_path" ]; then
+            export PATH="$libexec_path:$PATH"
+            echo "Using Homebrew $pyver"
+            break
+        fi
+        # Intel Mac location
+        libexec_path="/usr/local/opt/$pyver/libexec/bin"
+        if [ -d "$libexec_path" ]; then
+            export PATH="$libexec_path:$PATH"
+            echo "Using Homebrew $pyver"
+            break
+        fi
+    done
+fi
+
 # Find the correct Python 3.11+ executable
 find_python() {
     local python_cmd=""
-    local python_version=""
     
     # On macOS with Homebrew, prefer Homebrew Python
     if [ "$OS" = "Darwin" ]; then
-        # Check Homebrew Python locations first
+        # Check Homebrew Python locations first (versioned binaries)
         for cmd in /opt/homebrew/bin/python3.13 /opt/homebrew/bin/python3.12 /opt/homebrew/bin/python3.11 \
                    /usr/local/bin/python3.13 /usr/local/bin/python3.12 /usr/local/bin/python3.11; do
             if [ -x "$cmd" ]; then
@@ -35,6 +54,11 @@ find_python() {
     if [ -z "$python_cmd" ]; then
         for cmd in python3.13 python3.12 python3.11 python3; do
             if command -v "$cmd" &> /dev/null; then
+                local cmd_path=$(command -v "$cmd")
+                # Skip system Python on macOS
+                if [ "$OS" = "Darwin" ] && [[ "$cmd_path" == "/usr/bin/"* ]]; then
+                    continue
+                fi
                 local version=$($cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null)
                 local major=$(echo "$version" | cut -d. -f1)
                 local minor=$(echo "$version" | cut -d. -f2)
@@ -93,12 +117,45 @@ fi
 
 # Install pipx if needed for Homebrew Python
 if [ "$USE_PIPX" = true ]; then
-    if ! command -v pipx &> /dev/null; then
-        echo "Installing pipx..."
-        brew install pipx 2>/dev/null || $PYTHON_CMD -m pip install --user pipx
+    # Check if pipx exists and is using the right Python
+    NEED_PIPX_REINSTALL=false
+    
+    if command -v pipx &> /dev/null; then
+        # Check what Python pipx is using
+        PIPX_PYTHON=$(pipx environment --value PIPX_DEFAULT_PYTHON 2>/dev/null || echo "")
+        if [ -n "$PIPX_PYTHON" ]; then
+            PIPX_PY_VERSION=$($PIPX_PYTHON -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || echo "unknown")
+            PIPX_PY_MAJOR=$(echo "$PIPX_PY_VERSION" | cut -d. -f1)
+            PIPX_PY_MINOR=$(echo "$PIPX_PY_VERSION" | cut -d. -f2)
+            
+            if [ "$PIPX_PY_MAJOR" = "3" ] && [ "$PIPX_PY_MINOR" -ge "11" ]; then
+                echo -e "${GREEN}✓${NC} pipx available (using Python $PIPX_PY_VERSION)"
+            else
+                echo -e "${YELLOW}pipx is using Python $PIPX_PY_VERSION, need 3.11+${NC}"
+                NEED_PIPX_REINSTALL=true
+            fi
+        else
+            echo -e "${GREEN}✓${NC} pipx available"
+        fi
+    else
+        NEED_PIPX_REINSTALL=true
+    fi
+    
+    if [ "$NEED_PIPX_REINSTALL" = true ]; then
+        echo "Installing/reinstalling pipx with Python 3.11+..."
+        
+        # Install pipx via Homebrew (preferred) or pip
+        if command -v brew &> /dev/null; then
+            brew reinstall pipx 2>/dev/null || brew install pipx
+        else
+            $PYTHON_CMD -m pip install --user --force-reinstall pipx
+        fi
+        
+        # Configure pipx to use our Python
+        export PIPX_DEFAULT_PYTHON="$PYTHON_CMD"
         
         # Ensure pipx is in PATH
-        $PYTHON_CMD -m pipx ensurepath 2>/dev/null || true
+        eval "$($PYTHON_CMD -m pipx ensurepath 2>/dev/null)" || true
         export PATH="$HOME/.local/bin:$PATH"
         
         if ! command -v pipx &> /dev/null; then
@@ -106,8 +163,8 @@ if [ "$USE_PIPX" = true ]; then
             echo "Please install manually: brew install pipx"
             exit 1
         fi
+        echo -e "${GREEN}✓${NC} pipx installed"
     fi
-    echo -e "${GREEN}✓${NC} pipx available"
     echo ""
 fi
 
@@ -119,7 +176,10 @@ if [ "$USE_PIPX" = true ]; then
     # Uninstall first if exists (pipx doesn't have --upgrade for reinstall)
     pipx uninstall workato-platform-cli 2>/dev/null || true
     
-    # Install with pipx using the correct Python
+    # Set default Python for pipx and install
+    export PIPX_DEFAULT_PYTHON="$PYTHON_CMD"
+    echo "Using Python: $PYTHON_CMD"
+    
     pipx install workato-platform-cli --python "$PYTHON_CMD"
     
     if [ $? -eq 0 ]; then
