@@ -20,7 +20,7 @@ export function getDatabase(): Database.Database {
   if (!db) {
     try {
       if (DEBUG_DB) {
-        console.log('[DB] Connecting to database:', DB_PATH);
+        console.error('[DB] Connecting to database:', DB_PATH);
       }
       db = new Database(DB_PATH);
       
@@ -31,14 +31,14 @@ export function getDatabase(): Database.Database {
       db.pragma('journal_mode = WAL');
       
       if (DEBUG_DB) {
-        console.log('[DB] Database connected successfully');
+        console.error('[DB] Database connected successfully');
         // Log table info
         const tables = db.prepare(`
           SELECT name FROM sqlite_master 
           WHERE type='table' 
           ORDER BY name
         `).all();
-        console.log('[DB] Available tables:', tables.map((t: any) => t.name).join(', '));
+        console.error('[DB] Available tables:', tables.map((t: any) => t.name).join(', '));
       }
       
     } catch (error) {
@@ -102,15 +102,15 @@ export function executeUpdate(
     const database = getDatabase();
     
     if (DEBUG_DB) {
-      console.log('[DB] Executing update:', query);
-      console.log('[DB] Parameters:', params);
+      console.error('[DB] Executing update:', query);
+      console.error('[DB] Parameters:', params);
       
       // Check if table and columns exist for INSERT/UPDATE queries
       const tableMatch = query.match(/(?:INSERT INTO|UPDATE)\s+(\w+)/i);
       if (tableMatch) {
         const tableName = tableMatch[1];
         const columns = database.prepare(`PRAGMA table_info(${tableName})`).all();
-        console.log(`[DB] Table '${tableName}' columns:`, columns.map((c: any) => c.name).join(', '));
+        console.error(`[DB] Table '${tableName}' columns:`, columns.map((c: any) => c.name).join(', '));
       }
     }
     
@@ -118,7 +118,7 @@ export function executeUpdate(
     const result = stmt.run(params);
     
     if (DEBUG_DB) {
-      console.log('[DB] Update result:', { changes: result.changes, lastInsertRowid: result.lastInsertRowid });
+      console.error('[DB] Update result:', { changes: result.changes, lastInsertRowid: result.lastInsertRowid });
     }
     
     return result;
