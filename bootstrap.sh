@@ -224,17 +224,40 @@ install_node() {
 
 # Install Python 3.11+
 install_python() {
-    local need_install=false
+    # On macOS, we must use Homebrew Python, not system Python
+    if [ "$OS" = "macos" ]; then
+        # Check for Homebrew Python specifically
+        for cmd in /opt/homebrew/bin/python3.13 /opt/homebrew/bin/python3.12 /opt/homebrew/bin/python3.11 \
+                   /usr/local/bin/python3.13 /usr/local/bin/python3.12 /usr/local/bin/python3.11; do
+            if [ -x "$cmd" ]; then
+                local version=$($cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+                echo -e "${GREEN}✓${NC} Python $version available (Homebrew: $cmd)"
+                return 0
+            fi
+        done
+        
+        # No Homebrew Python found, install it
+        echo -e "${YELLOW}Installing Python 3.11 via Homebrew...${NC}"
+        brew install python@3.11
+        
+        # Also install pipx for package management
+        echo -e "${YELLOW}Installing pipx...${NC}"
+        brew install pipx
+        pipx ensurepath 2>/dev/null || true
+        
+        echo -e "${GREEN}✓${NC} Python 3.11 installed via Homebrew"
+        return 0
+    fi
     
-    # Check for Python 3.11+
-    for cmd in python3 python; do
+    # Linux: check for Python 3.11+
+    for cmd in python3.13 python3.12 python3.11 python3; do
         if command_exists "$cmd"; then
-            local version=$($cmd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+' | head -1)
+            local version=$($cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null)
             local major=$(echo "$version" | cut -d. -f1)
             local minor=$(echo "$version" | cut -d. -f2)
             
             if [ "$major" = "3" ] && [ "$minor" -ge "11" ]; then
-                echo -e "${GREEN}✓${NC} Python $version already installed (using $cmd)"
+                echo -e "${GREEN}✓${NC} Python $version available (using $cmd)"
                 return 0
             fi
         fi
@@ -242,29 +265,22 @@ install_python() {
     
     echo -e "${YELLOW}Installing Python 3.11+...${NC}"
     
-    case "$OS" in
-        macos)
-            brew install python@3.11
+    case "$DISTRO" in
+        ubuntu|debian|pop)
+            sudo apt-get update
+            sudo apt-get install -y python3.11 python3-pip 2>/dev/null || \
+            sudo apt-get install -y python3 python3-pip
             ;;
-        linux)
-            case "$DISTRO" in
-                ubuntu|debian|pop)
-                    sudo apt-get update
-                    sudo apt-get install -y python3.11 python3.11-venv python3-pip || \
-                    sudo apt-get install -y python3 python3-venv python3-pip
-                    ;;
-                fedora|rhel|centos)
-                    sudo dnf install -y python3.11 python3-pip || \
-                    sudo dnf install -y python3 python3-pip
-                    ;;
-                arch|manjaro)
-                    sudo pacman -S --noconfirm python python-pip
-                    ;;
-                *)
-                    echo -e "${RED}Please install Python 3.11+ manually${NC}"
-                    exit 1
-                    ;;
-            esac
+        fedora|rhel|centos)
+            sudo dnf install -y python3.11 python3-pip 2>/dev/null || \
+            sudo dnf install -y python3 python3-pip
+            ;;
+        arch|manjaro)
+            sudo pacman -S --noconfirm python python-pip
+            ;;
+        *)
+            echo -e "${RED}Please install Python 3.11+ manually${NC}"
+            return 1
             ;;
     esac
     
