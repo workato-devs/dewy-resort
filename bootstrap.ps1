@@ -14,9 +14,7 @@
 
 param(
     [string]$RepoUrl = "https://github.com/workato-devs/dewy-resort.git",
-    # TODO: Change back to "main" after merging feature/windows-powershell-scripts
-    # [string]$Branch = "main",
-    [string]$Branch = "feature/windows-powershell-scripts",
+    [string]$Branch = "main",
     [string]$TargetDir = ""
 )
 
