@@ -55,9 +55,15 @@ Write-Host "Target org: $TargetOrg"
 Write-Host ""
 
 try {
+    # Native CLI commands (sf) write warnings to stderr (e.g., "this command will
+    # expose sensitive information..."). With ErrorActionPreference=Stop, PowerShell
+    # converts every stderr line into a terminating error — killing the script on
+    # harmless warnings. Switch to Continue and use $LASTEXITCODE for real failures.
+    $ErrorActionPreference = "Continue"
+
     # Verify org connection
     Write-Host "Verifying connection to $TargetOrg..."
-    $orgCheck = & $sfCli org display --target-org $TargetOrg 2>&1
+    & $sfCli org display --target-org $TargetOrg 2>$null | Out-Null
     if ($LASTEXITCODE -ne 0) {
         Write-Host "[ERROR] Unable to authenticate to org '$TargetOrg'" -ForegroundColor Red
         Write-Host ""
@@ -104,6 +110,11 @@ try {
         --name Hotel_Management_Admin `
         --target-org $TargetOrg
 
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[ERROR] Permission set assignment failed" -ForegroundColor Red
+        exit 1
+    }
+
     Write-Host ""
     Write-Host "[OK] Permission set assigned" -ForegroundColor Green
     Write-Host ""
@@ -118,6 +129,11 @@ try {
     & $sfCli data import tree `
         --plan data/data-plan.json `
         --target-org $TargetOrg
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[ERROR] Seed data import failed" -ForegroundColor Red
+        exit 1
+    }
 
     Write-Host ""
     Write-Host "[OK] Seed data imported successfully" -ForegroundColor Green
