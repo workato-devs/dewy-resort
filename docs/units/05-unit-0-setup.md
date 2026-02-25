@@ -61,7 +61,11 @@ cp .env.example app/.env
 #### Windows
 
 ```powershell
-Copy-Item .env.example -Destination app/.env
+$copyParams = @{
+    Path        = ".env.example"
+    Destination = "app\.env"
+}
+Copy-Item @copyParams
 ```
 
 > **Important:** This `.env` file will be used throughout the workshop. Future setup steps will have you update its values as you configure each service.
