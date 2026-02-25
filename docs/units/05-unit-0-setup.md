@@ -24,6 +24,8 @@ parent: Workshop Units
 
 Copy and paste the appropriate command for your operating system. The script clones the repository, checks for required prerequisites, installs any that are missing, sets up the local application, and installs the Salesforce and Workato CLIs.
 
+### 1.1 Run relevant setup script for your machine
+
 #### Mac/Linux
 
 ```bash
@@ -45,6 +47,30 @@ cd dewy-resort
 Watch for any errors and flag a facilitator or assistant for help.
 
 **CHECKPOINT:** `make status` shows all prerequisites and CLIs installed
+
+### 1.2 Create an .env file
+
+The project includes a `.env.example` file in the root directory with placeholder values for all required environment variables. Copy this file into the `app/` directory and save it as `.env`:
+
+#### Mac/Linux
+
+```bash
+cp .env.example app/.env
+```
+
+#### Windows
+
+```powershell
+$copyParams = @{
+    Path        = ".env.example"
+    Destination = "app\.env"
+}
+Copy-Item @copyParams
+```
+
+> **Important:** This `.env` file will be used throughout the workshop. Future setup steps will have you update its values as you configure each service.
+
+**CHECKPOINT:** `app/.env` file exists with placeholder values
 
 ---
 
