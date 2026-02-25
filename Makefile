@@ -11,6 +11,18 @@ tool ?= all
 
 ifeq ($(OS),Windows_NT)
     PLATFORM     := windows
+    # MSYS2/MinGW Make (common Windows install via Chocolatey) sets HOME to
+    # Unix-style paths (e.g., /c/Users/foo). CLI tools use HOME to locate
+    # their credential and config stores:
+    #   - Salesforce CLI: $HOME/.sf/  (OAuth tokens)
+    #   - Workato CLI:    $HOME/.workato/ (profiles & keychain refs)
+    # Normalize HOME to the native Windows USERPROFILE so CLIs can find
+    # credentials that were stored during interactive authentication.
+    export HOME := $(USERPROFILE)
+    # Prevent MSYS2 from auto-converting arguments that resemble Unix paths
+    # (e.g., --target-org could be mangled). These apply to recipe shell lines.
+    export MSYS_NO_PATHCONV := 1
+    export MSYS2_ARG_CONV_EXCL := *
     WORKATO_CMD  := workato
     SF_CMD       := sf
     PS_EXEC      := powershell -NoProfile -ExecutionPolicy Bypass -File
@@ -53,7 +65,7 @@ else
     RUN_STOP_STRICT    = bash workato/scripts/cli/stop_workato_recipes.sh
     RUN_ENABLE_EP      = bash workato/scripts/cli/enable_api_endpoints.sh
     RUN_WORKATO_INIT   = bash workato/scripts/cli/create_workato_folders.sh
-    RUN_SF_DEPLOY      = cd vendor/salesforce && bash scripts/deploy.sh
+    RUN_SF_DEPLOY      = bash vendor/salesforce/scripts/deploy.sh
 endif
 
 # Default values for create-api-client
