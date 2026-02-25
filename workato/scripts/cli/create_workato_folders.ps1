@@ -2,6 +2,13 @@
 
 $ErrorActionPreference = "Stop"
 
+# Ensure HOME points to the real Windows user profile.
+# MSYS2/MinGW Make may set HOME to a Unix-style path (/c/Users/foo),
+# which prevents the Workato CLI from finding its profile/keychain config.
+if ($env:HOME -and $env:HOME -match '^/') {
+    $env:HOME = $env:USERPROFILE
+}
+
 # Get the project root directory
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = (Get-Item "$ScriptDir\..\..\..").FullName

@@ -5,6 +5,14 @@
 
 set -e  # Exit on error
 
+# Resolve directories relative to the script so this works regardless of
+# caller's working directory (e.g., invoked from Make at the project root).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SF_PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$SF_PROJECT_DIR")"
+
+cd "$SF_PROJECT_DIR"
+
 echo "========================================="
 echo "Dewy Resort Hotel - Salesforce Deployment"
 echo "========================================="
@@ -12,10 +20,8 @@ echo ""
 
 # Check if Salesforce CLI is installed
 # Use the project's bin/sf wrapper if available, otherwise look in PATH
-if [ -f "../../bin/sf" ]; then
-    SF_CLI="../../bin/sf"
-elif [ -f "../bin/sf" ]; then
-    SF_CLI="../bin/sf"
+if [ -f "$PROJECT_ROOT/bin/sf" ]; then
+    SF_CLI="$PROJECT_ROOT/bin/sf"
 elif command -v sf &> /dev/null; then
     SF_CLI="sf"
 else
@@ -46,8 +52,14 @@ echo ""
 # Verify org connection
 echo "Verifying connection to $TARGET_ORG..."
 if ! $SF_CLI org display --target-org "$TARGET_ORG" &> /dev/null; then
-    echo "Error: Unable to connect to org '$TARGET_ORG'"
-    echo "Please authenticate first: $SF_CLI org login web --alias $TARGET_ORG"
+    echo ""
+    echo "Error: Unable to authenticate to org '$TARGET_ORG'"
+    echo ""
+    echo "This usually means the access token has expired."
+    echo "Re-authenticate from your terminal:"
+    echo "  $SF_CLI org login web --alias $TARGET_ORG"
+    echo ""
+    echo "Then retry:  make sf-deploy org=$TARGET_ORG"
     exit 1
 fi
 
