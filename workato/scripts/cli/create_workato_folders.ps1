@@ -57,20 +57,28 @@ try {
         "Content-Type" = "application/json"
     }
 
+    # Native CLI commands (workato) may write warnings/info to stderr.
+    # With ErrorActionPreference=Stop, PowerShell treats any stderr output as a
+    # terminating error. Switch to Continue and check $LASTEXITCODE instead.
+    $ErrorActionPreference = "Continue"
+
     foreach ($folder in $folders) {
-        # Initialize workato project
-        try {
-            & workato init --profile default --region custom --non-interactive --project-name $folder --api-url $env:WORKATO_HOST 2>$null
-        } catch { }
-        
+        # Initialize workato project. The first call creates the .workato profile;
+        # subsequent calls (and re-runs) fail with "file already exists" — expected.
+        # Suppress all output (*>$null) and catch any PS-level exceptions.
+        try { & workato init --profile default --region custom --non-interactive --project-name $folder --api-url $env:WORKATO_HOST *>$null } catch { }
+
         $recipesPath = "$ProjectRoot\workato\recipes\$folder"
         if (Test-Path $recipesPath) {
             Copy-Item -Path "$recipesPath\*" -Destination $folder -Recurse -Force -ErrorAction SilentlyContinue
             Write-Host "Copied recipes to $folder"
-            
+
             Push-Location $folder
             try {
                 & workato push
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Host "[WARN] workato push failed for $folder" -ForegroundColor Yellow
+                }
             } finally {
                 Pop-Location
             }

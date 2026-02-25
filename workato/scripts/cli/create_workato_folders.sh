@@ -33,7 +33,9 @@ fi
 folders=("Workspace Connections" "atomic-salesforce-recipes" "atomic-stripe-recipes" "orchestrator-recipes" "sf-api-collection")
 
 for folder in "${folders[@]}"; do
-    workato init --profile default --region custom --non-interactive --project-name "$folder" --api-url "$WORKATO_HOST" 2>/dev/null || true
+    # Init creates the .workato profile on first call; subsequent calls fail
+    # with "file already exists" — expected and safe to ignore.
+    workato init --profile default --region custom --non-interactive --project-name "$folder" --api-url "$WORKATO_HOST" &>/dev/null || true
     
     if [ -d "$PROJECT_ROOT/workato/recipes/$folder" ]; then
         cp -r "$PROJECT_ROOT/workato/recipes/$folder"/* "$folder"/ 2>/dev/null || true
