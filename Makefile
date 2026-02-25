@@ -6,6 +6,62 @@
 tool ?= all
 
 # ============================================================
+# Platform Detection
+# ============================================================
+
+ifeq ($(OS),Windows_NT)
+    PLATFORM     := windows
+    WORKATO_CMD  := workato
+    SF_CMD       := sf
+    PS_EXEC      := powershell -NoProfile -ExecutionPolicy Bypass -File
+else
+    PLATFORM     := unix
+    WORKATO_CMD  := bin/workato
+    SF_CMD       := bin/sf
+endif
+
+# CLI availability (evaluated by Make, not by shell)
+ifeq ($(PLATFORM),windows)
+    HAS_WORKATO := $(shell where workato >NUL 2>NUL && echo 1)
+    HAS_SF      := $(shell where sf >NUL 2>NUL && echo 1)
+else
+    HAS_WORKATO := $(if $(wildcard bin/workato),1,)
+    HAS_SF      := $(if $(wildcard bin/sf),1,)
+endif
+
+# Script dispatch (maps to .sh on Unix, .ps1 on Windows with correct param syntax)
+ifeq ($(PLATFORM),windows)
+    SETUP_WORKATO      = $(PS_EXEC) app\scripts\setup\setup-cli.ps1 -Tool workato
+    SETUP_SALESFORCE   = $(PS_EXEC) app\scripts\setup\setup-cli.ps1 -Tool salesforce
+    SETUP_TOOL         = $(PS_EXEC) app\scripts\setup\setup-cli.ps1 -Tool $(tool)
+    CLEANUP_WORKATO    = $(PS_EXEC) workato\scripts\cli\workato-cleanup.ps1
+    RUN_START_RECIPES  = $(PS_EXEC) workato\scripts\cli\start_workato_recipes.ps1 -SkipFailed
+    RUN_START_STRICT   = $(PS_EXEC) workato\scripts\cli\start_workato_recipes.ps1
+    RUN_STOP_RECIPES   = $(PS_EXEC) workato\scripts\cli\stop_workato_recipes.ps1 -SkipFailed
+    RUN_STOP_STRICT    = $(PS_EXEC) workato\scripts\cli\stop_workato_recipes.ps1
+    RUN_ENABLE_EP      = $(PS_EXEC) workato\scripts\cli\enable_api_endpoints.ps1
+    RUN_WORKATO_INIT   = $(PS_EXEC) workato\scripts\cli\create_workato_folders.ps1
+    RUN_SF_DEPLOY      = $(PS_EXEC) vendor\salesforce\scripts\deploy.ps1 -TargetOrg
+else
+    SETUP_WORKATO      = bash app/scripts/setup/setup-cli.sh --tool=workato
+    SETUP_SALESFORCE   = bash app/scripts/setup/setup-cli.sh --tool=salesforce
+    SETUP_TOOL         = bash app/scripts/setup/setup-cli.sh --tool=$(tool)
+    CLEANUP_WORKATO    = bash workato/scripts/cli/workato-cleanup.sh
+    RUN_START_RECIPES  = bash workato/scripts/cli/start_workato_recipes.sh --skip-failed
+    RUN_START_STRICT   = bash workato/scripts/cli/start_workato_recipes.sh
+    RUN_STOP_RECIPES   = bash workato/scripts/cli/stop_workato_recipes.sh --skip-failed
+    RUN_STOP_STRICT    = bash workato/scripts/cli/stop_workato_recipes.sh
+    RUN_ENABLE_EP      = bash workato/scripts/cli/enable_api_endpoints.sh
+    RUN_WORKATO_INIT   = bash workato/scripts/cli/create_workato_folders.sh
+    RUN_SF_DEPLOY      = cd vendor/salesforce && bash scripts/deploy.sh
+endif
+
+# Default values for create-api-client
+collection ?= sf-api-collection
+client ?= SF API Client
+description ?= API client for Salesforce search endpoints
+
+# ============================================================
 # Primary Commands (Unified, Multi-Tool)
 # ============================================================
 
@@ -53,11 +109,11 @@ help:
 setup:
 ifeq ($(tool),all)
 	@echo "Setting up all vendor CLIs..."
-	@bash app/scripts/setup/setup-cli.sh --tool=workato
-	@bash app/scripts/setup/setup-cli.sh --tool=salesforce
+	@$(SETUP_WORKATO)
+	@$(SETUP_SALESFORCE)
 else
 	@echo "Setting up $(tool) CLI..."
-	@bash app/scripts/setup/setup-cli.sh --tool=$(tool)
+	@$(SETUP_TOOL)
 endif
 
 # ============================================================
@@ -68,31 +124,31 @@ status:
 ifeq ($(tool),all)
 	@echo "Checking status of all vendor CLIs..."
 	@echo ""
-	@$(MAKE) --no-print-directory status tool=workato || true
+	-@$(MAKE) --no-print-directory status tool=workato
 	@echo ""
-	@$(MAKE) --no-print-directory status tool=salesforce || true
+	-@$(MAKE) --no-print-directory status tool=salesforce
 else ifeq ($(tool),workato)
-	@if [ ! -f bin/workato ]; then \
-		echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."; \
-		exit 1; \
-	fi
+ifeq ($(HAS_WORKATO),)
+	@echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."
+	@exit 1
+endif
 	@echo "Workato CLI Status"
 	@echo "------------------"
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bin/workato --version
+	@$(WORKATO_CMD) --version
 	@echo ""
 	@echo "Testing connection to Workato..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bin/workato workspace || echo "⚠️  Not authenticated. Set your API key in .env"
+	-@$(WORKATO_CMD) workspace || echo "⚠️  Not authenticated. Set your API key in .env"
 else ifeq ($(tool),salesforce)
-	@if [ ! -f bin/sf ]; then \
-		echo "❌ Salesforce CLI not installed. Run 'make setup tool=salesforce' first."; \
-		exit 1; \
-	fi
+ifeq ($(HAS_SF),)
+	@echo "❌ Salesforce CLI not installed. Run 'make setup tool=salesforce' first."
+	@exit 1
+endif
 	@echo "Salesforce CLI Status"
 	@echo "---------------------"
-	@bin/sf --version
+	@$(SF_CMD) --version
 	@echo ""
 	@echo "Authenticated orgs:"
-	@bin/sf org list || echo "⚠️  No orgs authenticated. Run: bin/sf org login web"
+	-@$(SF_CMD) org list || echo "⚠️  No orgs authenticated. Run: $(SF_CMD) org login web"
 else
 	@echo "❌ Unknown tool: $(tool)"
 	@echo "Valid options: workato, salesforce, all"
@@ -106,20 +162,35 @@ endif
 clean:
 ifeq ($(tool),all)
 	@echo "Cleaning up all vendor CLIs..."
-	@bash workato/scripts/cli/workato-cleanup.sh || true
+	-@$(CLEANUP_WORKATO)
+ifeq ($(PLATFORM),windows)
+	@powershell -NoProfile -Command "Remove-Item -Force -ErrorAction SilentlyContinue bin\workato*"
+	@powershell -NoProfile -Command "Remove-Item -Recurse -Force -ErrorAction SilentlyContinue tools\sf-cli"
+	@powershell -NoProfile -Command "Remove-Item -Force -ErrorAction SilentlyContinue bin\sf*"
+else
 	@rm -f bin/workato
 	@rm -rf tools/sf-cli/
 	@rm -f bin/sf
+endif
 	@echo "✓ Cleaned up all CLIs"
 else ifeq ($(tool),workato)
 	@echo "Cleaning up Workato CLI..."
-	@bash workato/scripts/cli/workato-cleanup.sh || true
+	-@$(CLEANUP_WORKATO)
+ifeq ($(PLATFORM),windows)
+	@powershell -NoProfile -Command "Remove-Item -Force -ErrorAction SilentlyContinue bin\workato*"
+else
 	@rm -f bin/workato
+endif
 	@echo "✓ Cleaned up Workato CLI"
 else ifeq ($(tool),salesforce)
 	@echo "Cleaning up Salesforce CLI..."
+ifeq ($(PLATFORM),windows)
+	@powershell -NoProfile -Command "Remove-Item -Recurse -Force -ErrorAction SilentlyContinue tools\sf-cli"
+	@powershell -NoProfile -Command "Remove-Item -Force -ErrorAction SilentlyContinue bin\sf*"
+else
 	@rm -rf tools/sf-cli/
 	@rm -f bin/sf
+endif
 	@echo "✓ Cleaned up Salesforce CLI"
 else
 	@echo "❌ Unknown tool: $(tool)"
@@ -138,62 +209,70 @@ ifneq (,$(wildcard .env))
 endif
 
 validate:
-	@if [ ! -f bin/workato ]; then \
-		echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."; \
-		exit 1; \
-	fi
+ifeq ($(HAS_WORKATO),)
+	@echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."
+	@exit 1
+endif
 	@echo "Validating recipes in workato/recipes/..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bin/workato recipe validate workato/recipes/**/*.recipe.json
+	@$(WORKATO_CMD) recipe validate workato/recipes/**/*.recipe.json
 
 push:
-	@if [ ! -f bin/workato ] && ! command -v workato &> /dev/null; then \
-		echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."; \
-		exit 1; \
-	fi
+ifeq ($(HAS_WORKATO),)
+	@echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."
+	@exit 1
+endif
 	@echo "Pushing recipes to developer sandbox..."
+ifeq ($(PLATFORM),windows)
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Directory projects\* | ForEach-Object { Write-Host ('Pushing ' + $$_.Name + '...'); Push-Location $$_.FullName; workato push; Pop-Location }"
+else
 	@for folder in projects/*/; do \
 		echo "Pushing $$folder..."; \
 		(cd "$$folder" && workato push); \
 	done
+endif
 
 pull:
-	@if [ ! -f bin/workato ]; then \
-		echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."; \
-		exit 1; \
-	fi
+ifeq ($(HAS_WORKATO),)
+	@echo "❌ Workato CLI not installed. Run 'make setup tool=workato' first."
+	@exit 1
+endif
 	@echo "Pulling recipes from developer sandbox to workato/sandbox/..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bin/workato recipe pull --output workato/sandbox/
+	@$(WORKATO_CMD) recipe pull --output workato/sandbox/
 
 workato-init:
 	@echo "Initializing Workato projects..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/create_workato_folders.sh
+	@$(RUN_WORKATO_INIT)
 
 start-recipes:
 	@echo "Starting all Workato recipes (skipping failures)..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/start_workato_recipes.sh --skip-failed
+	@$(RUN_START_RECIPES)
 
 start-recipes-stop-on-error:
 	@echo "Starting all Workato recipes (stop on first failure)..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/start_workato_recipes.sh
+	@$(RUN_START_STRICT)
 
 stop-recipes:
 	@echo "Stopping all Workato recipes (skipping failures)..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/stop_workato_recipes.sh --skip-failed
+	@$(RUN_STOP_RECIPES)
 
 stop-recipes-stop-on-error:
 	@echo "Stopping all Workato recipes (stop on first failure)..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/stop_workato_recipes.sh
+	@$(RUN_STOP_STRICT)
 
 enable-api-endpoints:
 	@echo "Enabling all API endpoints..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/enable_api_endpoints.sh
+	@$(RUN_ENABLE_EP)
 
 create-api-client:
 	@echo "Creating API Platform client for sf-api-collection..."
-	@export WORKATO_API_TOKEN=$(WORKATO_API_TOKEN) && bash workato/scripts/cli/create_api_collection_client.sh \
-		--collection-name "$(if $(collection),$(collection),sf-api-collection)" \
-		--client-name "$(if $(client),$(client),SF API Client)" \
-		--client-description "$(if $(description),$(description),API client for Salesforce search endpoints)"
+ifeq ($(PLATFORM),windows)
+	@$(PS_EXEC) workato\scripts\cli\create_api_collection_client.ps1 -CollectionName "$(collection)" -ClientName "$(client)" -ClientDescription "$(description)"
+else
+	@bash workato/scripts/cli/create_api_collection_client.sh \
+		--collection-name "$(collection)" \
+		--client-name "$(client)" \
+		--client-description "$(description)"
+endif
 
 # ============================================================
 # Salesforce-Specific Commands
@@ -205,15 +284,15 @@ ifndef org
 	@echo "Usage: make sf-deploy org=myDevOrg"
 	@echo ""
 	@echo "Available orgs:"
-	@bin/sf org list || echo "No orgs found. Run: bin/sf org login web"
+	-@$(SF_CMD) org list || echo "No orgs found. Run: $(SF_CMD) org login web"
 	@exit 1
 endif
-	@if [ ! -f bin/sf ]; then \
-		echo "❌ Salesforce CLI not installed. Run 'make setup tool=salesforce' first."; \
-		exit 1; \
-	fi
+ifeq ($(HAS_SF),)
+	@echo "❌ Salesforce CLI not installed. Run 'make setup tool=salesforce' first."
+	@exit 1
+endif
 	@echo "Deploying Salesforce metadata to $(org)..."
-	@cd vendor/salesforce && bash scripts/deploy.sh $(org)
+	@$(RUN_SF_DEPLOY) $(org)
 
 # ============================================================
 # Backward-Compatible Aliases
