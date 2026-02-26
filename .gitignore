@@ -80,3 +80,7 @@ workato/temp-*/
 
 # IDE settings
 .vscode/
+
+# local development artifacts
+_site/
+temp-*/
