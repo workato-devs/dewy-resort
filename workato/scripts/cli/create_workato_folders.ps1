@@ -53,7 +53,7 @@ try {
     foreach ($folder in $folders) {
         # Initialize workato project
         try {
-            & workato init --profile default --region custom --non-interactive --project-name $folder --api-url $env:WORKATO_HOST 2>$null
+            & workato init --profile dewy-resort --region custom --non-interactive --project-name $folder --api-url $env:WORKATO_HOST 2>$null
         } catch { }
         
         $recipesPath = "$ProjectRoot\workato\recipes\$folder"
