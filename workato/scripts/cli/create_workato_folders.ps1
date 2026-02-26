@@ -60,12 +60,32 @@ try {
         if (Test-Path $recipesPath) {
             Copy-Item -Path "$recipesPath\*" -Destination $folder -Recurse -Force -ErrorAction SilentlyContinue
             Write-Host "Copied recipes to $folder"
-            
-            Push-Location $folder
-            try {
-                & workato push
-            } finally {
-                Pop-Location
+
+            if ($folder -eq "sf-api-collection") {
+                # API endpoints depend on recipes and the api_group existing first.
+                # workato push sends the whole folder at once and the server may
+                # attempt to save endpoints before their dependencies are created.
+                # Solve this by pushing in two phases:
+                #   Phase 1: api_group + recipes (no cross-deps within this set)
+                #   Phase 2: everything (endpoints can now resolve their deps)
+
+                Write-Host "  Phase 1: pushing api_group and recipes..."
+                $stagingDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
+                New-Item -ItemType Directory -Force -Path $stagingDir | Out-Null
+                Get-ChildItem -Path $folder -Filter "*.api_endpoint.json" -ErrorAction SilentlyContinue | Move-Item -Destination $stagingDir
+
+                Push-Location $folder
+                try { & workato push } finally { Pop-Location }
+
+                Write-Host "  Phase 2: pushing api_endpoints (with all dependencies)..."
+                Get-ChildItem -Path $stagingDir -Filter "*.api_endpoint.json" -ErrorAction SilentlyContinue | Move-Item -Destination $folder
+                Remove-Item -Path $stagingDir -Recurse -Force
+
+                Push-Location $folder
+                try { & workato push } finally { Pop-Location }
+            } else {
+                Push-Location $folder
+                try { & workato push } finally { Pop-Location }
             }
         } else {
             Write-Host "[WARN] No recipes found at $recipesPath" -ForegroundColor Yellow
