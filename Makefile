@@ -1,6 +1,6 @@
 # Unified CLI Management for Multi-Vendor Tools
 # Supports: workato, salesforce, and future vendor CLIs
-.PHONY: setup status validate push pull clean help workato-setup workato-status sf-setup sf-status sf-deploy start-recipes stop-recipes enable-api-endpoints create-api-client
+.PHONY: setup status validate push pull clean help doctor workato-setup workato-status sf-setup sf-status sf-deploy start-recipes stop-recipes enable-api-endpoints create-api-client
 
 # Default tool is workato for backward compatibility
 tool ?= all
@@ -28,8 +28,8 @@ ifeq ($(OS),Windows_NT)
     PS_EXEC      := powershell -NoProfile -ExecutionPolicy Bypass -File
 else
     PLATFORM     := unix
-    WORKATO_CMD  := bin/workato
-    SF_CMD       := bin/sf
+    WORKATO_CMD  ?= $(CURDIR)/bin/workato
+    SF_CMD       ?= $(CURDIR)/bin/sf
 endif
 
 # CLI availability (evaluated by Make, not by shell)
@@ -37,8 +37,8 @@ ifeq ($(PLATFORM),windows)
     HAS_WORKATO := $(shell where workato >NUL 2>NUL && echo 1)
     HAS_SF      := $(shell where sf >NUL 2>NUL && echo 1)
 else
-    HAS_WORKATO := $(if $(wildcard bin/workato),1,)
-    HAS_SF      := $(if $(wildcard bin/sf),1,)
+    HAS_WORKATO := $(if $(wildcard $(WORKATO_CMD)),1,)
+    HAS_SF      := $(if $(wildcard $(SF_CMD)),1,)
 endif
 
 # Script dispatch (maps to .sh on Unix, .ps1 on Windows with correct param syntax)
@@ -99,6 +99,9 @@ help:
 	@echo ""
 	@echo "Salesforce-Specific Commands:"
 	@echo "  make sf-deploy org=<alias> - Deploy Salesforce metadata to specified org"
+	@echo ""
+	@echo "Diagnostics:"
+	@echo "  make doctor                - Verify CLI wrappers and underlying binaries"
 	@echo ""
 	@echo "Backward-Compatible Aliases:"
 	@echo "  make workato-setup         - Same as: make setup tool=workato"
@@ -237,20 +240,21 @@ endif
 ifeq ($(PLATFORM),windows)
 	@powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Directory projects\* | ForEach-Object { Write-Host ('Pushing ' + $$_.Name + '...'); Push-Location $$_.FullName; workato push; Pop-Location }"
 else
-	@for folder in projects/*/; do \
+	@WORKATO="$(WORKATO_CMD)"; \
+	for folder in projects/*/; do \
 		echo "Pushing $$folder..."; \
 		BASENAME=$$(basename "$$folder"); \
 		if [ "$$BASENAME" = "sf-api-collection" ]; then \
 			echo "  Phase 1: pushing api_group and recipes..."; \
 			STAGING=$$(mktemp -d); \
 			mv "$$folder"/*.api_endpoint.json "$$STAGING"/ 2>/dev/null || true; \
-			(cd "$$folder" && workato push); \
+			(cd "$$folder" && "$$WORKATO" push); \
 			echo "  Phase 2: pushing api_endpoints (with all dependencies)..."; \
 			mv "$$STAGING"/*.api_endpoint.json "$$folder"/ 2>/dev/null || true; \
 			rm -rf "$$STAGING"; \
-			(cd "$$folder" && workato push); \
+			(cd "$$folder" && "$$WORKATO" push); \
 		else \
-			(cd "$$folder" && workato push); \
+			(cd "$$folder" && "$$WORKATO" push); \
 		fi; \
 	done
 endif
@@ -317,6 +321,48 @@ ifeq ($(HAS_SF),)
 endif
 	@echo "Deploying Salesforce metadata to $(org)..."
 	@$(RUN_SF_DEPLOY) $(org)
+
+# ============================================================
+# Diagnostics
+# ============================================================
+
+doctor:
+	@echo "Environment"
+	@echo "==========="
+	@echo "  Platform:    $(PLATFORM)"
+	@echo "  CURDIR:      $(CURDIR)"
+	@echo "  WORKATO_CMD: $(WORKATO_CMD)"
+	@echo "  SF_CMD:      $(SF_CMD)"
+	@echo ""
+	@echo "Workato CLI"
+	@echo "==========="
+ifeq ($(HAS_WORKATO),1)
+	@echo "  Wrapper:  $(WORKATO_CMD) ... found"
+	@if $(WORKATO_CMD) --version >/dev/null 2>&1; then \
+		echo "  Binary:   $$($(WORKATO_CMD) --version 2>&1) ... OK"; \
+	else \
+		echo "  Binary:   FAILED — wrapper exists but underlying binary is not functional"; \
+		echo "            Run 'make setup tool=workato' to reinstall"; \
+	fi
+else
+	@echo "  Wrapper:  $(WORKATO_CMD) ... NOT FOUND"
+	@echo "            Run 'make setup tool=workato' to install"
+endif
+	@echo ""
+	@echo "Salesforce CLI"
+	@echo "=============="
+ifeq ($(HAS_SF),1)
+	@echo "  Wrapper:  $(SF_CMD) ... found"
+	@if $(SF_CMD) --version >/dev/null 2>&1; then \
+		echo "  Binary:   $$($(SF_CMD) --version 2>&1 | head -1) ... OK"; \
+	else \
+		echo "  Binary:   FAILED — wrapper exists but underlying binary is not functional"; \
+		echo "            Run 'make setup tool=salesforce' to reinstall"; \
+	fi
+else
+	@echo "  Wrapper:  $(SF_CMD) ... NOT FOUND"
+	@echo "            Run 'make setup tool=salesforce' to install"
+endif
 
 # ============================================================
 # Backward-Compatible Aliases
