@@ -34,8 +34,8 @@ endif
 
 # CLI availability (evaluated by Make, not by shell)
 ifeq ($(PLATFORM),windows)
-    HAS_WORKATO := $(shell where workato >NUL 2>NUL && echo 1)
-    HAS_SF      := $(shell where sf >NUL 2>NUL && echo 1)
+    HAS_WORKATO := $(or $(shell where workato >NUL 2>NUL && echo 1),$(wildcard bin/workato.cmd))
+    HAS_SF      := $(or $(shell where sf >NUL 2>NUL && echo 1),$(wildcard bin/sf.cmd))
 else
     HAS_WORKATO := $(if $(wildcard $(WORKATO_CMD)),1,)
     HAS_SF      := $(if $(wildcard $(SF_CMD)),1,)
@@ -229,7 +229,11 @@ ifeq ($(HAS_WORKATO),)
 	@exit 1
 endif
 	@echo "Validating recipes in workato/recipes/..."
+ifeq ($(PLATFORM),windows)
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "$$files = Get-ChildItem -Path 'workato\recipes' -Filter '*.recipe.json' -Recurse | Select-Object -ExpandProperty FullName; if ($$files) { & $(WORKATO_CMD) recipe validate $$files } else { Write-Host 'No recipe files found.' }"
+else
 	@$(WORKATO_CMD) recipe validate workato/recipes/**/*.recipe.json
+endif
 
 push:
 ifeq ($(HAS_WORKATO),)
@@ -238,7 +242,30 @@ ifeq ($(HAS_WORKATO),)
 endif
 	@echo "Pushing recipes to developer sandbox..."
 ifeq ($(PLATFORM),windows)
-	@powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Directory projects\* | ForEach-Object { Write-Host ('Pushing ' + $$_.Name + '...'); Push-Location $$_.FullName; workato push; Pop-Location }"
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "\
+		$$workatoBin = '$(WORKATO_CMD)';\
+		if (-not (Get-Command $$workatoBin -ErrorAction SilentlyContinue)) {\
+			$$fallback = Join-Path '$(CURDIR)' 'bin\workato.cmd';\
+			if (Test-Path $$fallback) { $$workatoBin = $$fallback } else { Write-Error 'workato not found'; exit 1 }\
+		}\
+		Get-ChildItem -Directory 'projects\*' | ForEach-Object {\
+			$$folder = $$_.FullName;\
+			$$name   = $$_.Name;\
+			Write-Host \"Pushing $$name...\";\
+			if ($$name -eq 'sf-api-collection') {\
+				Write-Host '  Phase 1: pushing api_group and recipes...';\
+				$$staging = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString());\
+				New-Item -ItemType Directory -Force -Path $$staging | Out-Null;\
+				Get-ChildItem -Path $$folder -Filter '*.api_endpoint.json' -ErrorAction SilentlyContinue | Move-Item -Destination $$staging;\
+				Push-Location $$folder; try { & $$workatoBin push } finally { Pop-Location };\
+				Write-Host '  Phase 2: pushing api_endpoints (with all dependencies)...';\
+				Get-ChildItem -Path $$staging -Filter '*.api_endpoint.json' -ErrorAction SilentlyContinue | Move-Item -Destination $$folder;\
+				Remove-Item -Path $$staging -Recurse -Force;\
+				Push-Location $$folder; try { & $$workatoBin push } finally { Pop-Location };\
+			} else {\
+				Push-Location $$folder; try { & $$workatoBin push } finally { Pop-Location };\
+			}\
+		}"
 else
 	@WORKATO="$(WORKATO_CMD)"; \
 	for folder in projects/*/; do \
@@ -338,12 +365,16 @@ doctor:
 	@echo "==========="
 ifeq ($(HAS_WORKATO),1)
 	@echo "  Wrapper:  $(WORKATO_CMD) ... found"
+ifeq ($(PLATFORM),windows)
+	@powershell -NoProfile -Command "try { $$v = & $(WORKATO_CMD) --version 2>&1; Write-Host \"  Binary:   $$v ... OK\" } catch { Write-Host '  Binary:   FAILED - wrapper exists but underlying binary is not functional'; Write-Host '            Run ''make setup tool=workato'' to reinstall' }"
+else
 	@if $(WORKATO_CMD) --version >/dev/null 2>&1; then \
 		echo "  Binary:   $$($(WORKATO_CMD) --version 2>&1) ... OK"; \
 	else \
 		echo "  Binary:   FAILED — wrapper exists but underlying binary is not functional"; \
 		echo "            Run 'make setup tool=workato' to reinstall"; \
 	fi
+endif
 else
 	@echo "  Wrapper:  $(WORKATO_CMD) ... NOT FOUND"
 	@echo "            Run 'make setup tool=workato' to install"
@@ -353,12 +384,16 @@ endif
 	@echo "=============="
 ifeq ($(HAS_SF),1)
 	@echo "  Wrapper:  $(SF_CMD) ... found"
+ifeq ($(PLATFORM),windows)
+	@powershell -NoProfile -Command "try { $$v = (& $(SF_CMD) --version 2>&1) -split \"`n\" | Select-Object -First 1; Write-Host \"  Binary:   $$v ... OK\" } catch { Write-Host '  Binary:   FAILED - wrapper exists but underlying binary is not functional'; Write-Host '            Run ''make setup tool=salesforce'' to reinstall' }"
+else
 	@if $(SF_CMD) --version >/dev/null 2>&1; then \
 		echo "  Binary:   $$($(SF_CMD) --version 2>&1 | head -1) ... OK"; \
 	else \
 		echo "  Binary:   FAILED — wrapper exists but underlying binary is not functional"; \
 		echo "            Run 'make setup tool=salesforce' to reinstall"; \
 	fi
+endif
 else
 	@echo "  Wrapper:  $(SF_CMD) ... NOT FOUND"
 	@echo "            Run 'make setup tool=salesforce' to install"
