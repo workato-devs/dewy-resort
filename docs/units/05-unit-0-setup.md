@@ -70,13 +70,7 @@ Copy-Item @copyParams
 
 > **Important:** This `.env` file will be used throughout the workshop. Future setup steps will have you update its values as you configure each service.
 
-**CHECKPOINT:** `app/.env` file exists with placeholder values
-
----
-
-## Step 2: Initialize App & Deploy Salesforce Metadata (10 min)
-
-### 2.1 Initialize Local Database
+### 1.3 Initialize Local Database
 
 ```bash
 cd app
@@ -85,24 +79,39 @@ npm run db:setup
 ```
 
 **Expected Output:**
+
 ```
 Database initialized successfully
 Tables created: users, conversations, messages, devices...
 ```
+Navigate back to the `dewy-resort` folder:
 
 ```bash
 cd ..
+```
+**CHECKPOINT:** `app/.env` file exists with placeholder values
+
+---
+
+## Step 2: Initialize CLIs & Deploy Salesforce Metadata (10 min)
+
+### 2.1 Install CLIs for Workato and Salesforce
+
+From the `dewy-resort` directory, run the following command (this invokes a script that installs the CLIs needed for the rest of setup):
+
+```bash
+make setup
 ```
 
 ### 2.2 Authenticate to Salesforce
 
 ```bash
-bin/sf org login web --alias myDevOrg
+sf org login web --alias myDevOrg
 ```
 
 A browser window will open. Log in to your Salesforce Developer Edition org.
 
-> **Tip:** If you have multiple Salesforce accounts, make sure to use the correct username for your Developer Edition org (the one you noted during pre-workshop setup).
+> **Tip:** If you have multiple Salesforce accounts, make sure to use the correct username for your **Developer Edition** org (the one you noted during pre-workshop setup).
 
 ### 2.3 Deploy Metadata + Seed Data
 
@@ -122,7 +131,7 @@ Deploying Salesforce metadata to myDevOrg...
 ### 2.4 Verify in Salesforce
 
 ```bash
-bin/sf org open --target-org myDevOrg
+sf org open --target-org myDevOrg
 ```
 
 1. Click App Launcher (9 dots, top left)
@@ -297,7 +306,7 @@ You now have:
 | Issue | Solution |
 |-------|----------|
 | Python version mismatch | Run `brew install python@3.11` |
-| Salesforce login timeout | Re-run `bin/sf org login web --alias myDevOrg` |
+| Salesforce login timeout | Re-run `sf org login web --alias myDevOrg` |
 | Recipes won't start | Manual activation (Step 3.7) |
 | "Connection not configured" | Verify Workspace Connections authenticated |
 | API Collection 401 | Check WORKATO_API_TOKEN in .env |
