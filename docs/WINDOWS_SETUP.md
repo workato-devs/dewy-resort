@@ -166,6 +166,32 @@ If winget installed Node.js but `node` or `npm` commands aren't found, restart P
 $env:Path = "$env:Path;$env:ProgramFiles\nodejs"
 ```
 
+### "Unable to authenticate" when running `make sf-deploy`
+
+If `make status tool=salesforce` shows your org but `make sf-deploy org=myDevOrg` fails
+with an authentication error, the most common causes are:
+
+1. **Expired access token** — Re-authenticate from your terminal (not through Make):
+   ```powershell
+   sf org login web --alias myDevOrg
+   ```
+   Then retry: `make sf-deploy org=myDevOrg`
+
+2. **MSYS2 HOME path mismatch** — GNU Make on Windows (via Chocolatey) uses MSYS2, which
+   sets `HOME` to a Unix-style path (e.g., `/c/Users/foo`). The Salesforce CLI can't find
+   credentials stored at `C:\Users\foo\.sf\`. The Makefile normalizes this automatically,
+   but if you still see issues, verify with:
+   ```powershell
+   make -p | findstr "^HOME"
+   ```
+   `HOME` should show your Windows user profile path (e.g., `C:\Users\YourName`).
+
+### Workato CLI init fails after creating profile
+
+If `workato init` creates the profile file but subsequent commands fail, the same
+MSYS2 HOME issue applies. The Workato CLI stores profiles relative to `HOME`. Ensure
+you're running the latest Makefile which normalizes the HOME variable automatically.
+
 ## Differences from Mac/Linux
 
 | Mac/Linux | Windows |
