@@ -777,7 +777,7 @@
                   "conditions": [
                     {
                       "operand": "blank",
-                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"2a511209\",\"path\":[\"result\",\"id\"]}')}",
+                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_contact\",\"path\":[\"result\",\"id\"]}')}",
                       "rhs": "",
                       "uuid": "91075960-c5cf-4bf0-992a-42ad0ba02d80"
                     }
@@ -1890,7 +1890,7 @@
               "parameters": {
                 "external_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"booking_external_id\"]}')}",
                 "opportunity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_opportunity\",\"path\":[\"result\",\"opportunity_id\"]}')",
-                "contact_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}') : _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"2a511209\",\"path\":[\"result\",\"id\"]}')",
+                "contact_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}') : _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_contact\",\"path\":[\"result\",\"id\"]}')",
                 "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_room\",\"path\":[\"result\",\"id\"]}')}",
                 "check_in_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}')}",
                 "check_out_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_out_date\"]}')}",
@@ -2269,7 +2269,7 @@
                 "check_in_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_in_date\"]}')}",
                 "check_out_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"check_out_date\"]}')}",
                 "total_nights": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"result\",\"total_nights\"]}')}",
-                "guest_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}') : _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"2a511209\",\"path\":[\"result\",\"id\"]}')",
+                "guest_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_search_contact\",\"path\":[\"result\",\"id\"]}') : _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_create_contact\",\"path\":[\"result\",\"id\"]}')",
                 "guest_name": " #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_first_name\"]}')} #{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_last_name\"]}')}",
                 "guest_email": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"guest_email\"]}')}",
                 "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"call_upsert_booking\",\"path\":[\"result\",\"status\"]}')}",

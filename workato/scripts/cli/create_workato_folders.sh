@@ -33,16 +33,36 @@ fi
 folders=("Workspace Connections" "atomic-salesforce-recipes" "atomic-stripe-recipes" "orchestrator-recipes" "sf-api-collection")
 
 for folder in "${folders[@]}"; do
-    workato init --profile default --region custom --non-interactive --project-name "$folder" --api-url "$WORKATO_HOST" 2>/dev/null || true
-    
+    workato init --profile dewy-resort --region custom --non-interactive --project-name "$folder" --api-url "$WORKATO_HOST" 2>/dev/null || true
+
     if [ -d "$PROJECT_ROOT/workato/recipes/$folder" ]; then
         cp -r "$PROJECT_ROOT/workato/recipes/$folder"/* "$folder"/ 2>/dev/null || true
         echo "Copied recipes to $folder"
-        (cd "$folder" && workato push)
+
+        if [ "$folder" = "sf-api-collection" ]; then
+            # API endpoints depend on recipes and the api_group existing first.
+            # workato push sends the whole folder at once and the server may
+            # attempt to save endpoints before their dependencies are created.
+            # Solve this by pushing in two phases:
+            #   Phase 1: api_group + recipes (no cross-deps within this set)
+            #   Phase 2: everything (endpoints can now resolve their deps)
+
+            echo "  Phase 1: pushing api_group and recipes..."
+            STAGING_DIR=$(mktemp -d)
+            mv "$folder"/*.api_endpoint.json "$STAGING_DIR"/ 2>/dev/null || true
+            (cd "$folder" && workato push)
+
+            echo "  Phase 2: pushing api_endpoints (with all dependencies)..."
+            mv "$STAGING_DIR"/*.api_endpoint.json "$folder"/ 2>/dev/null || true
+            rm -rf "$STAGING_DIR"
+            (cd "$folder" && workato push)
+        else
+            (cd "$folder" && workato push)
+        fi
     else
         echo "Warning: No recipes found at $PROJECT_ROOT/workato/recipes/$folder"
     fi
-    
+
     curl -X POST "$WORKATO_HOST/api/folders" \
         -H "Authorization: Bearer $WORKATO_API_TOKEN" \
         -H "Content-Type: application/json" \

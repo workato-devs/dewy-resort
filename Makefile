@@ -153,7 +153,19 @@ push:
 	@echo "Pushing recipes to developer sandbox..."
 	@for folder in projects/*/; do \
 		echo "Pushing $$folder..."; \
-		(cd "$$folder" && workato push); \
+		BASENAME=$$(basename "$$folder"); \
+		if [ "$$BASENAME" = "sf-api-collection" ]; then \
+			echo "  Phase 1: pushing api_group and recipes..."; \
+			STAGING=$$(mktemp -d); \
+			mv "$$folder"/*.api_endpoint.json "$$STAGING"/ 2>/dev/null || true; \
+			(cd "$$folder" && workato push); \
+			echo "  Phase 2: pushing api_endpoints (with all dependencies)..."; \
+			mv "$$STAGING"/*.api_endpoint.json "$$folder"/ 2>/dev/null || true; \
+			rm -rf "$$STAGING"; \
+			(cd "$$folder" && workato push); \
+		else \
+			(cd "$$folder" && workato push); \
+		fi; \
 	done
 
 pull:
