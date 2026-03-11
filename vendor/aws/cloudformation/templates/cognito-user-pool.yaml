@@ -100,8 +100,8 @@ Resources:
       ClientName: !Sub 'hotel-mgmt-client-${Environment}'
       UserPoolId: !Ref UserPool
       
-      # Generate client secret for server-side OAuth flow
-      GenerateSecret: true
+      # No client secret for public client (SPA/browser app)
+      GenerateSecret: false
       
       # OAuth 2.0 Configuration
       AllowedOAuthFlows:
