@@ -236,7 +236,7 @@ const tools = await manager.getToolsForRole(userRole);
 // Pass tools to Bedrock
 const bedrockService = new BedrockService(credentials, region);
 const stream = bedrockService.streamInvoke({
-  model: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  model: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   messages: conversationMessages,
   systemPrompt: rolePrompt,
   tools: tools  // MCP tools available to the LLM

@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         try {
           // Send initial message_start event with model info
-          const modelId = process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0';
+          const modelId = process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-20250514-v1:0';
           const messageStartData = JSON.stringify({
             type: 'message_start',
             model: modelId,
@@ -356,7 +356,7 @@ export async function POST(request: NextRequest) {
 
             // Stream invoke Bedrock
             const streamOptions = {
-              model: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0',
+              model: process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-20250514-v1:0',
               messages: conversationMessages,
               systemPrompt,
               maxTokens: parseInt(process.env.BEDROCK_MAX_TOKENS || '4096'),

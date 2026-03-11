@@ -99,7 +99,7 @@ interface BedrockConfig {
 - `COGNITO_CLIENT_ID` - App Client ID
 
 **Optional**:
-- `BEDROCK_MODEL_ID` - Model to use (default: anthropic.claude-3-sonnet-20240229-v1:0)
+- `BEDROCK_MODEL_ID` - Model to use (default: us.anthropic.claude-sonnet-4-20250514-v1:0)
 - `BEDROCK_MAX_TOKENS` - Max tokens (default: 4096, range: 1-200000)
 - `BEDROCK_TEMPERATURE` - Temperature (default: 0.7, range: 0.0-1.0)
 - `MCP_CONFIG_PATH` - MCP config directory (default: config/mcp)
@@ -268,7 +268,7 @@ COGNITO_CLIENT_ID=abc123def456
 AWS_REGION=us-west-2  # or COGNITO_REGION
 
 # Required for Bedrock (used by other services)
-BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
 ```
 
 ### Architecture
@@ -402,7 +402,7 @@ import { TemporaryCredentials } from '@/lib/bedrock/identity-pool';
 // Create service with credentials
 const service = new BedrockService(credentials, {
   region: 'us-east-1',
-  modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  modelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   maxTokens: 4096,
   temperature: 0.7,
 });
@@ -413,7 +413,7 @@ const messages = [
 ];
 
 for await (const chunk of service.streamInvoke({
-  model: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  model: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   messages,
   systemPrompt: 'You are a helpful assistant.',
 })) {
@@ -436,7 +436,7 @@ const service = BedrockService.fromEnvironment(credentials);
 
 // Environment variables used:
 // - AWS_REGION or COGNITO_REGION (default: us-east-1)
-// - BEDROCK_MODEL_ID (default: anthropic.claude-3-sonnet-20240229-v1:0)
+// - BEDROCK_MODEL_ID (default: us.anthropic.claude-sonnet-4-20250514-v1:0)
 // - BEDROCK_MAX_TOKENS (default: 4096)
 // - BEDROCK_TEMPERATURE (default: 0.7)
 ```
@@ -466,7 +466,7 @@ const tools: MCPTool[] = [
 const chunks = [];
 
 for await (const chunk of service.streamInvoke({
-  model: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  model: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   messages,
   systemPrompt: 'You are a helpful assistant with access to weather data.',
   tools,
@@ -503,7 +503,7 @@ conversation.push({ role: 'user', content: 'What is the capital of France?' });
 
 let assistantResponse = '';
 for await (const chunk of service.streamInvoke({
-  model: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  model: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   messages: conversation,
   systemPrompt: 'You are a helpful assistant.',
 })) {
@@ -519,7 +519,7 @@ conversation.push({ role: 'user', content: 'What is its population?' });
 
 assistantResponse = '';
 for await (const chunk of service.streamInvoke({
-  model: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  model: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   messages: conversation,
   systemPrompt: 'You are a helpful assistant.',
 })) {
@@ -546,7 +546,7 @@ interface BedrockConfig {
 ```
 
 **Default Values**:
-- `modelId`: `anthropic.claude-3-sonnet-20240229-v1:0`
+- `modelId`: `us.anthropic.claude-sonnet-4-20250514-v1:0`
 - `maxTokens`: `4096`
 - `temperature`: `0.7`
 - `timeout`: `60000` (60 seconds)
@@ -745,7 +745,7 @@ for await (const chunk of bedrockService.streamInvoke(options)) {
 
 The service supports any Bedrock model that uses the Claude 3 message format:
 
-- `anthropic.claude-3-sonnet-20240229-v1:0` (default)
+- `us.anthropic.claude-sonnet-4-20250514-v1:0` (default)
 - `anthropic.claude-3-haiku-20240307-v1:0`
 - `anthropic.claude-3-opus-20240229-v1:0`
 - `anthropic.claude-3-5-sonnet-20240620-v1:0`

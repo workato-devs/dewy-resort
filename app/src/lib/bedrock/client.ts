@@ -103,7 +103,7 @@ export class BedrockService {
   private config: BedrockServiceConfig;
   
   // Default configuration
-  private readonly DEFAULT_MODEL = 'anthropic.claude-3-sonnet-20240229-v1:0';
+  private readonly DEFAULT_MODEL = 'us.anthropic.claude-sonnet-4-20250514-v1:0';
   private readonly DEFAULT_MAX_TOKENS = 4096;
   private readonly DEFAULT_TEMPERATURE = 0.7;
   private readonly DEFAULT_TIMEOUT = 60000; // 60 seconds

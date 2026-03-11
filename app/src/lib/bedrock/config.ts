@@ -52,7 +52,7 @@ export function loadBedrockConfig(): BedrockConfig {
       clientId: process.env.COGNITO_CLIENT_ID || '',
     },
     bedrock: {
-      modelId: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0',
+      modelId: process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-20250514-v1:0',
       maxTokens: parseInt(process.env.BEDROCK_MAX_TOKENS || '4096', 10),
       temperature: parseFloat(process.env.BEDROCK_TEMPERATURE || '0.7'),
       region: process.env.AWS_REGION || process.env.COGNITO_REGION || '',
@@ -104,7 +104,7 @@ export function validateBedrockConfig(config: BedrockConfig): void {
   if (!config.bedrock.modelId || config.bedrock.modelId.trim() === '') {
     errors.push('BEDROCK_MODEL_ID cannot be empty');
   } else if (!isValidBedrockModelId(config.bedrock.modelId)) {
-    errors.push('BEDROCK_MODEL_ID must be in format: provider.model-name-version (e.g., anthropic.claude-3-sonnet-20240229-v1:0)');
+    errors.push('BEDROCK_MODEL_ID must be in format: provider.model-name-version (e.g., us.anthropic.claude-sonnet-4-20250514-v1:0)');
   }
 
   if (!config.bedrock.region || config.bedrock.region.trim() === '') {
@@ -165,7 +165,7 @@ function isValidAwsRegion(region: string): boolean {
 function isValidBedrockModelId(modelId: string): boolean {
   // Format: provider.model-name-version
   // Examples:
-  // - anthropic.claude-3-sonnet-20240229-v1:0
+  // - us.anthropic.claude-sonnet-4-20250514-v1:0
   // - anthropic.claude-3-haiku-20240307-v1:0
   // - ai21.j2-ultra-v1
   const pattern = /^[a-z0-9]+\.[a-z0-9-]+/i;

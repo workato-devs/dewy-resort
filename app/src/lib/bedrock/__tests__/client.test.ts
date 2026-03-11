@@ -29,7 +29,7 @@ const MOCK_CREDENTIALS: TemporaryCredentials = {
  */
 const TEST_CONFIG = {
   region: process.env.AWS_REGION || process.env.COGNITO_REGION || 'us-east-1',
-  modelId: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0',
+  modelId: process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   maxTokens: 1000,
   temperature: 0.7,
 };
