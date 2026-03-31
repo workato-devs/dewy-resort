@@ -927,507 +927,6 @@
             "extended_input_schema": [
               {
                 "control_type": "text",
-                "custom": false,
-                "label": "Account ID",
-                "name": "AccountId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Asset ID",
-                "name": "AssetId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Case ID",
-                "name": "Id",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Case Number",
-                "name": "CaseNumber",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Case Origin",
-                "name": "Origin",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Case\"",
-                  "field_name": "\"Origin\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Case Origin",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Origin"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Case Reason",
-                "name": "Reason",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Case\"",
-                  "field_name": "\"Reason\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Case Reason",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Reason"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Case Source ID",
-                "name": "SourceId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Case Type",
-                "name": "Type",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Case\"",
-                  "field_name": "\"Type\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Case Type",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Type"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "checkbox",
-                "custom": false,
-                "label": "Closed",
-                "name": "IsClosed",
-                "optional": true,
-                "toggle_field": {
-                  "label": "Closed",
-                  "control_type": "text",
-                  "toggle_hint": "Use custom value",
-                  "render_input": null,
-                  "parse_output": null,
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": false,
-                  "sfdc_updateable": false,
-                  "type": "boolean",
-                  "name": "IsClosed"
-                },
-                "toggle_hint": "Select from option list",
-                "type": "boolean",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Closed Date",
-                "name": "ClosedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Company",
-                "name": "SuppliedCompany",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Contact Email",
-                "name": "ContactEmail",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "phone",
-                "custom": false,
-                "label": "Contact Fax",
-                "name": "ContactFax",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Contact ID",
-                "name": "ContactId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "phone",
-                "custom": false,
-                "label": "Contact Mobile",
-                "name": "ContactMobile",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "phone",
-                "custom": false,
-                "label": "Contact Phone",
-                "name": "ContactPhone",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Created By ID",
-                "name": "CreatedById",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Created Date",
-                "name": "CreatedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "checkbox",
-                "custom": false,
-                "label": "Deleted",
-                "name": "IsDeleted",
-                "ngIf": "false",
-                "optional": true,
-                "toggle_field": {
-                  "label": "Deleted",
-                  "control_type": "text",
-                  "toggle_hint": "Use custom value",
-                  "render_input": null,
-                  "parse_output": null,
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": false,
-                  "sfdc_updateable": false,
-                  "ngIf": "false",
-                  "type": "boolean",
-                  "name": "IsDeleted"
-                },
-                "toggle_hint": "Select from option list",
-                "type": "boolean",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Email Address",
-                "name": "SuppliedEmail",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "checkbox",
-                "custom": false,
-                "label": "Escalated",
-                "name": "IsEscalated",
-                "optional": true,
-                "toggle_field": {
-                  "label": "Escalated",
-                  "control_type": "text",
-                  "toggle_hint": "Use custom value",
-                  "render_input": null,
-                  "parse_output": null,
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "boolean",
-                  "name": "IsEscalated"
-                },
-                "toggle_hint": "Select from option list",
-                "type": "boolean",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Last Modified By ID",
-                "name": "LastModifiedById",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Last Modified Date",
-                "name": "LastModifiedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Last Referenced Date",
-                "name": "LastReferencedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Last Viewed Date",
-                "name": "LastViewedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Master Record ID",
-                "name": "MasterRecordId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Name",
-                "name": "SuppliedName",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Owner ID",
-                "name": "OwnerId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Parent Case ID",
-                "name": "ParentId",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Phone",
-                "name": "SuppliedPhone",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Priority",
-                "name": "Priority",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Case\"",
-                  "field_name": "\"Priority\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Priority",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Priority"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": false,
-                "label": "Status",
-                "name": "Status",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Case\"",
-                  "field_name": "\"Status\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Status",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Status"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Subject",
-                "name": "Subject",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "System Modstamp",
-                "name": "SystemModstamp",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Booking",
-                "name": "Booking__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Engineering Req Number",
-                "name": "EngineeringReqNumber__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
                 "custom": true,
                 "label": "External ID",
                 "name": "External_ID__c",
@@ -1435,108 +934,6 @@
                 "type": "string",
                 "sfdc_createable": true,
                 "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "Potential Liability",
-                "name": "PotentialLiability__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Case\"",
-                  "field_name": "\"PotentialLiability__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Potential Liability",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "PotentialLiability__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "Product",
-                "name": "Product__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Case\"",
-                  "field_name": "\"Product__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Product",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Product__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Room",
-                "name": "Room__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "SLA Violation",
-                "name": "SLAViolation__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Case\"",
-                  "field_name": "\"SLAViolation__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "SLA Violation",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "SLAViolation__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "checkbox",
-                "disable_formula": true,
-                "extends_schema": true,
-                "hint": "Select <b>Yes</b> to obtain data from notes, attachments and files associated to the queried records. Default value is <b>Yes</b>.",
-                "label": "Select combined attachments",
-                "name": "include_combined_attachments",
-                "optional": true,
-                "support_pills": false,
-                "type": "boolean"
               }
             ],
             "visible_config_fields": [
@@ -1575,9 +972,9 @@
                 "input": {
                   "sobject_name": "Case",
                   "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"find_case\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Id\"]}')}",
-                  "Status": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}')",
-                  "Priority": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"priority\"]}')",
-                  "Comments": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"comments\"]}')"
+                  "Status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}')}",
+                  "Priority": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"priority\"]}')}",
+                  "Comments": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"comments\"]}')}"
                 },
                 "extended_input_schema": [
                   {
@@ -1589,234 +986,28 @@
                     "key_scope": "case"
                   },
                   {
-                    "control_type": "text",
-                    "hint": "Leave empty to not apply assignment rules; the special value <b>true</b> to apply the default assignment rules; or pass specific rule ID.",
-                    "label": "Assignment rule ID",
-                    "name": "assignment_rule_id",
-                    "optional": true,
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Account ID",
-                    "name": "AccountId",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Asset ID",
-                    "name": "AssetId",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
                     "control_type": "select",
                     "custom": false,
-                    "label": "Case Origin",
-                    "name": "Origin",
+                    "label": "Status",
+                    "name": "Status",
                     "optional": true,
                     "pick_list": "sobject_field_values_list",
                     "pick_list_params": {
                       "sobject_name": "\"Case\"",
-                      "field_name": "\"Origin\""
+                      "field_name": "\"Status\""
                     },
                     "toggle_field": {
                       "control_type": "text",
-                      "label": "Case Origin",
+                      "label": "Status",
                       "toggle_hint": "Enter custom value",
                       "optional": true,
                       "custom": false,
                       "sfdc_createable": true,
                       "sfdc_updateable": true,
                       "type": "string",
-                      "name": "Origin"
+                      "name": "Status"
                     },
                     "toggle_hint": "Select from list",
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "select",
-                    "custom": false,
-                    "label": "Case Reason",
-                    "name": "Reason",
-                    "optional": true,
-                    "pick_list": "sobject_field_values_list",
-                    "pick_list_params": {
-                      "sobject_name": "\"Case\"",
-                      "field_name": "\"Reason\""
-                    },
-                    "toggle_field": {
-                      "control_type": "text",
-                      "label": "Case Reason",
-                      "toggle_hint": "Enter custom value",
-                      "optional": true,
-                      "custom": false,
-                      "sfdc_createable": true,
-                      "sfdc_updateable": true,
-                      "type": "string",
-                      "name": "Reason"
-                    },
-                    "toggle_hint": "Select from list",
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Case Source ID",
-                    "name": "SourceId",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "select",
-                    "custom": false,
-                    "label": "Case Type",
-                    "name": "Type",
-                    "optional": true,
-                    "pick_list": "sobject_field_values_list",
-                    "pick_list_params": {
-                      "sobject_name": "\"Case\"",
-                      "field_name": "\"Type\""
-                    },
-                    "toggle_field": {
-                      "control_type": "text",
-                      "label": "Case Type",
-                      "toggle_hint": "Enter custom value",
-                      "optional": true,
-                      "custom": false,
-                      "sfdc_createable": true,
-                      "sfdc_updateable": true,
-                      "type": "string",
-                      "name": "Type"
-                    },
-                    "toggle_hint": "Select from list",
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Company",
-                    "name": "SuppliedCompany",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Contact ID",
-                    "name": "ContactId",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text-area",
-                    "custom": false,
-                    "label": "Description",
-                    "name": "Description",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Email Address",
-                    "name": "SuppliedEmail",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "checkbox",
-                    "custom": false,
-                    "label": "Escalated",
-                    "name": "IsEscalated",
-                    "optional": true,
-                    "toggle_field": {
-                      "label": "Escalated",
-                      "control_type": "text",
-                      "toggle_hint": "Use custom value",
-                      "render_input": null,
-                      "parse_output": null,
-                      "optional": true,
-                      "custom": false,
-                      "sfdc_createable": true,
-                      "sfdc_updateable": true,
-                      "type": "boolean",
-                      "name": "IsEscalated"
-                    },
-                    "toggle_hint": "Select from option list",
-                    "type": "boolean",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text-area",
-                    "custom": false,
-                    "label": "Internal Comments",
-                    "name": "Comments",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Name",
-                    "name": "SuppliedName",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Owner ID",
-                    "name": "OwnerId",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Parent Case ID",
-                    "name": "ParentId",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Phone",
-                    "name": "SuppliedPhone",
-                    "optional": true,
                     "type": "string",
                     "sfdc_createable": true,
                     "sfdc_updateable": true
@@ -1849,159 +1040,11 @@
                     "sfdc_updateable": true
                   },
                   {
-                    "control_type": "select",
+                    "control_type": "text-area",
                     "custom": false,
-                    "label": "Status",
-                    "name": "Status",
+                    "label": "Internal Comments",
+                    "name": "Comments",
                     "optional": true,
-                    "pick_list": "sobject_field_values_list",
-                    "pick_list_params": {
-                      "sobject_name": "\"Case\"",
-                      "field_name": "\"Status\""
-                    },
-                    "toggle_field": {
-                      "control_type": "text",
-                      "label": "Status",
-                      "toggle_hint": "Enter custom value",
-                      "optional": true,
-                      "custom": false,
-                      "sfdc_createable": true,
-                      "sfdc_updateable": true,
-                      "type": "string",
-                      "name": "Status"
-                    },
-                    "toggle_hint": "Select from list",
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": false,
-                    "label": "Subject",
-                    "name": "Subject",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": true,
-                    "label": "Booking",
-                    "name": "Booking__c",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": true,
-                    "label": "Engineering Req Number",
-                    "name": "EngineeringReqNumber__c",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": true,
-                    "label": "External ID",
-                    "name": "External_ID__c",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "select",
-                    "custom": true,
-                    "label": "Potential Liability",
-                    "name": "PotentialLiability__c",
-                    "optional": true,
-                    "pick_list": "sobject_field_values_list",
-                    "pick_list_params": {
-                      "sobject_name": "\"Case\"",
-                      "field_name": "\"PotentialLiability__c\""
-                    },
-                    "toggle_field": {
-                      "control_type": "text",
-                      "label": "Potential Liability",
-                      "toggle_hint": "Enter custom value",
-                      "optional": true,
-                      "custom": true,
-                      "sfdc_createable": true,
-                      "sfdc_updateable": true,
-                      "type": "string",
-                      "name": "PotentialLiability__c"
-                    },
-                    "toggle_hint": "Select from list",
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "select",
-                    "custom": true,
-                    "label": "Product",
-                    "name": "Product__c",
-                    "optional": true,
-                    "pick_list": "sobject_field_values_list",
-                    "pick_list_params": {
-                      "sobject_name": "\"Case\"",
-                      "field_name": "\"Product__c\""
-                    },
-                    "toggle_field": {
-                      "control_type": "text",
-                      "label": "Product",
-                      "toggle_hint": "Enter custom value",
-                      "optional": true,
-                      "custom": true,
-                      "sfdc_createable": true,
-                      "sfdc_updateable": true,
-                      "type": "string",
-                      "name": "Product__c"
-                    },
-                    "toggle_hint": "Select from list",
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "text",
-                    "custom": true,
-                    "label": "Room",
-                    "name": "Room__c",
-                    "optional": true,
-                    "type": "string",
-                    "sfdc_createable": true,
-                    "sfdc_updateable": true
-                  },
-                  {
-                    "control_type": "select",
-                    "custom": true,
-                    "label": "SLA Violation",
-                    "name": "SLAViolation__c",
-                    "optional": true,
-                    "pick_list": "sobject_field_values_list",
-                    "pick_list_params": {
-                      "sobject_name": "\"Case\"",
-                      "field_name": "\"SLAViolation__c\""
-                    },
-                    "toggle_field": {
-                      "control_type": "text",
-                      "label": "SLA Violation",
-                      "toggle_hint": "Enter custom value",
-                      "optional": true,
-                      "custom": true,
-                      "sfdc_createable": true,
-                      "sfdc_updateable": true,
-                      "type": "string",
-                      "name": "SLAViolation__c"
-                    },
-                    "toggle_hint": "Select from list",
                     "type": "string",
                     "sfdc_createable": true,
                     "sfdc_updateable": true
@@ -2019,8 +1062,8 @@
                   "result": {
                     "case_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"find_case\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Id\"]}')}",
                     "case_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"find_case\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"CaseNumber\"]}')}",
-                    "updated_status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"find_case\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Status\"]}')}",
-                    "updated_priority": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"find_case\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Priority\"]}')}"
+                    "updated_status": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}') : _dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"find_case\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Status\"]}')",
+                    "updated_priority": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"priority\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"priority\"]}') : _dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"find_case\",\"path\":[\"Case\",{\"path_element_type\":\"current_item\"},\"Priority\"]}')"
                   }
                 },
                 "extended_output_schema": [
@@ -2117,11 +1160,11 @@
                     "keyword": "action",
                     "input": {
                       "result": {
-                        "error": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"return_updated\",\"path\":[\"result\",\"error\"]}')}",
-                        "case_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"return_updated\",\"path\":[\"result\",\"case_id\"]}')}",
-                        "case_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"return_updated\",\"path\":[\"result\",\"case_number\"]}')}",
-                        "updated_status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"return_updated\",\"path\":[\"result\",\"updated_status\"]}')}",
-                        "updated_priority": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"return_updated\",\"path\":[\"result\",\"updated_priority\"]}')}"
+                        "case_id": "=null",
+                        "case_number": "=null",
+                        "updated_status": "=null",
+                        "updated_priority": "=null",
+                        "error": "Case not found for the given idempotency token"
                       }
                     },
                     "extended_output_schema": [
@@ -2232,6 +1275,13 @@
                 },
                 "extended_input_schema": [
                   {
+                    "control_type": "text-area",
+                    "label": "Message",
+                    "name": "message",
+                    "type": "string",
+                    "optional": false
+                  },
+                  {
                     "control_type": "switch",
                     "default": false,
                     "disable_formula": true,
@@ -2244,6 +1294,103 @@
                   }
                 ],
                 "uuid": "update-case-log-001"
+              },
+              {
+                "number": 10,
+                "provider": "workato_recipe_function",
+                "name": "return_result",
+                "as": "return_catch_error",
+                "keyword": "action",
+                "input": {
+                  "result": {
+                    "case_id": "=null",
+                    "case_number": "=null",
+                    "updated_status": "=null",
+                    "updated_priority": "=null",
+                    "error": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"update-case-catch-001\",\"path\":[\"message\"]}')}"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Case ID",
+                        "name": "case_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Case number",
+                        "name": "case_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Updated status",
+                        "name": "updated_status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Updated priority",
+                        "name": "updated_priority",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error",
+                        "name": "error",
+                        "type": "string",
+                        "optional": true
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Case ID",
+                        "name": "case_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Case number",
+                        "name": "case_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Updated status",
+                        "name": "updated_status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Updated priority",
+                        "name": "updated_priority",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Error",
+                        "name": "error",
+                        "type": "string",
+                        "optional": true
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "update-case-return-catch-001"
               }
             ],
             "uuid": "update-case-catch-001"
