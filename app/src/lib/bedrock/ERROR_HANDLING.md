@@ -328,14 +328,14 @@ logStreamComplete(userId, role, modelId, duration, tokenCount);
   "message": "Started Bedrock streaming invocation",
   "userId": "user123",
   "role": "guest",
-  "modelId": "anthropic.claude-3-sonnet-20240229-v1:0",
+  "modelId": "us.anthropic.claude-sonnet-4-20250514-v1:0",
   "conversationId": "conv_abc123"
 }
 ```
 
 #### Production (Single Line)
 ```json
-{"timestamp":"2024-01-15T10:30:00.000Z","level":"info","event":"bedrock.stream.start","message":"Started Bedrock streaming invocation","userId":"user123","role":"guest","modelId":"anthropic.claude-3-sonnet-20240229-v1:0","conversationId":"conv_abc123"}
+{"timestamp":"2024-01-15T10:30:00.000Z","level":"info","event":"bedrock.stream.start","message":"Started Bedrock streaming invocation","userId":"user123","role":"guest","modelId":"us.anthropic.claude-sonnet-4-20250514-v1:0","conversationId":"conv_abc123"}
 ```
 
 ## Best Practices

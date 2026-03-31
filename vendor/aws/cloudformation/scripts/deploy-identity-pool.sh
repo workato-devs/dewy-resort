@@ -300,7 +300,7 @@ main() {
     ENVIRONMENT=$1
     USER_POOL_ID=$2
     CLIENT_ID=$3
-    BEDROCK_MODEL_ID=${4:-"anthropic.claude-3-sonnet-20240229-v1:0"}
+    BEDROCK_MODEL_ID=${4:-"us.anthropic.claude-sonnet-4-20250514-v1:0"}
     AWS_PROFILE=${5:-default}
     AWS_REGION=${6:-}
     STACK_NAME="hotel-mgmt-identity-pool-${ENVIRONMENT}"

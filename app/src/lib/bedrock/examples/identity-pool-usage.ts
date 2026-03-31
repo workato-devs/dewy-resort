@@ -57,7 +57,7 @@ export async function invokeBedrockWithCredentials(idToken: string, sessionId: s
   });
   
   // Invoke model
-  const modelId = process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0';
+  const modelId = process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-20250514-v1:0';
   const command = new InvokeModelCommand({
     modelId,
     body: JSON.stringify({
@@ -213,7 +213,7 @@ export async function concurrentRequestsExample(idToken: string, sessionId: stri
     'How do I request housekeeping?',
   ].map(async (question) => {
     const command = new InvokeModelCommand({
-      modelId: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0',
+      modelId: process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-20250514-v1:0',
       body: JSON.stringify({
         anthropic_version: 'bedrock-2023-05-31',
         max_tokens: 512,

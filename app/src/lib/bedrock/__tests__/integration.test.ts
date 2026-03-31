@@ -100,7 +100,7 @@ async function testEndToEndStreamingFlow(): Promise<void> {
   // Step 5: Verify Bedrock service can be created with credentials
   const bedrockService = new BedrockService(mockCredentials, {
     region: 'us-east-1',
-    modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+    modelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   });
   
   assert(bedrockService !== null, 'Bedrock service should be created');
@@ -108,7 +108,7 @@ async function testEndToEndStreamingFlow(): Promise<void> {
   
   // Step 6: Verify stream options structure
   const streamOptions = {
-    model: 'anthropic.claude-3-sonnet-20240229-v1:0',
+    model: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
     messages: recentMessages,
     systemPrompt,
     maxTokens: 4096,
@@ -359,7 +359,7 @@ async function testErrorHandlingScenarios(): Promise<void> {
   // Test 7: Bedrock service error handling structure
   const bedrockService = new BedrockService(mockCredentials, {
     region: 'us-east-1',
-    modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+    modelId: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
   });
   
   // Verify service is created and can handle errors through streaming
@@ -547,7 +547,7 @@ async function testConfigurationValidation(): Promise<void> {
   }
   
   // Test 3: Verify model ID format
-  const modelId = process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0';
+  const modelId = process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-20250514-v1:0';
   // AWS Bedrock model IDs follow pattern: provider.model-name or provider.model-name:version
   const modelIdPattern = /^[a-z0-9-]+\.[a-z0-9-]+(:[a-z0-9-]+)?$/;
   const isValidModelId = modelIdPattern.test(modelId);

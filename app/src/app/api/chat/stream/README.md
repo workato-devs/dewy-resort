@@ -189,7 +189,7 @@ Required:
 - `AWS_REGION` or `COGNITO_REGION`
 
 Optional:
-- `BEDROCK_MODEL_ID` (default: anthropic.claude-3-sonnet-20240229-v1:0)
+- `BEDROCK_MODEL_ID` (default: us.anthropic.claude-sonnet-4-20250514-v1:0)
 - `BEDROCK_MAX_TOKENS` (default: 4096)
 - `BEDROCK_TEMPERATURE` (default: 0.7)
 

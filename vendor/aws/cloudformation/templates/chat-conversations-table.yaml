@@ -194,7 +194,7 @@ Resources:
               StringEquals:
                 # User can only query their own data via GSI
                 dynamodb:LeadingKeys:
-                  - !Sub 'USER#${cognito-identity.amazonaws.com:sub}'
+                  - 'USER#${cognito-identity.amazonaws.com:sub}'
           
           # Allow users to update only their own conversations
           - Sid: AllowUpdateOwnConversations
@@ -234,7 +234,7 @@ Resources:
             Condition:
               StringNotEquals:
                 dynamodb:LeadingKeys:
-                  - !Sub 'USER#${cognito-identity.amazonaws.com:sub}'
+                  - 'USER#${cognito-identity.amazonaws.com:sub}'
                   - CONV#*
           
           # Deny dangerous operations

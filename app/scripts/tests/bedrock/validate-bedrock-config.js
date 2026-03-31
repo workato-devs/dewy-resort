@@ -176,7 +176,7 @@ function validateIdentityPool() {
 function validateBedrock() {
   logSection('Bedrock Model Configuration');
   
-  const modelId = process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0';
+  const modelId = process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-20250514-v1:0';
   const maxTokens = parseInt(process.env.BEDROCK_MAX_TOKENS || '4096', 10);
   const temperature = parseFloat(process.env.BEDROCK_TEMPERATURE || '0.7');
   const region = process.env.AWS_REGION || process.env.COGNITO_REGION;
@@ -186,7 +186,7 @@ function validateBedrock() {
   // Check model ID
   if (!isValidBedrockModelId(modelId)) {
     logError(`Invalid BEDROCK_MODEL_ID format: ${modelId}`);
-    logInfo('Expected format: provider.model-name-version (e.g., anthropic.claude-3-sonnet-20240229-v1:0)');
+    logInfo('Expected format: provider.model-name-version (e.g., us.anthropic.claude-sonnet-4-20250514-v1:0)');
     hasErrors = true;
   } else {
     logSuccess(`BEDROCK_MODEL_ID: ${modelId}`);
