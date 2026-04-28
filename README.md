@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/workato-devs-dewy-resort-badge.png)](https://mseep.ai/app/workato-devs-dewy-resort)
+
 # Dewy Resort Hotel - Sample Application
 
 **Enterprise MCP Design Patterns for LLM Productivity**
