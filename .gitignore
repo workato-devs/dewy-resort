@@ -55,15 +55,15 @@ next-env.d.ts
 /database/*.db-wal
 /app/database/*.db-wal
 
-# vendor CLI tools (workato, salesforce, twilio, stripe, etc.)
+# vendor CLI tools (salesforce, etc.)
 bin/
-tools/workato-cli/
 tools/sf-cli/
-.workatoenv
-.env.tools
 **/workato-api-key.txt
 workato/sandbox/**/*.recipe.json
 workato/temp-*/
+
+# wk CLI local projects (synced workspace exports, not source)
+demo-project*/
 
 # salesforce CLI
 .sf/                            # Salesforce CLI configuration

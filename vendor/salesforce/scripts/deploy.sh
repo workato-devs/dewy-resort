@@ -9,7 +9,7 @@ set -e  # Exit on error
 # caller's working directory (e.g., invoked from Make at the project root).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SF_PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-PROJECT_ROOT="$(dirname "$SF_PROJECT_DIR")"
+PROJECT_ROOT="$(dirname "$(dirname "$SF_PROJECT_DIR")")"
 
 cd "$SF_PROJECT_DIR"
 

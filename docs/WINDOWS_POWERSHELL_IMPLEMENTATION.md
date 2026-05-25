@@ -1,5 +1,7 @@
 # Windows PowerShell Support Implementation
 
+> **Deprecation Notice (2026-05):** The Workato CLI migration from the Python-based `workato-platform-cli` to the Go-based `wk` CLI has eliminated most of the Windows-specific PowerShell script complexity described below. The `wk` CLI is a cross-platform binary (installed via `brew` on macOS/Linux, `scoop` on Windows), so Workato operations now work identically on all platforms through Make targets. The PowerShell scripts in `workato/scripts/cli/` have been removed (except `create_api_collection_client.ps1`). This document is retained for historical context only.
+
 ## Overview
 
 This document describes the implementation of Windows PowerShell support for the Dewy Resort workshop, enabling Windows users to set up and run the workshop without requiring WSL, Git Bash, or other Unix emulation layers.

@@ -11,7 +11,7 @@ The setup script will automatically install missing prerequisites via **winget**
 - **Git** (auto-installed if missing)
 - **make** (auto-installed if missing) - for workshop Makefile commands
 - **Node.js v20 LTS** (auto-installed if missing)
-- **Python 3.11+** (auto-installed if missing) - for Workato CLI
+- **wk CLI** - Workato CLI ([install instructions](https://docs.workato.com/wk-cli.html))
 
 > **Note:** Node.js v20 is specifically required. Other versions (v18, v21, v22) may cause compatibility issues.
 
@@ -52,17 +52,21 @@ The setup script will automatically install missing prerequisites via **winget**
 | `.\app\scripts\setup\fix-bcrypt.ps1` | Fix bcrypt architecture issues |
 | `.\app\scripts\setup\create-cognito-staff-users.ps1` | Create Cognito test users |
 
-### Workato Scripts
+### Workato Commands
 
-| Script | Description |
-|--------|-------------|
-| `.\workato\scripts\cli\workato-setup.ps1` | Install Workato CLI |
-| `.\workato\scripts\cli\workato-cleanup.ps1` | Uninstall Workato CLI |
-| `.\workato\scripts\cli\start_workato_recipes.ps1` | Start all recipes |
-| `.\workato\scripts\cli\stop_workato_recipes.ps1` | Stop all recipes |
-| `.\workato\scripts\cli\enable_api_endpoints.ps1` | Enable API endpoints |
-| `.\workato\scripts\cli\create_api_collection_client.ps1` | Create API client |
-| `.\workato\scripts\cli\create_workato_folders.ps1` | Initialize Workato folders |
+Workato operations are now handled by the cross-platform `wk` CLI and Make targets:
+
+| Command | Description |
+|---------|-------------|
+| `make setup tool=workato` | Verify wk CLI installation |
+| `make workato-init` | Initialize Workato workspace (clone projects) |
+| `make validate` | Lint all Workato recipes |
+| `make push` | Push recipes to workspace |
+| `make pull` | Pull recipes from workspace |
+| `make start-recipes` | Start all stopped recipes |
+| `make stop-recipes` | Stop all running recipes |
+| `make enable-api-endpoints` | Enable all disabled API endpoints |
+| `make create-api-client` | Create API client and update .env |
 
 ### Salesforce Scripts
 
@@ -131,15 +135,6 @@ If you encounter bcrypt architecture mismatch errors:
 .\app\scripts\setup\fix-bcrypt.ps1
 ```
 
-### Python Not Found
-
-Ensure Python is in your PATH. You can verify with:
-```powershell
-python --version
-```
-
-If not found, reinstall Python and check "Add Python to PATH" during installation.
-
 ### Salesforce CLI Download Issues
 
 If the automatic download fails, the setup will try npm installation automatically. If that also fails, install manually:
@@ -186,28 +181,15 @@ with an authentication error, the most common causes are:
    ```
    `HOME` should show your Windows user profile path (e.g., `C:\Users\YourName`).
 
-### Workato CLI init fails after creating profile
-
-If `workato init` creates the profile file but subsequent commands fail, the same
-MSYS2 HOME issue applies. The Workato CLI stores profiles relative to `HOME`. Ensure
-you're running the latest Makefile which normalizes the HOME variable automatically.
-
 ## Differences from Mac/Linux
+
+The `wk` CLI is cross-platform, so most Workato commands work identically on Windows and Mac/Linux via Make targets. The main differences are in initial setup:
 
 | Mac/Linux | Windows |
 |-----------|---------|
-| `make setup` | `.\setup.ps1` |
-| `make setup tool=workato` | `.\setup.ps1 -Tool workato` |
-| `make start-recipes` | `.\workato\scripts\cli\start_workato_recipes.ps1` |
-| `make stop-recipes` | `.\workato\scripts\cli\stop_workato_recipes.ps1` |
+| `make setup` | `.\setup.ps1` (or `make setup`) |
+| `make setup tool=workato` | `.\setup.ps1 -Tool workato` (or `make setup tool=workato`) |
 | `make sf-deploy org=myOrg` | `.\vendor\salesforce\scripts\deploy.ps1 -TargetOrg myOrg` |
-| `bin/workato` | `.\bin\workato.ps1` or `bin\workato` (cmd) |
-| `bin/sf` | `sf` (global command via npm) |
+| `brew install workato/tap/wk` | `scoop install wk` |
 
-## Using from Command Prompt (cmd.exe)
-
-The setup creates `.cmd` wrapper files for use from Command Prompt:
-```cmd
-bin\workato --version
-bin\sf --version
-```
+All `make` targets (start-recipes, stop-recipes, validate, push, pull, etc.) work identically on both platforms.

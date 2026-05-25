@@ -10,96 +10,79 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Get project root directory (go up from app/scripts/setup to project root)
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Resolve-Path (Join-Path $ScriptDir "..\..\..") | Select-Object -ExpandProperty Path
 
-# Map tool names to their setup script locations
-$ToolScripts = @{
-    "workato" = Join-Path $ProjectRoot "workato\scripts\cli\workato-setup.ps1"
-    "salesforce" = Join-Path $ProjectRoot "vendor\salesforce\scripts\salesforce-setup.ps1"
-}
+switch ($Tool) {
+    "workato" {
+        Write-Host "========================================" -ForegroundColor Blue
+        Write-Host "Verifying Workato CLI (wk)" -ForegroundColor Blue
+        Write-Host "========================================" -ForegroundColor Blue
+        Write-Host ""
 
-$ToolScript = $ToolScripts[$Tool]
-
-# Check if tool-specific setup script exists
-if (-not (Test-Path $ToolScript)) {
-    Write-Host "[ERROR] Setup script not found: $ToolScript" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Available tools:"
-    Write-Host "  - workato"
-    Write-Host "  - salesforce"
-    exit 1
-}
-
-# Check if wrapper already exists OR global command available (skip if already installed)
-$WrapperScripts = @{
-    "workato" = Join-Path $ProjectRoot "bin\workato.ps1"
-    "salesforce" = Join-Path $ProjectRoot "bin\sf.ps1"
-}
-
-$GlobalCommands = @{
-    "workato" = "workato"
-    "salesforce" = "sf"
-}
-
-$WrapperScript = $WrapperScripts[$Tool]
-$GlobalCmd = $GlobalCommands[$Tool]
-$globalAvailable = Get-Command $GlobalCmd -ErrorAction SilentlyContinue
-
-if ((Test-Path $WrapperScript) -or $globalAvailable) {
-    Write-Host "[WARN] $Tool CLI appears to be already installed" -ForegroundColor Yellow
-    if ($globalAvailable) {
-        Write-Host "Global command '$GlobalCmd' is available"
-    } else {
-        Write-Host "Wrapper found at: $WrapperScript"
+        if (Get-Command wk -ErrorAction SilentlyContinue) {
+            $version = & wk version 2>$null
+            Write-Host "wk CLI available: $version" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "To verify auth:"
+            Write-Host "  make status tool=workato"
+        } else {
+            Write-Host "wk CLI not found." -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "Install it:"
+            Write-Host "  Windows:     scoop install wk"
+            Write-Host "  macOS/Linux: brew install workato/tap/wk"
+            Write-Host ""
+            Write-Host "Then authenticate:"
+            Write-Host "  wk auth login"
+            exit 1
+        }
     }
-    Write-Host ""
-    
-    $reply = Read-Host "Reinstall anyway? [y/N]"
-    if ($reply -notmatch '^[Yy]$') {
-        Write-Host "Skipping installation."
-        exit 0
+    "salesforce" {
+        $ToolScript = Join-Path $ProjectRoot "vendor\salesforce\scripts\salesforce-setup.ps1"
+
+        if (-not (Test-Path $ToolScript)) {
+            Write-Host "Error: Salesforce setup script not found at $ToolScript" -ForegroundColor Red
+            exit 1
+        }
+
+        $WrapperScript = Join-Path $ProjectRoot "bin\sf.ps1"
+        $globalAvailable = Get-Command sf -ErrorAction SilentlyContinue
+
+        if ((Test-Path $WrapperScript) -or $globalAvailable) {
+            Write-Host "Salesforce CLI appears to be already installed" -ForegroundColor Yellow
+            Write-Host ""
+            $reply = Read-Host "Reinstall anyway? [y/N]"
+            if ($reply -notmatch '^[Yy]$') {
+                Write-Host "Skipping. To force reinstall: make clean tool=salesforce && make setup tool=salesforce"
+                exit 0
+            }
+        }
+
+        Write-Host "========================================" -ForegroundColor Blue
+        Write-Host "Setting up Salesforce CLI" -ForegroundColor Blue
+        Write-Host "========================================" -ForegroundColor Blue
+        Write-Host ""
+
+        Push-Location $ProjectRoot
+        try {
+            & $ToolScript
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "Setup script failed with exit code $LASTEXITCODE" -ForegroundColor Red
+                exit $LASTEXITCODE
+            }
+        } finally {
+            Pop-Location
+        }
+
+        $globalAvailable = Get-Command sf -ErrorAction SilentlyContinue
+        if ((Test-Path $WrapperScript) -or $globalAvailable) {
+            Write-Host ""
+            Write-Host "Salesforce CLI successfully installed!" -ForegroundColor Green
+            Write-Host "  Verify: make status tool=salesforce"
+        } else {
+            Write-Host "Installation failed: CLI not available" -ForegroundColor Red
+            exit 1
+        }
     }
-}
-
-# Execute tool-specific setup script
-Write-Host "========================================" -ForegroundColor Blue
-Write-Host "Setting up $Tool CLI" -ForegroundColor Blue
-Write-Host "========================================" -ForegroundColor Blue
-Write-Host ""
-
-Push-Location $ProjectRoot
-try {
-    & $ToolScript
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "[ERROR] Setup script failed with exit code $LASTEXITCODE" -ForegroundColor Red
-        exit $LASTEXITCODE
-    }
-} finally {
-    Pop-Location
-}
-
-# Verify installation - check for wrapper script OR global command
-$globalAvailable = Get-Command $GlobalCmd -ErrorAction SilentlyContinue
-
-if ((Test-Path $WrapperScript) -or $globalAvailable) {
-    Write-Host ""
-    Write-Host "========================================" -ForegroundColor Green
-    Write-Host "[OK] $Tool CLI successfully installed!" -ForegroundColor Green
-    Write-Host "========================================" -ForegroundColor Green
-    Write-Host ""
-    
-    if ($globalAvailable) {
-        Write-Host "Installed globally. To verify:"
-        Write-Host "  $GlobalCmd --version"
-    } else {
-        Write-Host "To verify installation:"
-        Write-Host "  .\bin\$Tool.ps1 --version"
-    }
-    Write-Host ""
-    exit 0
-} else {
-    Write-Host "[ERROR] Installation failed: CLI not available" -ForegroundColor Red
-    exit 1
 }

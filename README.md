@@ -40,12 +40,12 @@ This project demonstrates a **two-tier tool design** that balances LLM flexibili
 
 ## Why This Matters
 
-![System Architecture](./docs/architecture/system-architecture.png)<br/>
+![System Architecture](./app/docs/architecture/system-architecture.png)<br/>
 *Enterprise MCP Architecture - Persona-based servers with orchestrators and atomic skills*
 
 ### Real-World Example: Guest Check-In
 
-![Guest Check-In Flow](./docs/architecture/guest-checkin-flow.png)<br/>
+![Guest Check-In Flow](./app/docs/architecture/guest-checkin-flow.png)<br/>
 *Check-in orchestrator: < 3 seconds, 6 API calls, validates prerequisites, ensures correct state transitions*
 
 **Traditional Approach (LLM with raw Salesforce access):**
@@ -222,12 +222,12 @@ curl -fsSL https://raw.githubusercontent.com/workato-devs/dewy-resort/main/boots
 iwr -useb https://raw.githubusercontent.com/workato-devs/dewy-resort/main/bootstrap.ps1 | iex
 ```
 
-The bootstrap script automatically installs all dependencies (Node.js v20, Python 3.11+, Git) and sets up the project.
+The bootstrap script automatically installs all dependencies (Node.js v20, Git) and sets up the project.
 
 ### Manual Setup
 
 **Prerequisites:**
-- Node.js 20+, Python 3.11+
+- Node.js 20+
 - [Workato Developer sandbox](https://www.workato.com/sandbox) (free Developer sandbox)
 - [Salesforce Developer org](https://developer.salesforce.com/signup) (free Developer Edition)
 - [Stripe Developer account](https://dashboard.stripe.com/register) (Stripe Developer sign up)
@@ -257,32 +257,32 @@ bin/sf org login web --alias myDevOrg
 ./vendor/salesforce/scripts/deploy.sh myDevOrg
 ```
 
-**📚 See:** [docs/SALESFORCE_SETUP.md](./docs/SALESFORCE_SETUP.md)
+**📚 See:** [Salesforce Setup](./vendor/salesforce/docs/SALESFORCE_SETUP.md)
 
 ### 3. Deploy Workato MCP Server ⭐
 
 Workato implements the enterprise MCP architecture.
 
 ```bash
-# Install CLI (if not done via setup.sh)
-./setup.sh --tool=workato
+# Install wk CLI (if not done via setup.sh)
+# macOS/Linux: brew install workato/tap/wk
+# Windows: scoop install wk
 
-# Add API token to .env (see guide for how to generate token)
-WORKATO_API_TOKEN=your_token
-WORKATO_API_EMAIL=your_email
+# Authenticate with your Workato workspace
+wk auth login
 
-# Initialize Workato folders
-./workato/scripts/cli/create_workato_folders.sh
+# Initialize Workato project and pull recipes
+make workato-init
 
 # Configure connections in Workato UI (see guide)
 
 # Start recipes
-./workato/scripts/cli/start_workato_recipes.sh
+make start-recipes
 ```
 
 **⚠️ IMPORTANT:** 4 recipes require manual activation in Workato UI (SOQL query configuration). See detailed guide.
 
-**📚 See:** [docs/WORKATO_SETUP.md](./docs/WORKATO_SETUP.md)
+**📚 See:** [Workato Setup](./workato/docs/WORKATO_SETUP.md)
 
 ### 4. Configure Dewy Hotel Application
 
@@ -336,7 +336,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 **Goal:** Understand enterprise MCP design patterns
 
-1. **Start here:** Review architecture diagrams in [`docs/architecture/`](./docs/architecture/)
+1. **Start here:** Review architecture diagrams in [`app/docs/architecture/`](./app/docs/architecture/)
 2. **Explore:** Compare orchestrator vs atomic skill patterns
 3. **Observe:** Check-in orchestrator flow (prerequisites, state transitions, error handling)
 4. **Experiment:** Try edge cases (missing contact, double check-in, invalid room)
@@ -346,9 +346,9 @@ Open [http://localhost:3000](http://localhost:3000)
 
 **Goal:** Apply these patterns to your own projects
 
-1. **Architecture:** Study [system-architecture.png](./docs/architecture/system-architecture.png)
+1. **Architecture:** Study [system-architecture.png](./app/docs/architecture/system-architecture.png)
 2. **Implementation:** Review Workato recipes in `workato/` directory
-3. **Patterns:** Read [WORKATO_SETUP.md](./docs/WORKATO_SETUP.md) for detailed pattern explanations
+3. **Patterns:** Read [WORKATO_SETUP.md](./workato/docs/WORKATO_SETUP.md) for detailed pattern explanations
 4. **Adaptation:** Consider how to apply orchestrator + atomic skill pattern to your domain
 
 ### Key Takeaways
@@ -365,18 +365,17 @@ Open [http://localhost:3000](http://localhost:3000)
 ## Additional Resources
 
 ### Setup Guides
-- **[Salesforce Setup](./docs/SALESFORCE_SETUP.md)** - Deploy custom objects and seed data
-- **[Workato Setup](./docs/WORKATO_SETUP.md)** - Deploy MCP server recipes
-- **[Architecture Diagrams](./docs/architecture/README.md)** - Visual documentation of all workflows
+- **[Salesforce Setup](./vendor/salesforce/docs/SALESFORCE_SETUP.md)** - Deploy custom objects and seed data
+- **[Workato Setup](./workato/docs/WORKATO_SETUP.md)** - Deploy MCP server recipes
+- **[Architecture Diagrams](./app/docs/architecture/README.md)** - Visual documentation of all workflows
 
 ### Optional Features
-- **[Stripe Integration](./docs/WORKATO_SETUP.md#stripe-recipe-activation-optional)** - Payment processing
+- **[Stripe Integration](./workato/docs/WORKATO_SETUP.md#stripe-recipe-activation-optional)** - Payment processing
 - **[Cognito Authentication](#cognito-authentication-workshop-convenience)** - User auth (workshop convenience)
 - **[Bedrock AI Chat](#bedrock-ai-chat-optional)** - AI assistants (optional)
-- **[Home Assistant Integration](./app/docs/HOME_ASSISTANT_QUICKSTART.md)** - IoT room controls
 
 ### Technical Details
-- **[Salesforce Metadata](./salesforce/README.md)** - Complete object and field documentation
+- **[Salesforce Metadata](./vendor/salesforce/README.md)** - Complete object and field documentation
 - **[Project Structure](#project-structure)** - Codebase organization
 - **[CLI Commands](#cli-commands)** - Automation scripts
 
@@ -387,29 +386,37 @@ Open [http://localhost:3000](http://localhost:3000)
 ```
 dewy-resort/
 ├── workato/                      # ⭐ MCP SERVER IMPLEMENTATION
-│   ├── atomic-salesforce-recipes/   # 15 atomic skills
-│   ├── atomic-stripe-recipes/       # 6 payment atomic skills
-│   ├── orchestrator-recipes/        # 12 high-level orchestrators
-│   ├── Salesforce/                  # API Collection definitions
-│   └── Workspace-Connections/       # Connection configs
-├── docs/
-│   ├── architecture/             # ⭐ ARCHITECTURE DIAGRAMS
-│   │   ├── system-architecture.png
-│   │   ├── guest-checkin-flow.png
-│   │   ├── guest-checkout-flow.png
-│   │   ├── guest-service-request-flow.png
-│   │   └── maintenance-request-flow.png
-│   ├── SALESFORCE_SETUP.md       # Salesforce deployment guide
-│   ├── WORKATO_SETUP.md          # MCP server setup guide
-│   └── ...
+│   ├── recipes/
+│   │   ├── atomic-salesforce-recipes/  # 15 atomic skills
+│   │   ├── atomic-stripe-recipes/      # 6 payment atomic skills
+│   │   ├── orchestrator-recipes/       # 13 high-level orchestrators
+│   │   ├── home-assistant/             # Home Assistant integration
+│   │   ├── sf-api-collection/          # API Collection definitions
+│   │   └── Workspace Connections/      # Connection configs
+│   └── docs/
+│       └── WORKATO_SETUP.md            # MCP server setup guide
 ├── app/                          # Next.js application
-│   ├── guest/                    # Guest portal
-│   ├── manager/                  # Manager portal
-│   └── api/                      # API routes (calls MCP server)
-├── salesforce/                   # Salesforce metadata
-│   ├── force-app/                # Custom objects, fields, app
-│   └── data/                     # Seed data
-└── components/                   # React components
+│   ├── src/                      # Application source
+│   ├── docs/
+│   │   └── architecture/         # ⭐ ARCHITECTURE DIAGRAMS
+│   │       ├── system-architecture.png
+│   │       ├── guest-checkin-flow.png
+│   │       ├── guest-checkout-flow.png
+│   │       ├── guest-service-request-flow.png
+│   │       └── maintenance-request-flow.png
+│   └── public/                   # Static assets
+├── vendor/
+│   ├── salesforce/               # Salesforce metadata & deployment
+│   │   ├── force-app/            # Custom objects, fields, app
+│   │   ├── data/                 # Seed data
+│   │   ├── docs/
+│   │   │   └── SALESFORCE_SETUP.md
+│   │   └── scripts/
+│   │       └── deploy.sh
+│   ├── aws/                      # CloudFormation templates
+│   └── okta/                     # Okta auth config
+└── docs/                         # Additional documentation
+    └── WINDOWS_SETUP.md
 ```
 
 ---
@@ -418,22 +425,26 @@ dewy-resort/
 
 ```bash
 # Setup
-./setup.sh                        # Install all CLIs + prerequisites
-./setup.sh --tool=workato         # Install Workato CLI only
+./setup.sh                        # Install prerequisites + verify CLIs
 ./setup.sh --tool=salesforce      # Install Salesforce CLI only
 ./setup.sh --skip-deps            # Skip prerequisite checks
 
-# Workato (MCP Server)
-./workato/scripts/cli/create_workato_folders.sh    # Initialize folders
-./workato/scripts/cli/start_workato_recipes.sh     # Start recipes
-./workato/scripts/cli/stop_workato_recipes.sh      # Stop recipes
+# Workato (MCP Server) — requires wk CLI (brew install workato/tap/wk)
+make workato-init                 # Initialize wk project & pull recipes
+make validate                     # Lint all recipes
+make push                         # Push recipes to workspace
+make pull                         # Pull recipes from workspace
+make start-recipes                # Start all recipes
+make stop-recipes                 # Stop all recipes
+make enable-api-endpoints         # Enable API endpoints
+make create-api-client            # Create API client & update .env
 
 # Salesforce (Backend)
-./vendor/salesforce/scripts/deploy.sh <org-alias>  # Deploy metadata
+make sf-deploy org=<alias>        # Deploy metadata and seed data
 
-# Legacy (Makefile still works)
-make setup                        # Install all CLIs
-make status                       # Check all CLIs
+# Diagnostics
+make status                       # Check all CLI status
+make doctor                       # Verify CLI installations
 ```
 
 ---
@@ -524,4 +535,4 @@ This is a **sample application for teaching enterprise MCP design patterns**. Th
 - Patterns for idempotency and state validation
 - Zero direct system integrations architecture
 
-For implementation details, see the guides in [`docs/`](./docs/).
+For implementation details, see the setup guides in [`workato/docs/`](./workato/docs/) and [`vendor/salesforce/docs/`](./vendor/salesforce/docs/).

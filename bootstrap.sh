@@ -262,69 +262,17 @@ install_node() {
     fi
 }
 
-# Install Python 3.11+
-install_python() {
-    # On macOS, we must use Homebrew Python, not system Python
-    if [ "$OS" = "macos" ]; then
-        # Check for Homebrew Python specifically
-        for cmd in /opt/homebrew/bin/python3.13 /opt/homebrew/bin/python3.12 /opt/homebrew/bin/python3.11 \
-                   /usr/local/bin/python3.13 /usr/local/bin/python3.12 /usr/local/bin/python3.11; do
-            if [ -x "$cmd" ]; then
-                local version=$($cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-                echo -e "${GREEN}✓${NC} Python $version available (Homebrew: $cmd)"
-                return 0
-            fi
-        done
-        
-        # No Homebrew Python found, install it
-        echo -e "${YELLOW}Installing Python 3.11 via Homebrew...${NC}"
-        brew install python@3.11
-        
-        # Also install pipx for package management
-        echo -e "${YELLOW}Installing pipx...${NC}"
-        brew install pipx
-        pipx ensurepath 2>/dev/null || true
-        
-        echo -e "${GREEN}✓${NC} Python 3.11 installed via Homebrew"
+# Check for wk CLI
+check_wk() {
+    if command_exists wk; then
+        echo -e "${GREEN}✓${NC} wk CLI available: $(wk version)"
         return 0
     fi
-    
-    # Linux: check for Python 3.11+
-    for cmd in python3.13 python3.12 python3.11 python3; do
-        if command_exists "$cmd"; then
-            local version=$($cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null)
-            local major=$(echo "$version" | cut -d. -f1)
-            local minor=$(echo "$version" | cut -d. -f2)
-            
-            if [ "$major" = "3" ] && [ "$minor" -ge "11" ]; then
-                echo -e "${GREEN}✓${NC} Python $version available (using $cmd)"
-                return 0
-            fi
-        fi
-    done
-    
-    echo -e "${YELLOW}Installing Python 3.11+...${NC}"
-    
-    case "$DISTRO" in
-        ubuntu|debian|pop)
-            sudo apt-get update
-            sudo apt-get install -y python3.11 python3-pip 2>/dev/null || \
-            sudo apt-get install -y python3 python3-pip
-            ;;
-        fedora|rhel|centos)
-            sudo dnf install -y python3.11 python3-pip 2>/dev/null || \
-            sudo dnf install -y python3 python3-pip
-            ;;
-        arch|manjaro)
-            sudo pacman -S --noconfirm python python-pip
-            ;;
-        *)
-            echo -e "${RED}Please install Python 3.11+ manually${NC}"
-            return 1
-            ;;
-    esac
-    
-    echo -e "${GREEN}✓${NC} Python installed"
+
+    echo -e "${YELLOW}wk CLI not found. Install it after bootstrap:${NC}"
+    echo "  macOS/Linux: brew install workato/tap/wk"
+    echo "  Windows:     scoop install wk"
+    return 1
 }
 
 # Clone repository
@@ -394,7 +342,7 @@ main() {
         install_git
         install_make
         install_node
-        install_python
+        check_wk || true
         
         echo ""
         echo -e "${GREEN}✓${NC} All dependencies installed"
@@ -421,10 +369,12 @@ main() {
     echo -e "  ${CYAN}$TARGET_DIR${NC}"
     echo ""
     echo "Next steps:"
-    echo "  cd \"$TARGET_DIR/app\""
-    echo "  cp .env.example .env"
-    echo "  # Edit .env with your configuration"
-    echo "  npm run dev"
+    echo "  cd \"$TARGET_DIR\""
+    echo "  wk auth login                    # Authenticate with Workato"
+    echo "  make workato-init                # Initialize wk project"
+    echo "  make start-recipes               # Start all recipes"
+    echo "  cd app && cp .env.example .env   # Configure app"
+    echo "  npm install && npm run dev"
     echo ""
 }
 
