@@ -1983,6 +1983,211 @@
               },
               {
                 "number": 24,
+                "keyword": "if",
+                "input": {
+                  "type": "compound",
+                  "operand": "or",
+                  "conditions": [
+                    {
+                      "operand": "contains",
+                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}",
+                      "rhs": "400",
+                      "uuid": "check-bad-request-cond-001"
+                    },
+                    {
+                      "operand": "contains",
+                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}",
+                      "rhs": "Bad Request",
+                      "uuid": "check-bad-request-cond-002"
+                    },
+                    {
+                      "operand": "contains",
+                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}",
+                      "rhs": "Validation",
+                      "uuid": "check-bad-request-cond-003"
+                    }
+                  ]
+                },
+                "block": [
+                  {
+                    "number": 25,
+                    "provider": "workato_api_platform",
+                    "name": "return_response",
+                    "as": "return_bad_request",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "http_status_code": "400 - Validation Error"
+                    },
+                    "toggleCfg": {
+                      "http_status_code": true
+                    },
+                    "input": {
+                      "http_status_code": "400",
+                      "response": {
+                        "success": "false",
+                        "error_code": "VALIDATION_ERROR",
+                        "error_message": "Compensation request validation failed",
+                        "details": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch_error\",\"path\":[\"message\"]}')}"
+                      }
+                    },
+                    "extended_output_schema": [
+                      {
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "Success",
+                            "200"
+                          ],
+                          [
+                            "Validation Error",
+                            "400"
+                          ],
+                          [
+                            "Payment Not Found",
+                            "404"
+                          ],
+                          [
+                            "Payment Not Refundable",
+                            "422"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "label": "Response body",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "checkbox",
+                            "label": "Success",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "success",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Success",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "success",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error code",
+                            "name": "error_code",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error message",
+                            "name": "error_message",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Details",
+                            "name": "details",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "extended_input_schema": [
+                      {
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "Success",
+                            "200"
+                          ],
+                          [
+                            "Validation Error",
+                            "400"
+                          ],
+                          [
+                            "Payment Not Found",
+                            "404"
+                          ],
+                          [
+                            "Payment Not Refundable",
+                            "422"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "label": "Response body",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "checkbox",
+                            "label": "Success",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "success",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Success",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "success",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error code",
+                            "name": "error_code",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error message",
+                            "name": "error_message",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Details",
+                            "name": "details",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "uuid": "return-bad-request-001"
+                  }
+                ],
+                "uuid": "check-bad-request"
+              },
+              {
+                "number": 26,
+                "keyword": "else",
+                "uuid": "default-error"
+              },
+              {
+                "number": 27,
                 "provider": "workato_api_platform",
                 "name": "return_response",
                 "as": "return_error",

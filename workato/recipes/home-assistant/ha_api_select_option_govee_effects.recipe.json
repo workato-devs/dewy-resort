@@ -1184,179 +1184,381 @@
                                   },
                                   {
                                     "number": 16,
-                                    "as": "default-error",
+                                    "as": "check-bad-request",
                                     "keyword": "else",
                                     "input": {
                                     },
                                     "block": [
                                       {
                                         "number": 17,
-                                        "provider": "workato_api_platform",
-                                        "name": "return_response",
-                                        "as": "return-500-001",
-                                        "keyword": "action",
+                                        "as": "check-400",
+                                        "keyword": "if",
                                         "input": {
-                                          "http_status_code": "500",
-                                          "response": {
-                                            "success": "false",
-                                            "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                                            "guest_context": {
-                                              "name": "",
-                                              "email": "",
-                                              "room": ""
+                                          "type": "compound",
+                                          "operand": "or",
+                                          "conditions": [
+                                            {
+                                              "operand": "contains",
+                                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                              "rhs": "400",
+                                              "uuid": "cond-400-001"
+                                            },
+                                            {
+                                              "operand": "contains",
+                                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                              "rhs": "Bad Request",
+                                              "uuid": "cond-bad-request-001"
                                             }
-                                          }
+                                          ]
                                         },
-                                        "extended_output_schema": [
+                                        "block": [
                                           {
-                                            "change_on_blur": true,
-                                            "control_type": "select",
-                                            "extends_schema": true,
-                                            "label": "Response",
-                                            "name": "http_status_code",
-                                            "pick_list": [
-                                              [
-                                                "Success",
-                                                "200"
-                                              ],
-                                              [
-                                                "Bad Request",
-                                                "400"
-                                              ],
-                                              [
-                                                "Unauthorized",
-                                                "401"
-                                              ],
-                                              [
-                                                "Forbidden",
-                                                "403"
-                                              ],
-                                              [
-                                                "Not Found",
-                                                "404"
-                                              ],
-                                              [
-                                                "Server Error",
-                                                "500"
-                                              ]
-                                            ],
-                                            "type": "string"
-                                          },
-                                          {
-                                            "label": "Response body",
-                                            "name": "response",
-                                            "properties": [
-                                              {
-                                                "control_type": "checkbox",
-                                                "label": "Success",
-                                                "render_input": "boolean_conversion",
-                                                "parse_output": "boolean_conversion",
-                                                "name": "success",
-                                                "type": "boolean",
-                                                "toggle_hint": "Select from option list",
-                                                "toggle_field": {
-                                                  "label": "Success",
-                                                  "control_type": "text",
-                                                  "toggle_hint": "Use custom value",
-                                                  "name": "success",
-                                                  "type": "boolean"
+                                            "number": 18,
+                                            "provider": "workato_api_platform",
+                                            "name": "return_response",
+                                            "as": "return-400-001",
+                                            "keyword": "action",
+                                            "input": {
+                                              "http_status_code": "400",
+                                              "response": {
+                                                "success": "false",
+                                                "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                                "guest_context": {
+                                                  "name": "",
+                                                  "email": "",
+                                                  "room": ""
                                                 }
-                                              },
+                                              }
+                                            },
+                                            "extended_output_schema": [
                                               {
-                                                "control_type": "text",
-                                                "label": "Error",
-                                                "name": "error",
+                                                "change_on_blur": true,
+                                                "control_type": "select",
+                                                "extends_schema": true,
+                                                "label": "Response",
+                                                "name": "http_status_code",
+                                                "pick_list": [
+                                                  [
+                                                    "Success",
+                                                    "200"
+                                                  ],
+                                                  [
+                                                    "Bad Request",
+                                                    "400"
+                                                  ],
+                                                  [
+                                                    "Unauthorized",
+                                                    "401"
+                                                  ],
+                                                  [
+                                                    "Forbidden",
+                                                    "403"
+                                                  ],
+                                                  [
+                                                    "Not Found",
+                                                    "404"
+                                                  ],
+                                                  [
+                                                    "Server Error",
+                                                    "500"
+                                                  ]
+                                                ],
                                                 "type": "string"
                                               },
                                               {
+                                                "label": "Response body",
+                                                "name": "response",
                                                 "properties": [
+                                                  {
+                                                    "control_type": "checkbox",
+                                                    "label": "Success",
+                                                    "render_input": "boolean_conversion",
+                                                    "parse_output": "boolean_conversion",
+                                                    "name": "success",
+                                                    "type": "boolean",
+                                                    "toggle_hint": "Select from option list",
+                                                    "toggle_field": {
+                                                      "label": "Success",
+                                                      "control_type": "text",
+                                                      "toggle_hint": "Use custom value",
+                                                      "name": "success",
+                                                      "type": "boolean"
+                                                    }
+                                                  },
+                                                  {
+                                                    "control_type": "text",
+                                                    "label": "Error",
+                                                    "name": "error",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "properties": [
 
+                                                    ],
+                                                    "label": "Guest Context",
+                                                    "name": "guest_context",
+                                                    "type": "object"
+                                                  }
                                                 ],
-                                                "label": "Guest Context",
-                                                "name": "guest_context",
                                                 "type": "object"
                                               }
                                             ],
-                                            "type": "object"
-                                          }
-                                        ],
-                                        "extended_input_schema": [
-                                          {
-                                            "change_on_blur": true,
-                                            "control_type": "select",
-                                            "extends_schema": true,
-                                            "label": "Response",
-                                            "name": "http_status_code",
-                                            "pick_list": [
-                                              [
-                                                "Success",
-                                                "200"
-                                              ],
-                                              [
-                                                "Bad Request",
-                                                "400"
-                                              ],
-                                              [
-                                                "Unauthorized",
-                                                "401"
-                                              ],
-                                              [
-                                                "Forbidden",
-                                                "403"
-                                              ],
-                                              [
-                                                "Not Found",
-                                                "404"
-                                              ],
-                                              [
-                                                "Server Error",
-                                                "500"
-                                              ]
-                                            ],
-                                            "type": "string"
-                                          },
-                                          {
-                                            "label": "Response body",
-                                            "name": "response",
-                                            "properties": [
+                                            "extended_input_schema": [
                                               {
-                                                "control_type": "checkbox",
-                                                "label": "Success",
-                                                "render_input": "boolean_conversion",
-                                                "parse_output": "boolean_conversion",
-                                                "name": "success",
-                                                "type": "boolean",
-                                                "toggle_hint": "Select from option list",
-                                                "toggle_field": {
-                                                  "label": "Success",
-                                                  "control_type": "text",
-                                                  "toggle_hint": "Use custom value",
-                                                  "name": "success",
-                                                  "type": "boolean"
-                                                }
-                                              },
-                                              {
-                                                "control_type": "text",
-                                                "label": "Error",
-                                                "name": "error",
+                                                "change_on_blur": true,
+                                                "control_type": "select",
+                                                "extends_schema": true,
+                                                "label": "Response",
+                                                "name": "http_status_code",
+                                                "pick_list": [
+                                                  [
+                                                    "Success",
+                                                    "200"
+                                                  ],
+                                                  [
+                                                    "Bad Request",
+                                                    "400"
+                                                  ],
+                                                  [
+                                                    "Unauthorized",
+                                                    "401"
+                                                  ],
+                                                  [
+                                                    "Forbidden",
+                                                    "403"
+                                                  ],
+                                                  [
+                                                    "Not Found",
+                                                    "404"
+                                                  ],
+                                                  [
+                                                    "Server Error",
+                                                    "500"
+                                                  ]
+                                                ],
                                                 "type": "string"
                                               },
                                               {
+                                                "label": "Response body",
+                                                "name": "response",
                                                 "properties": [
+                                                  {
+                                                    "control_type": "checkbox",
+                                                    "label": "Success",
+                                                    "render_input": "boolean_conversion",
+                                                    "parse_output": "boolean_conversion",
+                                                    "name": "success",
+                                                    "type": "boolean",
+                                                    "toggle_hint": "Select from option list",
+                                                    "toggle_field": {
+                                                      "label": "Success",
+                                                      "control_type": "text",
+                                                      "toggle_hint": "Use custom value",
+                                                      "name": "success",
+                                                      "type": "boolean"
+                                                    }
+                                                  },
+                                                  {
+                                                    "control_type": "text",
+                                                    "label": "Error",
+                                                    "name": "error",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "properties": [
 
+                                                    ],
+                                                    "label": "Guest Context",
+                                                    "name": "guest_context",
+                                                    "type": "object"
+                                                  }
                                                 ],
-                                                "label": "Guest Context",
-                                                "name": "guest_context",
                                                 "type": "object"
                                               }
                                             ],
-                                            "type": "object"
+                                            "uuid": "return-400-001"
+                                          },
+                                          {
+                                            "number": 19,
+                                            "as": "default-error",
+                                            "keyword": "else",
+                                            "input": {
+                                            },
+                                            "block": [
+                                              {
+                                                "number": 20,
+                                                "provider": "workato_api_platform",
+                                                "name": "return_response",
+                                                "as": "return-500-001",
+                                                "keyword": "action",
+                                                "input": {
+                                                  "http_status_code": "500",
+                                                  "response": {
+                                                    "success": "false",
+                                                    "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                                    "guest_context": {
+                                                      "name": "",
+                                                      "email": "",
+                                                      "room": ""
+                                                    }
+                                                  }
+                                                },
+                                                "extended_output_schema": [
+                                                  {
+                                                    "change_on_blur": true,
+                                                    "control_type": "select",
+                                                    "extends_schema": true,
+                                                    "label": "Response",
+                                                    "name": "http_status_code",
+                                                    "pick_list": [
+                                                      [
+                                                        "Success",
+                                                        "200"
+                                                      ],
+                                                      [
+                                                        "Bad Request",
+                                                        "400"
+                                                      ],
+                                                      [
+                                                        "Unauthorized",
+                                                        "401"
+                                                      ],
+                                                      [
+                                                        "Forbidden",
+                                                        "403"
+                                                      ],
+                                                      [
+                                                        "Not Found",
+                                                        "404"
+                                                      ],
+                                                      [
+                                                        "Server Error",
+                                                        "500"
+                                                      ]
+                                                    ],
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "label": "Response body",
+                                                    "name": "response",
+                                                    "properties": [
+                                                      {
+                                                        "control_type": "checkbox",
+                                                        "label": "Success",
+                                                        "render_input": "boolean_conversion",
+                                                        "parse_output": "boolean_conversion",
+                                                        "name": "success",
+                                                        "type": "boolean",
+                                                        "toggle_hint": "Select from option list",
+                                                        "toggle_field": {
+                                                          "label": "Success",
+                                                          "control_type": "text",
+                                                          "toggle_hint": "Use custom value",
+                                                          "name": "success",
+                                                          "type": "boolean"
+                                                        }
+                                                      },
+                                                      {
+                                                        "control_type": "text",
+                                                        "label": "Error",
+                                                        "name": "error",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "properties": [
+
+                                                        ],
+                                                        "label": "Guest Context",
+                                                        "name": "guest_context",
+                                                        "type": "object"
+                                                      }
+                                                    ],
+                                                    "type": "object"
+                                                  }
+                                                ],
+                                                "extended_input_schema": [
+                                                  {
+                                                    "change_on_blur": true,
+                                                    "control_type": "select",
+                                                    "extends_schema": true,
+                                                    "label": "Response",
+                                                    "name": "http_status_code",
+                                                    "pick_list": [
+                                                      [
+                                                        "Success",
+                                                        "200"
+                                                      ],
+                                                      [
+                                                        "Bad Request",
+                                                        "400"
+                                                      ],
+                                                      [
+                                                        "Unauthorized",
+                                                        "401"
+                                                      ],
+                                                      [
+                                                        "Forbidden",
+                                                        "403"
+                                                      ],
+                                                      [
+                                                        "Not Found",
+                                                        "404"
+                                                      ],
+                                                      [
+                                                        "Server Error",
+                                                        "500"
+                                                      ]
+                                                    ],
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "label": "Response body",
+                                                    "name": "response",
+                                                    "properties": [
+                                                      {
+                                                        "control_type": "checkbox",
+                                                        "label": "Success",
+                                                        "render_input": "boolean_conversion",
+                                                        "parse_output": "boolean_conversion",
+                                                        "name": "success",
+                                                        "type": "boolean",
+                                                        "toggle_hint": "Select from option list",
+                                                        "toggle_field": {
+                                                          "label": "Success",
+                                                          "control_type": "text",
+                                                          "toggle_hint": "Use custom value",
+                                                          "name": "success",
+                                                          "type": "boolean"
+                                                        }
+                                                      },
+                                                      {
+                                                        "control_type": "text",
+                                                        "label": "Error",
+                                                        "name": "error",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "properties": [
+
+                                                        ],
+                                                        "label": "Guest Context",
+                                                        "name": "guest_context",
+                                                        "type": "object"
+                                                      }
+                                                    ],
+                                                    "type": "object"
+                                                  }
+                                                ],
+                                                "uuid": "return-500-001"
+                                              }
+                                            ],
+                                            "uuid": "default-error"
                                           }
                                         ],
-                                        "uuid": "return-500-001"
+                                        "uuid": "check-400"
                                       }
                                     ],
-                                    "uuid": "default-error"
+                                    "uuid": "check-bad-request"
                                   }
                                 ],
                                 "uuid": "check-403"

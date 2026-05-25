@@ -1444,6 +1444,111 @@
                   }
                 ],
                 "uuid": "upsert-case-log-001"
+              },
+              {
+                "number": 7,
+                "provider": "workato_recipe_function",
+                "name": "return_result",
+                "as": "return_error",
+                "keyword": "action",
+                "toggleCfg": {
+                  "result.created": true
+                },
+                "input": {
+                  "result": {
+                    "case_id": "=null",
+                    "case_number": "=null",
+                    "status": "=null",
+                    "created": "false"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Case ID",
+                        "name": "case_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Case number",
+                        "name": "case_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Created",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "created",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Created",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "created",
+                          "type": "boolean"
+                        }
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Case ID",
+                        "name": "case_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Case number",
+                        "name": "case_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Created",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "created",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Created",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "created",
+                          "type": "boolean"
+                        }
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "upsert-case-error-001"
               }
             ],
             "uuid": "upsert-case-catch-001"

@@ -1176,6 +1176,139 @@
                   }
                 ],
                 "uuid": "search-room-log-001"
+              },
+              {
+                "number": 9,
+                "provider": "workato_recipe_function",
+                "name": "return_result",
+                "as": "return_error",
+                "keyword": "action",
+                "toggleCfg": {
+                  "result.found": true
+                },
+                "input": {
+                  "result": {
+                    "id": "=null",
+                    "room_number": "=null",
+                    "status": "=null",
+                    "room_type": "=null",
+                    "floor": "=null",
+                    "found": "false"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Room ID",
+                        "name": "id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Room number",
+                        "name": "room_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Room type",
+                        "name": "room_type",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Floor",
+                        "parse_output": "float_conversion",
+                        "name": "floor",
+                        "type": "number"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Found",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "found",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Found",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "found",
+                          "type": "boolean"
+                        }
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Room ID",
+                        "name": "id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Room number",
+                        "name": "room_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Room type",
+                        "name": "room_type",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Floor",
+                        "parse_output": "float_conversion",
+                        "name": "floor",
+                        "type": "number"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Found",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "found",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Found",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "found",
+                          "type": "boolean"
+                        }
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "search-room-error-001"
               }
             ],
             "uuid": "search-room-catch-001"

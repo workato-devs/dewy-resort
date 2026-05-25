@@ -736,6 +736,184 @@
                   }
                 ],
                 "uuid": "search-bookings-log-001"
+              },
+              {
+                "number": 6,
+                "provider": "workato_recipe_function",
+                "name": "return_result",
+                "as": "return_error",
+                "keyword": "action",
+                "toggleCfg": {
+                  "result.has_conflicts": false
+                },
+                "input": {
+                  "result": {
+                    "conflicts": "=null",
+                    "has_conflicts": "false",
+                    "conflict_count": "0"
+                  }
+                },
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "label": "Conflicts",
+                        "name": "conflicts",
+                        "of": "object",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Booking ID",
+                            "name": "booking_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Booking number",
+                            "name": "booking_number",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "date",
+                            "label": "Check-in date",
+                            "render_input": "date_conversion",
+                            "parse_output": "date_conversion",
+                            "name": "check_in_date",
+                            "type": "date"
+                          },
+                          {
+                            "control_type": "date",
+                            "label": "Check-out date",
+                            "render_input": "date_conversion",
+                            "parse_output": "date_conversion",
+                            "name": "check_out_date",
+                            "type": "date"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Status",
+                            "name": "status",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Guest name",
+                            "name": "guest_name",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "array"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Has conflicts",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "has_conflicts",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Has conflicts",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "has_conflicts",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Conflict count",
+                        "parse_output": "float_conversion",
+                        "name": "conflict_count",
+                        "type": "number"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "label": "Conflicts",
+                        "name": "conflicts",
+                        "of": "object",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Booking ID",
+                            "name": "booking_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Booking number",
+                            "name": "booking_number",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "date",
+                            "label": "Check-in date",
+                            "render_input": "date_conversion",
+                            "parse_output": "date_conversion",
+                            "name": "check_in_date",
+                            "type": "date"
+                          },
+                          {
+                            "control_type": "date",
+                            "label": "Check-out date",
+                            "render_input": "date_conversion",
+                            "parse_output": "date_conversion",
+                            "name": "check_out_date",
+                            "type": "date"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Status",
+                            "name": "status",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Guest name",
+                            "name": "guest_name",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "array"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Has conflicts",
+                        "render_input": "boolean_conversion",
+                        "parse_output": "boolean_conversion",
+                        "name": "has_conflicts",
+                        "type": "boolean",
+                        "toggle_hint": "Select from option list",
+                        "toggle_field": {
+                          "label": "Has conflicts",
+                          "control_type": "text",
+                          "toggle_hint": "Use custom value",
+                          "name": "has_conflicts",
+                          "type": "boolean"
+                        }
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Conflict count",
+                        "parse_output": "float_conversion",
+                        "name": "conflict_count",
+                        "type": "number"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "uuid": "search-bookings-error-001"
               }
             ],
             "uuid": "search-bookings-catch-001"

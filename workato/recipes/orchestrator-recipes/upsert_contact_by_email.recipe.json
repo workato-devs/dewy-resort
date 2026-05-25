@@ -1080,161 +1080,359 @@
               },
               {
                 "number": 10,
-                "provider": "workato_api_platform",
-                "name": "return_response",
-                "as": "return_error",
-                "keyword": "action",
-                "toggleCfg": {
-                  "response.success": true
-                },
+                "as": "check-bad-request",
+                "keyword": "if",
                 "input": {
-                  "http_status_code": "500",
-                  "response": {
-                    "error_code": "CONTACT_CREATION_ERROR",
-                    "error_message": "Failed to search or create contact",
-                    "details": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-contact-catch-001\",\"path\":[\"message\"]}')}",
-                    "success": "false"
-                  }
+                  "type": "compound",
+                  "operand": "or",
+                  "conditions": [
+                    {
+                      "operand": "contains",
+                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-contact-catch-001\",\"path\":[\"message\"]}')}",
+                      "rhs": "400",
+                      "uuid": "check-bad-request-400"
+                    },
+                    {
+                      "operand": "contains",
+                      "lhs": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-contact-catch-001\",\"path\":[\"message\"]}')}",
+                      "rhs": "Bad Request",
+                      "uuid": "check-bad-request-text"
+                    }
+                  ]
                 },
-                "extended_output_schema": [
+                "block": [
                   {
-                    "change_on_blur": true,
-                    "control_type": "select",
-                    "extends_schema": true,
-                    "label": "Response",
-                    "name": "http_status_code",
-                    "pick_list": [
-                      [
-                        "OK - Contact Found",
-                        "200"
-                      ],
-                      [
-                        "Created - New Contact",
-                        "201"
-                      ],
-                      [
-                        "Bad Request",
-                        "400"
-                      ],
-                      [
-                        "Server Error",
-                        "500"
-                      ]
-                    ],
-                    "type": "string"
-                  },
-                  {
-                    "label": "Response body",
-                    "name": "response",
-                    "properties": [
+                    "number": 11,
+                    "provider": "workato_api_platform",
+                    "name": "return_response",
+                    "as": "return_bad_request",
+                    "keyword": "action",
+                    "dynamicPickListSelection": {
+                      "http_status_code": "400 - Bad Request"
+                    },
+                    "toggleCfg": {
+                      "response.success": true
+                    },
+                    "input": {
+                      "http_status_code": "400",
+                      "response": {
+                        "error_code": "BAD_REQUEST",
+                        "error_message": "Bad request",
+                        "details": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-contact-catch-001\",\"path\":[\"message\"]}')}",
+                        "success": "false"
+                      }
+                    },
+                    "extended_output_schema": [
                       {
-                        "control_type": "checkbox",
-                        "label": "Success",
-                        "render_input": "boolean_conversion",
-                        "parse_output": "boolean_conversion",
-                        "name": "success",
-                        "type": "boolean",
-                        "toggle_hint": "Select from option list",
-                        "toggle_field": {
-                          "label": "Success",
-                          "control_type": "text",
-                          "toggle_hint": "Use custom value",
-                          "name": "success",
-                          "type": "boolean"
-                        }
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Error code",
-                        "name": "error_code",
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "OK - Contact Found",
+                            "200"
+                          ],
+                          [
+                            "Created - New Contact",
+                            "201"
+                          ],
+                          [
+                            "Bad Request",
+                            "400"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
                         "type": "string"
                       },
                       {
-                        "control_type": "text",
-                        "label": "Error message",
-                        "name": "error_message",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Details",
-                        "name": "details",
-                        "type": "string"
+                        "label": "Response body",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "checkbox",
+                            "label": "Success",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "success",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Success",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "success",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error code",
+                            "name": "error_code",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error message",
+                            "name": "error_message",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Details",
+                            "name": "details",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "object"
                       }
                     ],
-                    "type": "object"
-                  }
-                ],
-                "extended_input_schema": [
-                  {
-                    "change_on_blur": true,
-                    "control_type": "select",
-                    "extends_schema": true,
-                    "label": "Response",
-                    "name": "http_status_code",
-                    "pick_list": [
-                      [
-                        "OK - Contact Found",
-                        "200"
-                      ],
-                      [
-                        "Created - New Contact",
-                        "201"
-                      ],
-                      [
-                        "Bad Request",
-                        "400"
-                      ],
-                      [
-                        "Server Error",
-                        "500"
-                      ]
-                    ],
-                    "type": "string"
-                  },
-                  {
-                    "label": "Response body",
-                    "name": "response",
-                    "properties": [
+                    "extended_input_schema": [
                       {
-                        "control_type": "checkbox",
-                        "label": "Success",
-                        "render_input": "boolean_conversion",
-                        "parse_output": "boolean_conversion",
-                        "name": "success",
-                        "type": "boolean",
-                        "toggle_hint": "Select from option list",
-                        "toggle_field": {
-                          "label": "Success",
-                          "control_type": "text",
-                          "toggle_hint": "Use custom value",
-                          "name": "success",
-                          "type": "boolean"
-                        }
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Error code",
-                        "name": "error_code",
+                        "change_on_blur": true,
+                        "control_type": "select",
+                        "extends_schema": true,
+                        "label": "Response",
+                        "name": "http_status_code",
+                        "pick_list": [
+                          [
+                            "OK - Contact Found",
+                            "200"
+                          ],
+                          [
+                            "Created - New Contact",
+                            "201"
+                          ],
+                          [
+                            "Bad Request",
+                            "400"
+                          ],
+                          [
+                            "Server Error",
+                            "500"
+                          ]
+                        ],
                         "type": "string"
                       },
                       {
-                        "control_type": "text",
-                        "label": "Error message",
-                        "name": "error_message",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Details",
-                        "name": "details",
-                        "type": "string"
+                        "label": "Response body",
+                        "name": "response",
+                        "properties": [
+                          {
+                            "control_type": "checkbox",
+                            "label": "Success",
+                            "render_input": "boolean_conversion",
+                            "parse_output": "boolean_conversion",
+                            "name": "success",
+                            "type": "boolean",
+                            "toggle_hint": "Select from option list",
+                            "toggle_field": {
+                              "label": "Success",
+                              "control_type": "text",
+                              "toggle_hint": "Use custom value",
+                              "name": "success",
+                              "type": "boolean"
+                            }
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error code",
+                            "name": "error_code",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Error message",
+                            "name": "error_message",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Details",
+                            "name": "details",
+                            "type": "string"
+                          }
+                        ],
+                        "type": "object"
                       }
                     ],
-                    "type": "object"
+                    "uuid": "return-bad-request-001"
+                  },
+                  {
+                    "number": 12,
+                    "as": "default-error",
+                    "keyword": "else",
+                    "block": [
+                      {
+                        "number": 13,
+                        "provider": "workato_api_platform",
+                        "name": "return_response",
+                        "as": "return_error",
+                        "keyword": "action",
+                        "dynamicPickListSelection": {
+                          "http_status_code": "500 - Internal Server Error"
+                        },
+                        "toggleCfg": {
+                          "response.success": true
+                        },
+                        "input": {
+                          "http_status_code": "500",
+                          "response": {
+                            "error_code": "CONTACT_CREATION_ERROR",
+                            "error_message": "Failed to search or create contact",
+                            "details": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"create-contact-catch-001\",\"path\":[\"message\"]}')}",
+                            "success": "false"
+                          }
+                        },
+                        "extended_output_schema": [
+                          {
+                            "change_on_blur": true,
+                            "control_type": "select",
+                            "extends_schema": true,
+                            "label": "Response",
+                            "name": "http_status_code",
+                            "pick_list": [
+                              [
+                                "OK - Contact Found",
+                                "200"
+                              ],
+                              [
+                                "Created - New Contact",
+                                "201"
+                              ],
+                              [
+                                "Bad Request",
+                                "400"
+                              ],
+                              [
+                                "Server Error",
+                                "500"
+                              ]
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "label": "Response body",
+                            "name": "response",
+                            "properties": [
+                              {
+                                "control_type": "checkbox",
+                                "label": "Success",
+                                "render_input": "boolean_conversion",
+                                "parse_output": "boolean_conversion",
+                                "name": "success",
+                                "type": "boolean",
+                                "toggle_hint": "Select from option list",
+                                "toggle_field": {
+                                  "label": "Success",
+                                  "control_type": "text",
+                                  "toggle_hint": "Use custom value",
+                                  "name": "success",
+                                  "type": "boolean"
+                                }
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Error code",
+                                "name": "error_code",
+                                "type": "string"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Error message",
+                                "name": "error_message",
+                                "type": "string"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Details",
+                                "name": "details",
+                                "type": "string"
+                              }
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "extended_input_schema": [
+                          {
+                            "change_on_blur": true,
+                            "control_type": "select",
+                            "extends_schema": true,
+                            "label": "Response",
+                            "name": "http_status_code",
+                            "pick_list": [
+                              [
+                                "OK - Contact Found",
+                                "200"
+                              ],
+                              [
+                                "Created - New Contact",
+                                "201"
+                              ],
+                              [
+                                "Bad Request",
+                                "400"
+                              ],
+                              [
+                                "Server Error",
+                                "500"
+                              ]
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "label": "Response body",
+                            "name": "response",
+                            "properties": [
+                              {
+                                "control_type": "checkbox",
+                                "label": "Success",
+                                "render_input": "boolean_conversion",
+                                "parse_output": "boolean_conversion",
+                                "name": "success",
+                                "type": "boolean",
+                                "toggle_hint": "Select from option list",
+                                "toggle_field": {
+                                  "label": "Success",
+                                  "control_type": "text",
+                                  "toggle_hint": "Use custom value",
+                                  "name": "success",
+                                  "type": "boolean"
+                                }
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Error code",
+                                "name": "error_code",
+                                "type": "string"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Error message",
+                                "name": "error_message",
+                                "type": "string"
+                              },
+                              {
+                                "control_type": "text",
+                                "label": "Details",
+                                "name": "details",
+                                "type": "string"
+                              }
+                            ],
+                            "type": "object"
+                          }
+                        ],
+                        "uuid": "return-error-response-001"
+                      }
+                    ],
+                    "uuid": "default-error"
                   }
                 ],
-                "uuid": "return-error-response-001"
+                "uuid": "check-bad-request"
               }
             ],
             "uuid": "create-contact-catch-001"
