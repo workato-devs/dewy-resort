@@ -1,244 +1,205 @@
 ---
 layout: default
-title: "Unit 2: Testing Your MCP Servers"
+title: "Unit 2: Observability & Monitoring"
 nav_order: 6
 parent: Workshop Units
 ---
 
-# Unit 2: Testing Your MCP Servers
+# Unit 2: Observability & Monitoring
 
-**Hands-On Testing (30 minutes)**
+**Hands-On Session (30 minutes)**
 
 ---
 
 ## Learning Objectives
 
-- Configure the hotel app for authenticated chat
-- Test MCP tools as both Guest and Manager personas
-- Use debug mode to observe tool call activity
-- Troubleshoot using Workato execution logs
-- (Optional) Test via Claude Desktop or ChatGPT Desktop
+- Understand how Workato recipes are organized (atomic skills vs orchestrators)
+- Exercise MCP tools through natural language and observe invocations in the debug panel
+- Trace a tool call end-to-end in Workato: recipe → job → execution steps → payloads
+- Use Workato's execution logs to diagnose issues and understand data flow
 
 ---
 
-## Part 1: Enable Chat in the Hotel App (10 min)
+## Part 1: Understand the Recipe Architecture (10 min)
 
-Now that your MCP servers are created, you'll configure the hotel app to use them with authenticated chat.
+Before diving into the tools, take a guided tour of how they're built. This will make the logs much easier to read.
 
-### 1.1 Switch to AWS Cognito Authentication
+### 1.1 Open Your Workato Workspace
 
-<!-- PLACEHOLDER: Specific env vars for Cognito switch -->
+1. Log in to Workato: [app.trial.workato.com](https://app.trial.workato.com)
+2. Navigate to **Projects**
 
-Update your `app/.env` file with the following changes:
+You'll see the folder structure that `make push` created:
 
-```bash
-# TODO: Add specific Cognito configuration variables
-# Your facilitator will provide these values
+```
+├── atomic-salesforce-recipes/   # Single-purpose Salesforce operations
+├── atomic-stripe-recipes/       # Single-purpose payment operations
+├── orchestrator-recipes/        # Composed workflows (exposed as MCP tools)
+└── sf-api-collection/           # Salesforce API collection recipes
 ```
 
-### 1.2 Create Your Cognito Account
+### 1.2 Atomic Recipes — The Building Blocks
 
-1. Restart the hotel app (if running):
-   ```bash
-   app/scripts/dev-tools/server.sh restart
-   ```
-2. Open http://localhost:3000
-3. The app will guide you through creating an AWS Cognito account
-4. This provisions LLM access via Amazon Bedrock
+Open the **atomic-salesforce-recipes** folder and click on any recipe (e.g., `search_contact_by_email`).
 
-### 1.3 Add Facilitator-Provided Keys
+Key things to notice:
+- **One operation** — each atomic recipe does exactly one thing (a single Salesforce query or update)
+- **API trigger** — it starts with an API request, meaning it's callable from other recipes or external systems
+- **Structured input/output** — well-defined request and response schemas
 
-Your facilitator will provide temporary keys for the workshop. Add them to your `app/.env`:
+These are the LEGO bricks. They don't encode business logic — they just read or write one thing.
 
-```bash
-# TODO: Add Bedrock/Cognito keys provided by facilitator
-```
+### 1.3 Orchestrator Recipes — The Workflows
 
-### 1.4 Verify Login Options
+Go back to **Projects** and open the **orchestrator-recipes** folder. Click on `check_in_guest`.
 
-After configuration is complete:
+This is what an MCP tool actually calls. Walk through the recipe steps:
 
-1. Restart the app
-2. The login page will now show **static login options**:
-   - Guest accounts (use your `+guest` email alias credentials)
-   - Manager accounts (use your `+manager` email alias credentials)
+1. **Validate prerequisites** — Does the guest exist? Is there a reservation? Is the room vacant?
+2. **Execute atomic recipes** — Calls multiple atomics to read/write Salesforce objects
+3. **State transitions** — Updates Booking, Room, and Opportunity in the correct dependency order
+4. **Return result** — Structured response back to the MCP tool caller
 
-**CHECKPOINT:** Login page shows Guest and Manager login options
+**Key concept:** When the LLM calls `check_in_guest` via MCP, it hits this orchestrator. The orchestrator calls atomics. The atomics call Salesforce. Every step is logged.
+
+### 1.4 How MCP Tools Map to Recipes
+
+| What the LLM sees | What Workato runs | What Salesforce does |
+|--------------------|-------------------|---------------------|
+| `Check_in_guest` tool | `check_in_guest` orchestrator | 3 reads + 3 updates across Booking, Room, Opportunity |
+| `Search_rooms_on_behalf_of_staff` tool | `search_rooms_on_behalf_of_staff` orchestrator | SOQL query against Hotel_Room__c |
+| `Submit_maintenance_request` tool | `submit_maintenance_request` orchestrator | Validates contact, creates Case |
+
+Each MCP tool = one orchestrator recipe = multiple atomic operations = multiple Salesforce API calls. The logs capture every layer.
 
 ---
 
-## Part 2: Test as a Guest (10 min)
+## Part 2: Exercise the Tools (10 min)
 
-### 2.1 Log In as Guest
+Now put the architecture into action. Log in to the hotel app as **Manager** and open the **Chat** interface with the debug panel visible.
 
-1. Select a **Guest** login option
-2. Enter your credentials
-3. Navigate to **Chat** in the left sidebar
-4. Wait for the agent greeting message (confirms Bedrock is connected)
+### 2.1 Create a Booking
 
-### 2.2 Enable Debug Mode
+Use natural, vague language — the LLM should fill in gaps by asking follow-up questions or using context:
 
-1. Look for the **Debug** toggle in the chat interface
-2. Enable it to open the tool call activity panel on the right
-3. This shows real-time MCP tool invocations
-
-### 2.3 Test Guest Scenarios
-
-Try these prompts and observe the tool calls in the debug panel:
-
-**Room Information:**
 ```
-What room am I staying in?
+I need to book a room for a guest arriving next Monday
 ```
-- Expected tool: `search_rooms_on_behalf_of_guest`
 
-**Service Request:**
-```
-I need extra towels in my room
-```
-- Expected tools: `submit_guest_service_request`
-- Watch: How does the agent gather missing info (room number, priority)?
+Watch the debug panel as the LLM:
+- Asks for missing information (guest name, email, room preference, checkout date)
+- Calls `Create_booking_orchestrator` with the gathered inputs
+- Returns a confirmation with booking details
 
-**Check Service Status:**
-```
-What's the status of my service requests?
-```
-- Expected tool: `search_cases_on_behalf_of_guest`
+### 2.2 Check In a Guest
 
-**Booking Management:**
+Use an existing booking from the seed data or the one you just created:
+
 ```
-I'd like to extend my stay by one night
+Check in the guest in room 101
 ```
-- Expected tool: `manage_booking_orchestrator`
 
-### 2.4 Observe in Workato Logs
+Watch for:
+- The tool call to `Check_in_guest`
+- Input parameters (guest email, room number)
+- The response showing state transitions (Booking → Checked In, Room → Occupied)
 
-1. Open Workato → **Tools → Logs**
-2. Find your recent tool executions
-3. Click on a log entry to see:
-   - Input parameters received
-   - Each step's execution
-   - Response returned to the agent
+### 2.3 Submit a Service Request
 
-**CHECKPOINT:** Successfully tested guest scenarios with debug panel showing tool calls
+```
+The guest in room 101 is requesting extra pillows
+```
+
+Notice how the LLM resolves which tool to use and gathers the required fields before calling it.
+
+### 2.4 Check Out a Guest
+
+```
+Process checkout for the guest in room 101
+```
+
+If Stripe is configured, watch for the payment processing step in the debug panel. If not, observe the error handling — the LLM should communicate the issue clearly.
+
+**CHECKPOINT:** You've exercised multiple tools and can see each invocation in the debug panel
 
 ---
 
-## Part 3: Test as a Manager (5 min)
+## Part 3: Trace Invocations in Workato (10 min)
 
-### 3.1 Switch to Manager Persona
+Now follow one of those tool calls from the Workato side to see the full execution trace.
 
-1. Log out of the guest account
-2. Log in with a **Manager** account
-3. Navigate to **Chat**
+### 3.1 Find Your Recipe
 
-### 3.2 Test Manager-Only Scenarios
+1. In Workato, navigate to **orchestrator-recipes**
+2. Click on the recipe that matches one of your recent tool calls (e.g., `check_in_guest`)
 
-These tools are only available to managers:
+### 3.2 Open a Job
 
-**View All Rooms:**
-```
-Show me all vacant rooms
-```
-- Expected tool: `search_rooms_on_behalf_of_staff`
-- Note: Returns ALL rooms, not just guest's bookings
+1. Click the **Jobs** tab
+2. You should see recent executions — each one corresponds to a tool call from your chat session
+3. Click on the most recent job
 
-**Maintenance Request:**
-```
-Room 205 has a leaky faucet, please file a maintenance request
-```
-- Expected tool: `submit_maintenance_request`
+### 3.3 Read the Execution Log
 
-**Process Refund:**
-```
-Process a refund for the failed checkout on booking BK-12345
-```
-- Expected tool: `compensate_checkout_failure`
+Each job shows a step-by-step execution trace:
 
-**Manage Cases:**
-```
-Show me all open service cases
-```
-- Expected tool: `search_cases_on_behalf_of_staff`
+- **Trigger** — The API request from the MCP server, including the full input payload
+- **Action steps** — Each atomic recipe call, with its own input and output
+- **Conditionals** — Validation checks (did the guest exist? was the room vacant?)
+- **Response** — The final payload returned to the MCP tool caller
 
-### 3.3 Compare Guest vs Manager Access
+Click on any step to expand it and see:
+- **Input** — What was passed to this step
+- **Output** — What it returned
+- **Duration** — How long this step took
 
-Notice the difference:
-- **Guest** `search_rooms` returns only their booked rooms
-- **Manager** `search_rooms` returns all hotel rooms with guest details
-- **Manager** has access to maintenance, case management, and refund tools
+### 3.4 Trace an Atomic Call
 
-**CHECKPOINT:** Confirmed manager has elevated access and additional tools
+From within the orchestrator job, click on one of the atomic recipe calls (e.g., "Search Contact by Email"). This opens the atomic recipe's own job, showing:
 
----
+- The exact SOQL query or DML operation sent to Salesforce
+- The Salesforce response
+- Timing for the Salesforce API call
 
-## Part 4: Trigger Error Conditions (5 min)
+This is the full chain: **Chat → MCP → Orchestrator → Atomic → Salesforce → back up the stack**.
 
-Test how the system handles errors gracefully:
+### 3.5 Trigger an Error
 
-### 4.1 Resource Not Found (404)
+Go back to the chat and intentionally cause a failure:
 
 ```
 Check in guest with email nonexistent@example.com
 ```
-- Expected: Clear error message, no crash
-- Check Workato logs for the 404 response
 
-### 4.2 Invalid State (409)
+Then find the failed job in Workato:
+1. The job will show a **failed** status
+2. Expand the failing step to see the error code and message
+3. Notice how the orchestrator returns a structured error (e.g., `404: guest not found`) rather than crashing
 
-```
-Check in a guest who is already checked in
-```
-- Expected: Conflict error explaining the issue
+This is how you'd diagnose production issues — the logs capture every input, output, and failure at every layer.
 
-### 4.3 Missing Required Info
+**CHECKPOINT:** Traced a tool call end-to-end in Workato, including a failure case
 
-```
-I need housekeeping
-```
-- Expected: Agent asks for room number, not a tool error
-- Observe: LLM gathers required fields before calling tool
+### 3.6 (Optional) Verify in Salesforce
+
+See the results of your tool calls in Salesforce itself:
+
+1. Open your Salesforce org (`sf org open --target-org myDevOrg`)
+2. Use **Global Search** to find the guest contact you created (search by email)
+3. On the Contact record, scroll to the **Opportunities** related list
+4. Click into an Opportunity — the **Booking** record is linked here
+
+> **Tip:** Start from the Contact record and explore the related lists — bookings are easiest to find from there.
 
 ---
 
-## Alternative: Test via Desktop Clients
+## What You Learned
 
-If the hotel app has issues, test your MCP servers directly:
-
-### Claude Desktop
-
-1. Copy the **Developer MCP Token** from your MCP server's Settings tab in Workato
-2. Add to `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "dewy-guest-mcp": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://your_url?wkt_token=your_token"
-      ]
-    }
-  }
-}
-```
-
-3. Restart Claude Desktop
-4. Test with: "What tools do you have available?"
-
-### ChatGPT Desktop
-
-1. Open Settings → MCP Servers
-2. Add your MCP server URL and token
-3. Test the same scenarios
-
-### Workato API Platform (Direct)
-
-1. Go to **Tools → API Platform → API Collections**
-2. Click on your collection
-3. Select an endpoint
-4. Use the **Test** tab to send requests directly
+- **Recipe organization**: Atomic recipes handle single operations; orchestrators compose them into validated workflows
+- **MCP tool mapping**: Each tool the LLM calls maps to one orchestrator, which calls multiple atomics
+- **Debug panel**: Client-side visibility into what the LLM is doing and what tools it invokes
+- **Workato execution logs**: Server-side visibility into every step, payload, and timing of each invocation
+- **Error tracing**: Failed jobs capture the exact step, error code, and context for diagnosis
 
 ---
 
@@ -246,21 +207,11 @@ If the hotel app has issues, test your MCP servers directly:
 
 | Issue | Solution |
 |-------|----------|
-| No agent greeting in chat | Bedrock provisioning incomplete; check env vars |
-| Login page unchanged | Restart app after env changes |
-| Tool calls not showing | Enable Debug mode toggle |
-| "Unauthorized" errors | Verify MCP server tokens in .env |
-| Tool returns error | Check Workato **Tools → Logs** for details |
-
----
-
-## What You Accomplished
-
-- Configured authenticated chat with AWS Cognito + Bedrock
-- Tested MCP tools as both Guest and Manager personas
-- Used debug mode to observe real-time tool activity
-- Explored error handling and LLM coaching behavior
-- (Optional) Validated MCP servers via desktop clients
+| No jobs appearing in recipe | Verify the recipe is running (green status); check that MCP server URLs in `app/.env` match |
+| Job shows "Connection error" | Re-authenticate the Salesforce connection in Workspace Connections |
+| Can't expand job steps | Click the step name, not the status icon |
+| Debug panel not updating | Hard refresh the browser (Cmd+Shift+R / Ctrl+Shift+R) |
+| Tool call succeeds but no Workato job | The call may have hit a different recipe — check the tool name in the debug panel |
 
 ---
 
@@ -269,18 +220,20 @@ If the hotel app has issues, test your MCP servers directly:
 ## Facilitator Notes
 
 **Before this unit:**
-- Ensure all attendees have MCP servers created from Unit 1
-- Have temporary Cognito/Bedrock keys ready to distribute
-- Test the full flow yourself before the session
+- Verify your own Workato workspace has recent jobs visible (run a few chat interactions beforehand)
+- Have a job pre-loaded on your screen to walk through if attendees need a guided example
+
+**Pacing guidance:**
+- Part 1 works best as a facilitator-led walkthrough — open the recipes on your shared screen while attendees follow along in their own workspaces
+- Parts 2 and 3 are self-paced. Circulate and help attendees find their first job in Workato — that's the main sticking point
 
 **Common issues:**
-- Attendees forgetting to restart app after env changes
-- Bedrock provisioning delays (can take 1-2 minutes)
-- Debug panel not appearing (browser cache issue - try hard refresh)
+- Attendees looking in the wrong folder for recipes (atomic vs orchestrator)
+- Jobs tab empty because recipe was restarted recently — previous jobs are cleared on restart
+- Confusion between the recipe detail view and the job detail view
 
-**If hotel app fails for an attendee:**
-- Pair them with someone whose app works
-- Direct them to desktop client alternative
-- Use Workato's direct API test as fallback
+**If an attendee's Workato has no jobs:**
+- Have them trigger a fresh tool call from chat, then immediately check the Jobs tab
+- If still empty, verify the recipe status is "Running" and the MCP URLs are correct
 
 </div>

@@ -1,19 +1,23 @@
 ---
 layout: default
-title: "Unit 3: Design Challenge"
+title: "Unit 3: Build Challenge"
 nav_order: 7
 parent: Workshop Units
 ---
 
-# Unit 3: Design Challenge
+# Unit 3: Build Challenge
 
-**Competitive Design Challenge (25 minutes)**
+**Hands-On Challenge (25 minutes)**
+
+---
+
+## The Goal
+
+Design and build a new orchestrator recipe, deploy it, and invoke it from chat. You've seen how the existing tools work end-to-end — now build one yourself.
 
 ---
 
 ## Choose Your Challenge
-
-You have two options based on your environment setup:
 
 | Challenge | Difficulty | Systems | Choose If... |
 |-----------|------------|---------|--------------|
@@ -22,14 +26,58 @@ You have two options based on your environment setup:
 
 ---
 
+## Choose How to Build
+
+You have two paths to build your recipe:
+
+### Path 1: Build with a Coding Agent
+
+If you have access to a coding agent (Claude Code, Cursor, GitHub Copilot, etc.), you can install additional tools that give your agent the knowledge to write Workato recipes:
+
+1. **Install Recipe Skills** — an agent-consumable knowledge base covering connector configuration, datapill syntax, control flow, and error handling:
+   ```bash
+   git clone https://github.com/workato-devs/recipe-skills.git
+   ```
+
+2. **Install the Recipe Linter** — catches datapill syntax errors, schema mismatches, and structural issues:
+
+   macOS/Linux:
+   ```bash
+   brew install workato-devs/tap/recipe-lint
+   wk plugins install recipe-lint
+   ```
+
+   Windows:
+   ```powershell
+   scoop install recipe-lint
+   wk plugins install recipe-lint
+   ```
+
+3. **(Optional) Install the Recipe Visualizer** — VS Code/Cursor/Windsurf extension that renders recipe JSON as interactive workflow graphs. Download the `.vsix` from the [Workato Labs page](https://workato-devs.github.io/labs/) and install via your IDE.
+
+Your workflow: **Agent writes recipe JSON → Linter validates → `make push` deploys → Test from chat**
+
+> For full setup details and documentation, see [workato-devs.github.io/labs](https://workato-devs.github.io/labs/)
+
+### Path 2: Build in the Workato UI
+
+1. Navigate to **Projects → orchestrator-recipes** in Workato
+2. Click **Create Recipe**
+3. Use the visual recipe editor to build your orchestrator step by step
+4. Start the recipe when you're ready to test
+
+Both paths end the same way: invoke your new tool from the hotel app chat and trace the execution in Workato.
+
+---
+
 ## Challenge Rules
 
 | Rule | Details |
 |------|---------|
-| **Time Limit** | 20 minutes for design + implementation |
+| **Time** | 20 minutes to build + test |
 | **Teams** | Individual or pairs |
-| **Deliverable** | MCP tool definition + workflow design |
-| **Bonus** | Working implementation in Workato |
+| **Goal** | Working orchestrator, invocable from chat |
+| **Stretch** | Trace your tool call end-to-end in Workato logs |
 
 ---
 
@@ -39,11 +87,11 @@ You have two options based on your environment setup:
 
 A guest currently checked in wants to **extend their stay** by a few more nights. The front desk needs to verify availability and update the reservation.
 
-**Your Mission:** Design an `extend_stay` orchestrator using compositional patterns.
+**Build an `extend_stay` orchestrator.**
 
 ---
 
-## Available Atomic Skills (Option A)
+## Available Atomic Skills
 
 | Atomic Skill | Purpose | Returns |
 |--------------|---------|---------|
@@ -55,7 +103,7 @@ A guest currently checked in wants to **extend their stay** by a few more nights
 
 ---
 
-## Requirements (Option A)
+## Requirements
 
 ### Input Parameters
 
@@ -75,7 +123,7 @@ Your solution must:
 4. Handle "room unavailable for extension" gracefully
 5. Be idempotent (safe to retry)
 
-### Response Codes (Option A)
+### Response Codes
 
 | HTTP Status | Condition | error_code |
 |-------------|-----------|------------|
@@ -92,11 +140,11 @@ Your solution must:
 
 A guest wants to **upgrade to a better room** and is willing to pay the price difference. This requires checking availability, processing an additional payment, and updating the reservation.
 
-**Your Mission:** Design an `upgrade_room` orchestrator that coordinates Salesforce and Stripe.
+**Build an `upgrade_room` orchestrator that coordinates Salesforce and Stripe.**
 
 ---
 
-## Available Atomic Skills (Option B)
+## Available Atomic Skills
 
 **Salesforce:**
 
@@ -117,7 +165,7 @@ A guest wants to **upgrade to a better room** and is willing to pay the price di
 
 ---
 
-## Requirements (Option B)
+## Requirements
 
 ### Input Parameters
 
@@ -136,12 +184,12 @@ Your solution must:
 2. Validate the target room is available
 3. Calculate the price difference (remaining nights x rate difference)
 4. Process the additional payment via Stripe
-5. Update room statuses (old room -> Cleaning, new room -> Occupied)
+5. Update room statuses (old room → Dirty, new room → Occupied)
 6. Update the booking with the new room
 7. Handle payment failures gracefully
 8. Be idempotent (safe to retry)
 
-### Response Codes (Option B)
+### Response Codes
 
 | HTTP Status | Condition | error_code |
 |-------------|-----------|------------|
@@ -154,82 +202,43 @@ Your solution must:
 
 ---
 
-## Design Template
+## Deploy and Test
 
-### Workflow Diagram
+Once your recipe is built:
 
-Fill in your workflow:
+1. **Deploy:**
+   - Coding agent path: `wk lint` to validate, then `make push` to deploy
+   - Workato UI path: Save and start the recipe
 
-```
-[your_orchestrator_name]
-|
-+-- Step 1: ______________________
-|   +-- Error if: ________________
-|
-+-- Step 2: ______________________
-|   +-- Error if: ________________
-|
-+-- Step 3: ______________________
-|   +-- IF unavailable: __________
-|
-+-- Step 4: ______________________
-|
-+-- Step 5: ______________________
-|
-+-- Return: ______________________
-```
+2. **Add to an API Collection:**
+   - In Workato, go to **Platform → API Platform → API Collections**
+   - Open the `dewy-resort-manager` collection
+   - Add your new recipe as an endpoint (Method: POST)
+   - Write a description that tells the LLM when and how to use your tool
+   - Enable the endpoint
 
-### MCP Tool Definition
-
-Fill in your tool definition:
-
-```json
-{
-  "name": "______________________",
-  "description": "_____________________________",
-  "inputSchema": {
-    "type": "object",
-    "properties": {
-      // Your parameters here
-    },
-    "required": [
-      // Required fields
-    ]
-  }
-}
-```
-
----
-
-<div class="facilitator-only" markdown="1">
-
-## Judging Criteria
-
-| Criterion | Weight | What We're Looking For |
-|-----------|--------|------------------------|
-| **Completeness** | 40% | Does the solution handle the full workflow? |
-| **Composition** | 30% | Proper use of atomic skills? Minimal duplication? |
-| **Error Handling** | 20% | What happens when things go wrong? |
-| **Tool Design** | 10% | Clear description? Intuitive parameters? |
-
-</div>
+3. **Test from chat:**
+   - Open the hotel app as Manager
+   - Ask the agent to perform the action your tool handles
+   - Watch the debug panel for your tool invocation
+   - Check Workato logs to trace the execution
 
 ---
 
 ## Hints
 
 <details>
-<summary>Hint 1: Order of Operations (Click to reveal)</summary>
+<summary>Hint 1: Order of Operations</summary>
 
 Think about dependencies:
 - What must you validate before making any changes?
 - For Option B: What happens if payment fails after you've already updated the room?
-- Check availability/validity FIRST, then make changes
+- Validate first, mutate last
 
 </details>
 
 <details>
-<summary>Hint 2: Calculating Extended Dates (Option A)</summary>
+<summary>Hint 2: Checking Extended Dates (Option A)</summary>
 
 You need to check availability between:
 - Current checkout date (from existing booking)
@@ -252,7 +261,7 @@ You'll need:
 </details>
 
 <details>
-<summary>Hint 4: Idempotency Pattern (Click to reveal)</summary>
+<summary>Hint 4: Idempotency Pattern</summary>
 
 Use the `idempotency_token` in multiple places:
 - As `external_id` in upsert_booking
@@ -262,17 +271,30 @@ Use the `idempotency_token` in multiple places:
 
 ---
 
-## Timer: 20 Minutes
-
-**START NOW**
-
----
-
 <div class="facilitator-only" markdown="1">
 
-## Solution Discussion (5 min)
+## Facilitator Notes
 
-### Option A: Extended Stay - Ideal Workflow
+**Pacing:** 20 minutes for building, 5 minutes for demo/discussion. If teams finish early, encourage them to trace their tool call in Workato logs or test edge cases (invalid email, unavailable room).
+
+**Coding agent path:** Attendees using coding agents may finish significantly faster. Encourage them to tackle Option B or refine their error handling and tool description.
+
+**If attendees get stuck on recipe-skills setup:** The repo README has step-by-step instructions for each agent platform. Prioritize getting the skills loaded — the linter and visualizer are nice-to-haves.
+
+**If time is running short:** Have attendees focus on designing the steps (which atomics, in what order, what error handling) even if they don't finish building. The design exercise is still valuable.
+
+## Judging Criteria
+
+| Criterion | Weight | What We're Looking For |
+|-----------|--------|------------------------|
+| **Working End-to-End** | 40% | Can it be invoked from chat and produce the right result? |
+| **Composition** | 25% | Proper use of atomic skills? Logical ordering? |
+| **Error Handling** | 20% | What happens when things go wrong? Structured error codes? |
+| **Tool Description** | 15% | Would the LLM know when and how to use this tool? |
+
+## Solution Walkthrough
+
+### Option A: Extended Stay
 
 ```
 extend_stay
@@ -295,7 +317,7 @@ extend_stay
 +-- Return: booking_id, new_checkout_date, total_nights
 ```
 
-### Option B: Room Upgrade - Ideal Workflow
+### Option B: Room Upgrade
 
 ```
 upgrade_room
@@ -319,7 +341,7 @@ upgrade_room
 |   +-- Error if fails: 402 PAYMENT_FAILED
 |   +-- Use idempotency_token as Idempotency-Key
 |
-+-- update_room_status (old room -> Cleaning)
++-- update_room_status (old room -> Dirty)
 |
 +-- update_room_status (new room -> Occupied)
 |
@@ -345,30 +367,6 @@ upgrade_room
 | Updating rooms before payment confirmed | Process payment first, then update state |
 | Forgetting to calculate price difference | Need both room rates and remaining nights |
 | No rollback plan for partial failures | Design for all-or-nothing where possible |
-
----
-
-## Scoring Rubric
-
-| Category | Criteria | Points |
-|----------|----------|--------|
-| **Completeness** | Guest/booking lookup | 10 |
-| | Availability/room validation | 10 |
-| | Core operation (date update OR payment + room swap) | 10 |
-| | Proper state updates | 10 |
-| **Composition** | Uses existing atomics correctly | 15 |
-| | Logical ordering of operations | 15 |
-| **Error Handling** | Handles primary failure case | 10 |
-| | Returns appropriate error codes | 5 |
-| | Helpful error messages | 5 |
-| **Tool Design** | Clear, helpful description | 5 |
-| | Intuitive parameter names | 5 |
-| **Total** | | **100** |
+| Vague tool description | Be specific about required params and error codes — the LLM needs this |
 
 </div>
-
----
-
-## Transition to Wrap-Up
-
-> "Great work everyone! Whether you tackled the extended stay or the room upgrade challenge, you've now applied compositional thinking to design a real workflow. Let's wrap up with key takeaways and resources for continuing your learning."
