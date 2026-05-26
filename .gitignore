@@ -30,13 +30,10 @@ yarn-error.log*
 .env*.local
 .env
 .env.bak
+profiles.env            # File store profiles created by wk cli
 
 # kiro settings with secrets
 .kiro/settings/mcp.json
-
-# Workato
-**/.workato-ignore
-**/.workatoenv
 
 # vercel
 .vercel
@@ -58,12 +55,11 @@ next-env.d.ts
 # vendor CLI tools (salesforce, etc.)
 bin/
 tools/sf-cli/
-**/workato-api-key.txt
-workato/sandbox/**/*.recipe.json
-workato/temp-*/
 
-# wk CLI local projects (synced workspace exports, not source)
-demo-project*/
+# workato CLI 
+*/.wk/                            # Workato CLI configuration, created by init
+**/*.wk
+**/*/recipes/.gitignore
 
 # salesforce CLI
 .sf/                            # Salesforce CLI configuration

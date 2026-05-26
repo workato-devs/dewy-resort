@@ -402,10 +402,6 @@ For instructors preparing workshops:
 
 ## Related Documentation
 
-- [Salesforce Metadata Specification](/workato/docs/salesforce-metadata.md) - Complete field definitions
-- [System Landscape](/workato/docs/system-landscape.md) - All systems and connections
-- [Recipe Architecture Template](/workato/docs/recipe-architecture-template.md) - Recipe docs standard
-- [Workato Connections](/workato/connections/README.md) - Connection setup guide
 
 ## Support
 

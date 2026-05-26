@@ -282,7 +282,7 @@ make start-recipes
 
 **⚠️ IMPORTANT:** 4 recipes require manual activation in Workato UI (SOQL query configuration). See detailed guide.
 
-**📚 See:** [Workato Setup](./workato/docs/WORKATO_SETUP.md)
+**📚 See:** [Workato Setup](./vendor/workato/docs/WORKATO_SETUP.md)
 
 ### 4. Configure Dewy Hotel Application
 
@@ -348,7 +348,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 1. **Architecture:** Study [system-architecture.png](./app/docs/architecture/system-architecture.png)
 2. **Implementation:** Review Workato recipes in `workato/` directory
-3. **Patterns:** Read [WORKATO_SETUP.md](./workato/docs/WORKATO_SETUP.md) for detailed pattern explanations
+3. **Patterns:** Read [WORKATO_SETUP.md](./vendor/workato/docs/WORKATO_SETUP.md) for detailed pattern explanations
 4. **Adaptation:** Consider how to apply orchestrator + atomic skill pattern to your domain
 
 ### Key Takeaways
@@ -366,11 +366,11 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Setup Guides
 - **[Salesforce Setup](./vendor/salesforce/docs/SALESFORCE_SETUP.md)** - Deploy custom objects and seed data
-- **[Workato Setup](./workato/docs/WORKATO_SETUP.md)** - Deploy MCP server recipes
+- **[Workato Setup](./vendor/workato/docs/WORKATO_SETUP.md)** - Deploy MCP server recipes
 - **[Architecture Diagrams](./app/docs/architecture/README.md)** - Visual documentation of all workflows
 
 ### Optional Features
-- **[Stripe Integration](./workato/docs/WORKATO_SETUP.md#stripe-recipe-activation-optional)** - Payment processing
+- **[Stripe Integration](./vendor/workato/docs/WORKATO_SETUP.md#stripe-recipe-activation-optional)** - Payment processing
 - **[Cognito Authentication](#cognito-authentication-workshop-convenience)** - User auth (workshop convenience)
 - **[Bedrock AI Chat](#bedrock-ai-chat-optional)** - AI assistants (optional)
 
@@ -393,8 +393,6 @@ dewy-resort/
 │   │   ├── home-assistant/             # Home Assistant integration
 │   │   ├── sf-api-collection/          # API Collection definitions
 │   │   └── Workspace Connections/      # Connection configs
-│   └── docs/
-│       └── WORKATO_SETUP.md            # MCP server setup guide
 ├── app/                          # Next.js application
 │   ├── src/                      # Application source
 │   ├── docs/
@@ -406,6 +404,10 @@ dewy-resort/
 │   │       └── maintenance-request-flow.png
 │   └── public/                   # Static assets
 ├── vendor/
+│   ├── workato/                  # Workato docs & scripts
+│   │   ├── docs/
+│   │   │   └── WORKATO_SETUP.md
+│   │   └── scripts/
 │   ├── salesforce/               # Salesforce metadata & deployment
 │   │   ├── force-app/            # Custom objects, fields, app
 │   │   ├── data/                 # Seed data
@@ -415,8 +417,6 @@ dewy-resort/
 │   │       └── deploy.sh
 │   ├── aws/                      # CloudFormation templates
 │   └── okta/                     # Okta auth config
-└── docs/                         # Additional documentation
-    └── WINDOWS_SETUP.md
 ```
 
 ---
@@ -535,4 +535,4 @@ This is a **sample application for teaching enterprise MCP design patterns**. Th
 - Patterns for idempotency and state validation
 - Zero direct system integrations architecture
 
-For implementation details, see the setup guides in [`workato/docs/`](./workato/docs/) and [`vendor/salesforce/docs/`](./vendor/salesforce/docs/).
+For implementation details, see the setup guides in [`vendor/workato/docs/`](./vendor/workato/docs/) and [`vendor/salesforce/docs/`](./vendor/salesforce/docs/).
