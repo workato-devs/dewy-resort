@@ -1,0 +1,7 @@
+{
+  "name": "Process guest checkout",
+  "method": "POST",
+  "path": "process-guest-checkout",
+  "recipe_name": "process_guest_checkout",
+  "description": "Orchestrate hotel checkout with Stripe payment: validates guest/booking, processes payment, executes state transitions (Booking→Checked Out, Room→Dirty, Opportunity→Closed Won). Requires guest_email, guest_name, amount (cents), payment_method_id, idempotency_token; optional room_number, booking_number. Returns payment confirmation or error codes (402: payment failed, 404: guest/booking not found, 202: 3D Secure required with next_action_url)."
+}

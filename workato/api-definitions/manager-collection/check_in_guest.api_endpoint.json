@@ -1,0 +1,7 @@
+{
+  "name": "Check in guest",
+  "method": "POST",
+  "path": "check-in-guest",
+  "recipe_name": "check_in_guest",
+  "description": "Orchestrate hotel check-in: validates guest/reservation prerequisites, checks room vacancy, executes state transitions (Booking→Checked In, Room→Occupied, Opportunity→Checked In). Requires guest_email; optional check_in_date (default: today), booking_number, payment_id (default: PENDING_CHECKIN). Returns booking/room details or error codes (404: guest/reservation not found, 409: multiple reservations or room not vacant)."
+}

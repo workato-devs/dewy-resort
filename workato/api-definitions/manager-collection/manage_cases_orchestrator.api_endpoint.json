@@ -1,0 +1,7 @@
+{
+  "name": "Manage cases orchestrator",
+  "method": "POST",
+  "path": "manage-cases-orchestrator",
+  "recipe_name": "manage_cases_orchestrator",
+  "description": "Create or update Salesforce Case by idempotency_token. Resolves guest_email→contact_id and room_number→room_id automatically. Requires idempotency_token; optional guest_email, room_number, type, priority, status, subject, description, origin (Web/Phone/Email/Internal). Returns case_id/case_number or error codes (400: guest/room not found)."
+}

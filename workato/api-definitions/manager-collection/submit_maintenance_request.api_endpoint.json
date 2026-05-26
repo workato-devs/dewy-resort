@@ -1,0 +1,7 @@
+{
+  "name": "Submit maintenance request",
+  "method": "POST",
+  "path": "submit-maintenance-request",
+  "recipe_name": "submit_maintenance_request",
+  "description": "Create Salesforce Case for staff-reported maintenance/facilities issues. Validates contact exists with type=Manager, links case to room. Requires idempotency_token, manager_email, manager_first_name, manager_last_name, room_number, type (Maintenance/Facilities), priority, description. Returns case_id/case_number or error codes (400: manager not found, invalid contact type, or room not found)."
+}

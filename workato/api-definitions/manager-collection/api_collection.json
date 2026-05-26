@@ -1,0 +1,5 @@
+{
+  "name": "dewy-resort-manager",
+  "version": "1.0",
+  "description": "Operations API endpoints for hotel managers including guest services, maintenance, case management, and compensation workflows."
+}

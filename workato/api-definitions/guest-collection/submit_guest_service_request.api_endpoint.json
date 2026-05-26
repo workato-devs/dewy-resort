@@ -1,0 +1,7 @@
+{
+  "name": "Submit guest service request",
+  "method": "POST",
+  "path": "submit-guest-service-request",
+  "recipe_name": "submit_guest_service_request",
+  "description": "Create Salesforce Case for guest service request (housekeeping, amenities). Validates guest contact exists with type=Guest, links case to guest and room. Requires idempotency_token, guest_email, guest_first_name, guest_last_name, room_number, type, priority, description. Returns case_id/case_number or error codes (400: guest not found, invalid contact type, or room not found)."
+}

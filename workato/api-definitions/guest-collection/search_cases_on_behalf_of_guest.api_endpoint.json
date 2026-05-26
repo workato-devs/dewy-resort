@@ -1,0 +1,7 @@
+{
+  "name": "Search cases on behalf of guest",
+  "method": "POST",
+  "path": "search-cases-on-behalf-of-guest",
+  "recipe_name": "search_cases_on_behalf_of_guest",
+  "description": "Search service cases filed by a specific guest. Requires guest_email; optional status_filter (Open/Closed/All, default: Open), case_type_filter (Facilities/Service Request/Housekeeping), limit (default: 10). Returns array of cases with case_number, type, status, priority, subject, description, room info, plus count."
+}

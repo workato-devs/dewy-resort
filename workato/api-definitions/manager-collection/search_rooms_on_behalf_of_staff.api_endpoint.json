@@ -1,0 +1,7 @@
+{
+  "name": "Search rooms on behalf of staff",
+  "method": "POST",
+  "path": "search-rooms-on-behalf-of-staff",
+  "recipe_name": "search_rooms_on_behalf_of_staff",
+  "description": "Search all hotel rooms with staff-level access. Optional status_filter (Vacant/Occupied/Dirty/Maintenance), floor_filter (1-10), limit (default: 20). Returns array of rooms with full details including current guest name/email/phone, plus count."
+}
