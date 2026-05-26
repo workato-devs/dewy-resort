@@ -37,6 +37,12 @@ parent: Workshop Units
   3. Choose the **"Sandbox"** option
   4. **Never use a Live Stripe account** for the workshop
 
+### 4. Email Account with Alias Support
+- **Purpose:** You'll create separate Guest and Manager accounts using email aliases (e.g., `yourname+guest@gmail.com`, `yourname+manager@gmail.com`)
+- **Gmail** works out of the box — the `+` suffix routes to your main inbox
+- **Outlook/Hotmail** also supports `+` aliases
+- **Action:** Verify alias delivery works by sending yourself a test email to `yourname+test@yourdomain.com` before workshop day
+
 ---
 
 ## Local Environment Requirements
@@ -45,23 +51,42 @@ parent: Workshop Units
 
 | Software | Minimum Version | Check Command |
 |----------|-----------------|---------------|
-| Xcode Command Line Tools (macOS only) | Any | `xcode-select -p` |
 | Node.js | 20+ | `node --version` |
 | Git | Any recent | `git --version` |
-| Python | 3.11+ | `python3 --version` |
+| make | Any | `make --version` |
+| Workato CLI (`wk`) | Any | `wk version` |
+
+### Install the Workato CLI
+
+The `wk` CLI must be installed before the workshop. The setup script will check for it but **cannot install it automatically**.
+
+#### macOS / Linux
+
+```bash
+brew install workato/tap/wk
+```
+
+#### Windows
+
+```powershell
+scoop install wk
+```
+
+Verify it's installed: `wk version`
 
 ### Recommended
 - VS Code or preferred IDE
 - Terminal access (iTerm2, Terminal.app, Windows Terminal)
 
-### MacOS
+### macOS / Linux
 
-- **Xcode Command Line Tools** (required): Run `xcode-select --install` and follow the GUI prompt, or look for the "down arrow icon" in Launcher. This provides Git, make, and the compiler toolchain.
-- The setup script will install Homebrew (if needed) and handle all remaining prerequisites automatically
+- **[Homebrew](https://brew.sh)** — required for installing `wk` and other dependencies
+- Install: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 
 ### Windows
 
-- The setup script will handle prerequisite installation automatically
+- **[Scoop](https://scoop.sh)** — required for installing `wk` and other dependencies
+- Install: `irm get.scoop.sh | iex`
 
 
 ---
@@ -75,7 +100,7 @@ Another way to test MCP functionality is with a desktop client that connects dir
 - **Claude Desktop:** [claude.ai/download](https://claude.ai/download) (requires Claude Pro)
 - **ChatGPT Desktop:** [openai.com/chatgpt/desktop](https://openai.com/chatgpt/desktop) (requires ChatGPT Plus)
 
-Configuration instructions are provided in Unit 1 after you create your MCP servers.
+Configuration instructions are provided in Unit 1 as an alternative way to test your MCP servers.
 
 ---
 
@@ -117,12 +142,20 @@ Please complete these steps before the workshop on [Date]:
    https://dashboard.stripe.com/register
    Note: Skip business registration, choose Sandbox mode
 
-4. Verify your local environment:
+4. Verify your email supports aliases:
+   - Send a test email to yourname+test@gmail.com
+   - You'll use +guest and +manager aliases during the workshop
+
+5. Install the Workato CLI:
+   - macOS/Linux: brew install workato/tap/wk
+   - Windows: scoop install wk
+   - Verify: wk version
+
+6. Verify your local environment:
    - Node.js 20+: `node --version`
    - Git: `git --version`
-   - Python 3.11+: `python3 --version`
 
-5. Ensure you have an IDE installed:
+7. Ensure you have an IDE installed:
    - Recommended: VS Code (https://code.visualstudio.com)
    - Any code editor that supports TypeScript will work
 
@@ -140,9 +173,11 @@ See you there!
 - [ ] Workato Developer Edition approved and accessible
 - [ ] Salesforce Developer Edition login working (note your username!)
 - [ ] Stripe Developer Account created (Sandbox mode)
-- [ ] Gmail aliases created for testing (e.g., `yourname+guest@gmail.com`, `yourname+manager@gmail.com`)
-- [ ] Node.js 20+ installed and verified
-- [ ] Python 3.11+ installed and verified
-- [ ] Git installed
+- [ ] Email alias delivery verified (e.g., `yourname+test@gmail.com`)
+- [ ] Homebrew (macOS/Linux) or Scoop (Windows) installed
+- [ ] Workato CLI installed (`wk version`)
+- [ ] Node.js 20+ installed (`node --version`)
+- [ ] Git installed (`git --version`)
+- [ ] make installed (`make --version`)
 - [ ] IDE installed (VS Code recommended)
 - [ ] Laptop charged / power adapter packed

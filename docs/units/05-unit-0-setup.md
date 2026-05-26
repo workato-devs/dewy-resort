@@ -22,7 +22,7 @@ parent: Workshop Units
 
 ## Step 1: Run the Setup Script (15 min)
 
-Copy and paste the appropriate command for your operating system. The script clones the repository, checks for required prerequisites, installs any that are missing, sets up the local application, and installs the Salesforce and Workato CLIs.
+Copy and paste the appropriate command for your operating system. The script clones the repository, checks for required prerequisites (Git, Node.js, make), installs any that are missing, and sets up the Salesforce CLI.
 
 ### 1.1 Run relevant setup script for your machine
 
@@ -46,9 +46,19 @@ cd dewy-resort
 
 Watch for any errors and flag a facilitator or assistant for help.
 
-**CHECKPOINT:** `make status` shows all prerequisites and CLIs installed
+### 1.2 Verify CLIs
 
-### 1.2 Create an .env file
+```bash
+make status
+```
+
+This checks that the Workato CLI (`wk`) and Salesforce CLI (`sf`) are both installed and shows their authentication status.
+
+> **If `wk` is not found:** Install it now — `brew install workato/tap/wk` (macOS/Linux) or `scoop install wk` (Windows).
+
+**CHECKPOINT:** `make status` shows both CLIs installed
+
+### 1.3 Create an .env file
 
 The project includes a `.env.example` file in the root directory with placeholder values for all required environment variables. Copy this file into the `app/` directory and save it as `.env`:
 
@@ -70,7 +80,7 @@ Copy-Item @copyParams
 
 > **Important:** This `.env` file will be used throughout the workshop. Future setup steps will have you update its values as you configure each service.
 
-### 1.3 Initialize Local Database
+### 1.4 Initialize Local Database
 
 ```bash
 cd app
@@ -95,13 +105,15 @@ cd ..
 
 ## Step 2: Initialize CLIs & Deploy Salesforce Metadata (10 min)
 
-### 2.1 Install CLIs for Workato and Salesforce
+### 2.1 Verify CLIs
 
-From the `dewy-resort` directory, run the following command (this invokes a script that installs the CLIs needed for the rest of setup):
+From the `dewy-resort` directory, verify that both CLIs are available:
 
 ```bash
 make setup
 ```
+
+This checks for the Workato CLI (`wk`) and installs the Salesforce CLI (`sf`) if needed.
 
 ### 2.2 Authenticate to Salesforce
 
@@ -162,7 +174,7 @@ sf org open --target-org myDevOrg
 5. Click **Save Changes**
 6. Click **API Clients** tab [https://app.trial.workato.com/members/api/roles]
 7. Click **Create API Client** button
-8. Enter "Dewy Resort App" in the Name field
+8. Enter "My CLI Client" in the Name field
 9. Select "New client role" from the Client Role dropdown
 10. Select "All Projects" in the Project Access drop-down menu
 11. Click **Create Client**
@@ -170,17 +182,28 @@ sf org open --target-org myDevOrg
 
 ### 3.2 Add Token to Environment
 
-Edit `app/.env` file:
+Edit the `.env` file in the **project root** (not `app/.env`):
 
 ```bash
 WORKATO_API_TOKEN=your_token_here
 ```
 
-### 3.3 Deploy Recipes
+### 3.3 Authenticate and Deploy Recipes
+
+```bash
+make workato-login
+```
+
+This reads the token from `.env` and creates an authenticated CLI profile. Verify with `wk auth status`.
+
+Next, initialize the local project and push all recipes to your workspace:
 
 ```bash
 make workato-init
+make push
 ```
+
+**Expected output:** A list of `.recipe.json` files with `created` status. Lint warnings are expected and will not block the push.
 
 ### 3.4 Configure Salesforce Connector in Workato
 
@@ -190,25 +213,27 @@ make workato-init
 4. Authenticate to your Salesforce Developer Edition org
 5. **WARNING: DO NOT rename the connection**
 
-### 3.5 Manual Activation (Required)
+### 3.5 Manual Activation (If Needed)
 
-Four recipes need manual activation due to SOQL metadata caching:
+Some recipes with dynamic SOQL queries may fail to start because their Salesforce connection isn't automatically linked. **If all your recipes started successfully in Step 3.7, skip to [Step 3.8](#38-set-up-api-platform).**
 
-1. Open Workato → **Projects → orchestrator-recipes**
-2. In the recipe search box, type **"search"** to filter the list
-3. Find and activate each of these recipes:
-   - `Search cases on behalf of guest`
-   - `Search cases on behalf of staff`
-   - `Search rooms on behalf of guest`
-   - `Search rooms on behalf of staff`
-4. For each recipe:
-   - Click the recipe name
-   - Click **Edit Recipe**
-   - Click the Salesforce action step
-   - Click the **Edit** button to the right of "Connect to Salesforce"
-   - Re-select the Salesforce connection **"SF Dev Account"**
-   - Click **Save**
-   - Click **Exit**
+The recipes that may need manual activation:
+
+1. `Search bookings by room and dates`
+2. `Search room by number`
+3. `Search rooms on behalf of staff`
+4. `Search rooms on behalf of guest`
+
+For **each** affected recipe:
+
+1. Navigate to the recipe in Workato (under **orchestrator-recipes** or **atomic-salesforce-recipes**)
+2. Click the recipe name to open its detail page
+3. Click the **Connections** tab (between "Jobs" and "Versions")
+4. In the left panel, you'll see **"Salesforce connection"** with a red **"Requires connection"** warning
+5. In the main panel under "Showing active connections", click your Salesforce connection
+6. A green **"Connection updated successfully"** banner confirms it worked
+
+Once all 4 are linked, run `make start-recipes` again to pick up the stragglers.
 
 ### 3.6 Configure Stripe Connection (Optional)
 
@@ -240,40 +265,37 @@ Four recipes need manual activation due to SOQL metadata caching:
 make start-recipes
 ```
 
-**Expected Output:**
-```
-========================================
-Summary
-========================================
-Total recipes: <count>
-Started: <count>
-Already running: 0
-Failed: 0
-```
+If all recipes start successfully, skip ahead to [Step 3.8](#38-set-up-api-platform). If some recipes fail to start, follow [Step 3.5](#35-manual-activation-if-needed) to link their connections, then run `make start-recipes` again.
 
-All recipes should show as started with 0 failed.
-
-**NOTE** If you did not setup or activate Stripe, some recipes will fail to start
+**NOTE:** If you did not set up or activate Stripe, some Stripe recipes will fail to start — that's expected.
 
 **CHECKPOINT:** All Salesforce recipes showing "Running" status
 
-### 3.8 Enable API Endpoints
+### 3.8 Set Up API Platform
+
+```bash
+make setup-api
+```
+
+This creates two API collections (`dewy-resort-guest` and `dewy-resort-manager`), their endpoints, and an API client with credentials written to `app/.env`.
+
+### 3.9 Enable API Endpoints
 
 ```bash
 make enable-api-endpoints
 ```
 
-This enables the endpoints on all API collections in your Workato account.
+This activates all API endpoints so they can receive traffic. All recipes must be running first.
 
-### 3.9 Create API Client
+### 3.10 Set Up MCP Servers
 
 ```bash
-make create-api-client
+make setup-mcp
 ```
 
-This creates an API Client for the Salesforce API Collection.
+This creates two MCP servers (`dewy-resort-guest` and `dewy-resort-manager`) and writes the MCP URLs and tokens to `app/.env`.
 
-**CHECKPOINT:** API endpoints enabled and client created
+**CHECKPOINT:** API endpoints enabled, MCP servers created, `app/.env` populated with URLs and tokens
 
 ---
 
@@ -297,7 +319,8 @@ app/scripts/dev-tools/server.sh start
 You now have:
 - Salesforce org with hotel data model
 - Workato workspace with all recipes running
-- Local application connected to both
+- API collections and MCP servers configured
+- Local application connected to all services
 
 ---
 
@@ -305,46 +328,16 @@ You now have:
 
 | Issue | Solution |
 |-------|----------|
-| Python version mismatch | Run `brew install python@3.11` |
+| `wk` not found | Install: `brew install workato/tap/wk` (macOS/Linux) or `scoop install wk` (Windows) |
+| `wk auth` fails | Re-run `make workato-login`, check token in root `.env` |
 | Salesforce login timeout | Re-run `sf org login web --alias myDevOrg` |
-| Recipes won't start | Manual activation (Step 3.7) |
+| Recipes won't start | Manual activation (Step 3.5), then re-run `make start-recipes` |
 | "Connection not configured" | Verify Workspace Connections authenticated |
-| API Collection 401 | Check WORKATO_API_TOKEN in .env |
+| API Collection 401 | Check WORKATO_API_TOKEN in `.env` |
 | Room search returns empty | Verify SF seed data imported |
 | API call fails silently | Check **Tools → Logs** in Workato for error details |
 | Recipe returns error | Expand the job in Logs to see error message and code |
-| Workato CLI command errors | Ensure API client scopes match guidance in Step 3.1 |
-
-### Manual Verification Script
-
-Run this script to quickly check your environment (Mac/Linux):
-
-```bash
-#!/bin/bash
-echo "=== Pre-Workshop Environment Check ==="
-
-# Node.js
-echo -n "Node.js: "
-node --version 2>/dev/null || echo "NOT INSTALLED"
-
-# Python
-echo -n "Python: "
-python3 --version 2>/dev/null || echo "NOT INSTALLED"
-
-# Git
-echo -n "Git: "
-git --version 2>/dev/null || echo "NOT INSTALLED"
-
-# Network (can reach Workato)
-echo -n "Network (Workato): "
-curl -s -o /dev/null -w "%{http_code}" https://app.trial.workato.com/users/sign_in_trial | grep -q "200" && echo "OK" || echo "BLOCKED"
-
-# Network (can reach Salesforce)
-echo -n "Network (Salesforce): "
-curl -s -o /dev/null -w "%{http_code}" https://login.salesforce.com | grep -q "200" && echo "OK" || echo "BLOCKED"
-
-echo "=== Check Complete ==="
-```
+| `wk` CLI command errors | Ensure API client scopes match guidance in Step 3.1 |
 
 ---
 

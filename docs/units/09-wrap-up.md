@@ -31,7 +31,7 @@ This isn't a limitation -- it's a feature that keeps the protocol focused.
 
 ---
 
-### 3. Separation of Concerns is the Key Insight
+### 3. Separation of Concerns is the Core Design Principle
 
 | LLMs Excel At (High-Entropy) | Backends Excel At (Low-Entropy) |
 |------------------------------|--------------------------------|
@@ -80,7 +80,7 @@ Experiment. Break things. Learn.
 |----------|------|
 | **GitHub Repo** | [github.com/workato-devs/dewy-resort](https://github.com/workato-devs/dewy-resort) |
 | **Workshop Slides** | [link to slides] |
-| **This Guide** | [link to GitHub Pages] |
+| **This Guide** | [workato-devs.github.io/dewy-resort](https://workato-devs.github.io/dewy-resort/) |
 
 ### Documentation
 

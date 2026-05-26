@@ -7,7 +7,7 @@ parent: Guides
 
 # CLI Troubleshooting Guide
 
-Common issues and solutions for Workato CLI, Salesforce CLI, and environment setup.
+Common issues and solutions for the Workato CLI (`wk`), Salesforce CLI (`sf`), and environment setup.
 
 ---
 
@@ -19,109 +19,63 @@ Run these to quickly identify issues:
 # Check Node.js
 node --version        # Need 20+
 
-# Check Python (Workato CLI dependency)
-python3 --version     # Need 3.11+
-which python3         # Should show a path
+# Check Workato CLI
+wk version            # Should show version
+wk auth status        # Should show authenticated profile
 
-# Check if CLIs installed
-ls -la bin/           # Should show workato and sf
-bin/workato --version # Test Workato CLI
-bin/sf --version      # Test Salesforce CLI
+# Check Salesforce CLI
+bin/sf --version      # Should show version
+
+# Check overall status
+make status           # Shows both CLIs
+make doctor           # Detailed diagnostics
 ```
 
 ---
 
 ## Workato CLI Issues
 
-### Issue: "Python not found" or Version Mismatch
+### Issue: "wk: command not found"
+
+**Solution:**
+
+macOS/Linux:
+```bash
+brew install workato/tap/wk
+```
+
+Windows:
+```powershell
+scoop install wk
+```
+
+Verify: `wk version`
+
+### Issue: "Not authenticated" or Auth Failures
 
 **Symptoms:**
 ```
-Error: Python 3.11+ required
-ModuleNotFoundError: No module named 'xyz'
+Error: not authenticated
+Error: Unauthorized
 ```
 
 **Diagnosis:**
 ```bash
-python3 --version
-# If shows <3.11 or command not found, Python needs setup
+wk auth status
+# Should show Profile, Workspace, Environment, Region, API status
 ```
 
 **Solutions:**
-
-#### Option A: Using pyenv (Recommended)
-
-```bash
-# Install pyenv if not present
-curl https://pyenv.run | bash
-
-# Add to shell profile (~/.zshrc or ~/.bashrc)
-export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init -)"
-
-# Restart shell or source profile
-source ~/.zshrc
-
-# Install Python 3.11
-pyenv install 3.11.14
-pyenv local 3.11.14
-
-# Verify
-python3 --version  # Should show 3.11.x
-```
-
-#### Option B: Using Homebrew (macOS)
-
-```bash
-brew install python@3.11
-export PATH="/opt/homebrew/opt/python@3.11/bin:$PATH"
-python3 --version
-```
-
-#### Option C: Using System Package Manager (Linux)
-
-```bash
-# Ubuntu/Debian
-sudo apt update
-sudo apt install python3.11 python3.11-venv
-
-# Use update-alternatives if needed
-sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
-```
-
-### Issue: "Permission denied" on bin/workato
-
-**Symptoms:**
-```
--bash: bin/workato: Permission denied
-```
-
-**Solution:**
-```bash
-chmod +x bin/workato
-```
-
-### Issue: "gem not found" or Ruby errors
-
-**Symptoms:**
-```
-ERROR: Gem::GemNotFoundException
-```
-
-**Background:** Workato CLI is a Ruby gem that requires Python for certain operations.
-
-**Solution:**
-```bash
-# Ensure Ruby is available (usually pre-installed on macOS)
-ruby --version
-
-# If missing on Linux:
-sudo apt install ruby-full
-
-# Re-run the setup script
-./setup.sh          # Mac/Linux
-.\setup.ps1         # Windows
-```
+1. Re-run authentication:
+   ```bash
+   make workato-login
+   ```
+2. Verify your token in the root `.env` file:
+   ```bash
+   # Should be a long token string, no extra spaces or newlines
+   WORKATO_API_TOKEN=wrkatrial-eyJ0eXAiOi...
+   ```
+3. If the token was regenerated in Workato, update `.env` and re-run `make workato-login`
 
 ### Issue: API Token Not Working
 
@@ -129,84 +83,62 @@ sudo apt install ruby-full
 ```
 Error: Unauthorized
 Error: Invalid API key
-```
-
-**Diagnosis:**
-```bash
-# Check .env file
-cat .env | grep WORKATO
-
-# Verify token format (should be long alphanumeric string)
+Error: Forbidden
 ```
 
 **Solutions:**
 1. Ensure token is copied correctly (no extra spaces or newlines)
-2. Verify API key permissions in Workato UI:
-   - Settings -> API Keys & Clients
+2. Verify API client permissions in Workato UI:
+   - Workspace Admin → API Clients → your client
    - Required permissions:
-     - Projects -> Project Assets (all)
-     - Projects -> Recipe Lifecycle Management (all)
-     - Tools -> API Platform (all except OpenAPI)
-     - Admin -> Workspace Details (all)
+     - Projects → Project Assets (all)
+     - Projects → Recipe Lifecycle Management (all)
+     - Tools → API Platform (all)
+     - Admin → Workspace Details (all)
+     - Admin → Developer API clients (all)
 3. Regenerate token if expired
 
-### Issue: "make workato-init" Hangs
+### Issue: "make workato-init" Fails
 
 **Symptoms:**
-- Command runs but no output for >2 minutes
-- Eventually times out
+- Command errors or no output
 
 **Solutions:**
-1. Check network connectivity to Workato
-2. Verify token is valid: `make status tool=workato`
-3. Try running script directly with verbose output:
+1. Check that `wk auth status` shows a valid profile
+2. Ensure you're in the `dewy-resort` root directory
+3. Try running with verbose output:
    ```bash
-   export WORKATO_API_TOKEN=your_token
-   bash -x scripts/tools/create_workato_folders.sh
+   make status tool=workato
    ```
+
+### Issue: "make push" Fails
+
+**Symptoms:**
+```
+Error: project not initialized
+Error: no recipes found
+```
+
+**Solutions:**
+1. Run `make workato-init` first — this creates the local project scaffold
+2. Verify the `workato/recipes/` directory contains `.recipe.json` files
+3. Lint warnings during push are expected and will not block deployment
 
 ---
 
 ## Salesforce CLI Issues
 
-### Issue: "npm ERR!" during sf install
-
-**Symptoms:**
-```
-npm ERR! code EACCES
-npm ERR! syscall access
-```
-
-**Solution:**
-```bash
-# Fix npm permissions (don't use sudo with npm)
-mkdir -p ~/.npm-global
-npm config set prefix '~/.npm-global'
-export PATH=~/.npm-global/bin:$PATH
-
-# Re-run the setup script
-./setup.sh          # Mac/Linux
-.\setup.ps1         # Windows
-```
-
 ### Issue: "sf: command not found" after install
-
-**Symptoms:**
-```
--bash: bin/sf: No such file or directory
-```
 
 **Diagnosis:**
 ```bash
 ls -la bin/
-# Check if sf exists
+# Check if sf wrapper exists
 ```
 
 **Solution:**
 ```bash
-# CLI installs to tools/sf-cli, symlink may have failed
-ls tools/sf-cli/bin/
-ln -sf ../tools/sf-cli/bin/sf bin/sf
+make setup tool=salesforce
 ```
 
 ### Issue: Salesforce Login Fails
@@ -220,14 +152,13 @@ Browser opened but login stuck
 **Solutions:**
 
 1. **Check browser popup blocker:**
-   - Ensure popup is allowed for salesforce.com
+   - Ensure popups are allowed for salesforce.com
 
 2. **Try incognito/private window:**
-   - Sometimes cached credentials interfere
+   - Cached credentials can interfere
 
-3. **Manual authentication:**
+3. **Use device flow instead of web flow:**
    ```bash
-   # Use device flow instead of web flow
    bin/sf org login device --alias myDevOrg
    ```
 
@@ -249,22 +180,13 @@ INSUFFICIENT_ACCESS: Cannot access object
    - Must be Developer Edition or Sandbox
    - Cannot use Production org
 
-2. **Check deployment order:**
+2. **Re-run the deploy:**
    ```bash
-   # Deploy metadata first
-   cd salesforce
-   ../bin/sf project deploy start --source-dir force-app --target-org myDevOrg
-
-   # Then assign permission set
-   ../bin/sf org assign permset --name Hotel_Management_Admin --target-org myDevOrg
-
-   # Then import data
-   ../bin/sf data import tree --plan data/data-plan.json --target-org myDevOrg
+   make sf-deploy org=myDevOrg
    ```
 
 3. **Check for existing data conflicts:**
    ```bash
-   # If seed data import fails, check for existing records
    bin/sf data query --query "SELECT Id FROM Account LIMIT 5" --target-org myDevOrg
    ```
 
@@ -280,7 +202,7 @@ INSUFFICIENT_ACCESS: Cannot access object
 
 **Diagnosis:**
 ```bash
-# Check .env exists and has content
+# Check .env exists in the project root and has content
 cat .env
 
 # Check for invisible characters
@@ -311,11 +233,9 @@ cat -A .env
    WORKATO_API_TOKEN = abc123
    ```
 
-3. **Reload shell:**
-   ```bash
-   source .env
-   # Or restart terminal
-   ```
+3. **Check you have the right .env file:**
+   - Root `.env` — contains `WORKATO_API_TOKEN` (used by Makefile and `wk` CLI)
+   - `app/.env` — contains MCP URLs, Cognito config, app settings (used by the hotel app)
 
 ---
 
@@ -327,9 +247,9 @@ cat -A .env
 
 **Temporary Workarounds:**
 
-1. **Skip Workato CLI, use UI directly:**
+1. **Skip `wk` CLI, use Workato UI directly:**
    - Import recipes manually via Workato UI
-   - Navigate to Projects -> Import -> Upload JSON files
+   - Navigate to Projects → Import → Upload JSON files
 
 2. **Use facilitator's Salesforce org:**
    - Have backup org pre-configured
@@ -337,11 +257,12 @@ cat -A .env
 
 3. **Use mock mode:**
    ```bash
-   # In .env
-   MOCK_MODE=true
+   # In app/.env
+   WORKATO_MOCK_MODE=true
+   AUTH_PROVIDER=mock
 
    # App will use local SQLite instead of Salesforce
-   npm run dev
+   cd app && npm run dev
    ```
 
 ### Pre-Workshop Validation Script
@@ -356,13 +277,13 @@ echo "=== Pre-Workshop Environment Check ==="
 echo -n "Node.js: "
 node --version 2>/dev/null || echo "NOT INSTALLED"
 
-# Python
-echo -n "Python: "
-python3 --version 2>/dev/null || echo "NOT INSTALLED"
-
 # Git
 echo -n "Git: "
 git --version 2>/dev/null || echo "NOT INSTALLED"
+
+# Workato CLI
+echo -n "wk CLI: "
+wk version 2>/dev/null || echo "NOT INSTALLED"
 
 # Network (can reach Workato)
 echo -n "Network (Workato): "

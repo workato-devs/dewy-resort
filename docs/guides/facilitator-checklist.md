@@ -19,7 +19,8 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 | Unit | Ratio | Reason |
 |------|-------|--------|
 | Unit 0 (Setup) | 1:8 | High troubleshooting potential |
-| Units 1-3 | 1:12 | Structured activities, less support needed |
+| Unit 1 (App Launch) | 1:8 | Cognito/env var issues |
+| Units 2-3 | 1:12 | Structured activities, less support needed |
 
 **Minimum staffing:** 2 facilitators for up to 20 attendees
 
@@ -34,6 +35,7 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 - [ ] Test full setup flow on fresh accounts
 - [ ] Prepare backup accounts (2-3 sets)
 - [ ] Confirm room/venue setup
+- [ ] Prepare Cognito/Bedrock credentials for distribution
 
 ### Day Before
 
@@ -50,6 +52,7 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 - [ ] Open all required tabs (Workato, Salesforce, VS Code)
 - [ ] Verify demo environment works
 - [ ] Post wifi credentials
+- [ ] Have Cognito/Bedrock credentials ready to hand out (Unit 1)
 
 ---
 
@@ -59,16 +62,16 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 
 | Issue | Symptoms | Resolution |
 |-------|----------|------------|
-| Python version | `python3 --version` < 3.11 | `pyenv local 3.11` |
-| Node version | `node --version` < 20 | `nvm use 20` |
-| Workato CLI fails | Ruby/gem errors | Check Python first, then retry |
-| Permission denied | Can't execute bin/workato | `chmod +x bin/workato bin/sf` |
+| `wk` not found | `wk version` fails | `brew install workato/tap/wk` or `scoop install wk` |
+| Node version | `node --version` < 20 | `nvm use 20` or re-run bootstrap |
+| `wk` auth fails | `make workato-login` errors | Check token in root `.env`, re-run `make workato-login` |
+| SF CLI missing | `bin/sf` not found | `make setup tool=salesforce` |
 
 ### Salesforce Issues
 
 | Issue | Symptoms | Resolution |
 |-------|----------|------------|
-| Login timeout | Browser hangs | Re-run `bin/sf org login web` |
+| Login timeout | Browser hangs | Re-run `sf org login web --alias myDevOrg` |
 | Deploy fails | Permission errors | Verify Developer Edition org |
 | No rooms visible | Empty Hotel Rooms tab | Refresh browser; check if Contacts exist |
 | Metadata conflicts | Deploy errors | Use fresh org or clean metadata |
@@ -77,18 +80,21 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 
 | Issue | Symptoms | Resolution |
 |-------|----------|------------|
-| API 401 | Unauthorized errors | Check WORKATO_API_TOKEN in .env |
-| Recipes won't start | "Failed: 4" message | Manual activation (Unit 0 Step 4.6) |
-| Connection errors | Salesforce not connected | Re-authenticate in Workspace-Connections |
-| Jobs failing | Recipe execution errors | Check Tools > Logs for details |
+| API 401 | Unauthorized errors | Check WORKATO_API_TOKEN in root `.env` |
+| Recipes won't start | Some recipes fail | May need manual connection linking (Unit 0, Step 3.5) |
+| Connection errors | Salesforce not connected | Re-authenticate in Workspace Connections |
+| Jobs failing | Recipe execution errors | Check Tools → Logs for details |
 
 ### Application Issues
 
 | Issue | Symptoms | Resolution |
 |-------|----------|------------|
 | Port in use | EADDRINUSE error | Kill process on port 3000 or use different port |
+| Login page shows mock mode | After env changes | Restart app: `app/scripts/dev-tools/server.sh restart` |
+| No agent greeting | Chat loads but no message | Check Cognito/Bedrock env vars in `app/.env` |
+| Debug panel missing | Not visible in chat | Set `NEXT_PUBLIC_ENABLE_CHAT_DEBUG=true`, restart app |
 | Empty responses | No data returned | Verify Workato recipes running |
-| Slow first request | 30+ second delay | Normal - cold start, subsequent faster |
+| Slow first request | 30+ second delay | Normal — cold start, subsequent requests faster |
 
 ---
 
@@ -99,72 +105,64 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 | Unit | What to Cut | What to Keep |
 |------|-------------|--------------|
 | Unit 0 | Skip Stripe setup | SF + Workato connection |
-| Unit 1 | Skip optional endpoint configurations | Core API Collection + MCP Server setup |
-| Unit 2 | Shorten recipe tour | Trace exercise + bonus activities |
+| Unit 1 | Shorten Part 3 to one or two prompts | App launch + Manager dashboard |
+| Unit 2 | Shorten Part 2 (fewer scenarios) | Architecture walkthrough + at least one Workato trace |
 | Unit 3 | Skip implementation, design only | Solution discussion |
 
 ### If Ahead of Schedule
 
 | Opportunity | How to Fill |
 |-------------|-------------|
-| Unit 1 | Allow time for additional endpoint customization |
-| Unit 2 | Let attendees explore bonus activities (error triggering, LLM coaching) |
-| Unit 3 | Allow full implementation time for both options |
+| Unit 1 | Let attendees explore guest vs manager tool differences |
+| Unit 2 | Optional Salesforce verification step, deeper log exploration |
+| Unit 3 | Allow full implementation time, encourage coding agent path |
 | Any | Open Q&A, deeper dive on specific topics |
 
 ---
 
 ## Facilitator Talking Points
 
-### Unit 1: Configuring MCP Servers
+### Unit 1: Running the Hotel App
 
-**"Why not just build one big recipe?"**
+**"Why two separate MCP servers?"**
 
-> "You could. But then you can't reuse any of it. Next month when you need a slightly different workflow, you're starting from scratch. Atomics give you building blocks. The investment in testing one atomic pays off every time you reuse it."
+> "Each persona gets access to only the tools appropriate for their role. A guest shouldn't be able to file maintenance requests or process refunds. By splitting into Guest and Manager servers, we enforce authorization at the platform level — the LLM can't call tools it doesn't have."
 
-**"When do I need a new atomic vs reusing existing?"**
+**"What's the debug panel actually showing?"**
 
-> "If you find yourself wanting to add parameters to an atomic that only apply to one use case, that's a sign you need a new atomic or the logic belongs in the orchestrator. Atomics should stay single-purpose."
-
-**Explaining Datapill Flow:**
-
-> "Each step's output becomes available as datapills for later steps. The key is knowing what each atomic returns -- that's why we document the return fields. If you're not sure what a step returns, check the atomic's result schema or run a test."
+> "It's the client-side view of the MCP conversation. Every time the LLM decides to call a tool, you see the tool name, the parameters it chose, the response it got back, and how long it took. It's the same data you'd see in the Workato logs, but from the LLM's perspective."
 
 ---
 
-### Unit 2: Exploring the Architecture
+### Unit 2: Observability & Monitoring
 
-**Explaining the Core Problem:**
+**Explaining the Core Architecture:**
 
-> "Think about what happens when you expose raw APIs to an LLM. The model has to figure out: Which API do I call first? What ID do I need? What if this call fails? That's asking the LLM to do work it's bad at -- deterministic sequencing and state management. Meanwhile, your backend sits idle when it could handle all of that in milliseconds."
+> "Think about what happens when you expose raw APIs to an LLM. The model has to figure out: Which API do I call first? What ID do I need? What if this call fails? That's asking the LLM to do work it's bad at — deterministic sequencing and state management. Meanwhile, your backend sits idle when it could handle all of that in milliseconds."
 
 **"Why not just let the LLM figure it out?"**
 
-> "It can -- and for simple cases, it works. But watch what happens as complexity grows: more round-trips, more chances for errors, more token spend, slower responses. The question isn't 'can the LLM do it' but 'should it?' We're not limiting the LLM -- we're letting each system do what it's best at."
-
-**"What's the actual performance difference?"**
-
-> "In our measurements, a simple guest service request completes in about 4 seconds. A checkout with payment takes about 7 seconds. Almost all of that time is the backend systems -- Salesforce, Stripe -- not the orchestration layer. The LLM makes one call and waits for one response instead of managing a multi-step conversation."
+> "It can — and for simple cases, it works. But watch what happens as complexity grows: more round-trips, more chances for errors, more token spend, slower responses. The question isn't 'can the LLM do it' but 'should it?' We're not limiting the LLM — we're letting each system do what it's best at."
 
 **Explaining Atomics vs Orchestrators:**
 
-> "Think of atomics like LEGO bricks -- small, tested, predictable. An orchestrator is the instruction manual that says 'connect these bricks in this order.' The LLM picks which manual to use; the backend follows the steps."
+> "Think of atomics like LEGO bricks — small, tested, predictable. An orchestrator is the instruction manual that says 'connect these bricks in this order.' The LLM picks which manual to use; the backend follows the steps."
+
+**"What's the actual performance difference?"**
+
+> "In our measurements, a simple guest service request completes in about 4 seconds. A checkout with payment takes about 7 seconds. Almost all of that time is the backend systems — Salesforce, Stripe — not the orchestration layer. The LLM makes one call and waits for one response instead of managing a multi-step conversation."
 
 ---
 
-### Unit 3: Challenge
+### Unit 3: Build Challenge
 
 **"What order should I check things?"**
 
-> "Validate before you mutate. Check that the guest exists, that the room is available, that the dates make sense -- all before you create or update anything. If you create records first and then discover a problem, you've got orphaned data to clean up."
+> "Validate before you mutate. Check that the guest exists, that the room is available, that the dates make sense — all before you create or update anything. If you create records first and then discover a problem, you've got orphaned data to clean up."
 
 **"How do I handle partial failures?"**
 
 > "Design for it upfront. Either make operations idempotent so retries are safe, or sequence them so failures happen before any state changes. For cross-system operations like payments, always confirm the payment before updating other systems."
-
-**"Is the HTTP-per-request overhead a problem?"**
-
-> "For this pattern -- enterprise integrations hitting Salesforce, Stripe, databases -- the backend systems dominate latency. Our 4-7 second operations spend 98%+ of time waiting on external APIs, not the orchestration layer. The cold start you see on the first request is real, but subsequent requests are faster. Where this pattern is less optimal: high-frequency, low-latency operations or streaming use cases. For those, you'd want persistent connections. But for business workflows like check-ins, service requests, payments? The HTTP overhead is noise."
 
 ---
 
@@ -172,11 +170,11 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 
 **When the Demo Breaks:**
 
-> "Perfect teaching moment. Let's trace what went wrong. This is exactly why we build observability into orchestrators -- production systems fail, and you need to know where and why."
+> "Perfect teaching moment. Let's trace what went wrong. This is exactly why we build observability into orchestrators — production systems fail, and you need to know where and why."
 
 **"What if I don't have Workato?"**
 
-> "The compositional patterns apply to any integration platform. You could implement the same architecture with n8n, Temporal, AWS Step Functions, or even custom code. The key principles -- atomic skills, orchestrators, separation of concerns -- are platform-agnostic."
+> "The compositional patterns apply to any integration platform. You could implement the same architecture with n8n, Temporal, AWS Step Functions, or even custom code. The key principles — atomic skills, orchestrators, separation of concerns — are platform-agnostic."
 
 **"Can I use this at my company?"**
 
