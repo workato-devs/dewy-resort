@@ -222,15 +222,6 @@ If the hotel app has issues, you can test your MCP servers directly with a deskt
 2. Add your MCP server URL and token
 3. Test the same scenarios
 
-### Workato API Platform (Direct)
-
-1. Go to **Platform → API Platform → API Collections**
-2. Click on your collection
-3. Select an endpoint
-4. Use the **Test** tab to send requests directly
-
----
-
 <div class="facilitator-only" markdown="1">
 
 ## Facilitator Notes
@@ -247,7 +238,6 @@ If the hotel app has issues, you can test your MCP servers directly with a deskt
 
 **If the app fails for an attendee:**
 - Pair them with a working neighbor
-- Workato's API Platform has a built-in **Test** tab (Tools → API Platform → select endpoint → Test) as a fallback for seeing tool behavior
 
 **Support Ratio:** 1 facilitator per 8-10 attendees — this unit has the most environment-specific troubleshooting
 

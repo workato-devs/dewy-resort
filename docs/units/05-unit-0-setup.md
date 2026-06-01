@@ -54,7 +54,7 @@ make status
 
 This checks that the Workato CLI (`wk`) and Salesforce CLI (`sf`) are both installed and shows their authentication status.
 
-> **If `wk` is not found:** Install it now — `brew install workato/tap/wk` (macOS/Linux) or `scoop install wk` (Windows).
+> **If `wk` is not found:** Install it now — `brew install workato-devs/tap/wk` (macOS/Linux) or `scoop install wk` (Windows).
 
 **CHECKPOINT:** `make status` shows both CLIs installed
 
@@ -328,7 +328,7 @@ You now have:
 
 | Issue | Solution |
 |-------|----------|
-| `wk` not found | Install: `brew install workato/tap/wk` (macOS/Linux) or `scoop install wk` (Windows) |
+| `wk` not found | Install: `brew install workato-devs/tap/wk` (macOS/Linux) or `scoop install wk` (Windows) |
 | `wk auth` fails | Re-run `make workato-login`, check token in root `.env` |
 | Salesforce login timeout | Re-run `sf org login web --alias myDevOrg` |
 | Recipes won't start | Manual activation (Step 3.5), then re-run `make start-recipes` |

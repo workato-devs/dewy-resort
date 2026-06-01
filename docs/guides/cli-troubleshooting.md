@@ -41,7 +41,7 @@ make doctor           # Detailed diagnostics
 
 macOS/Linux:
 ```bash
-brew install workato/tap/wk
+brew install workato-devs/tap/wk
 ```
 
 Windows:

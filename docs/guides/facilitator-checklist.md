@@ -62,7 +62,7 @@ This entire page is facilitator-focused content. Toggle to Facilitator Mode to s
 
 | Issue | Symptoms | Resolution |
 |-------|----------|------------|
-| `wk` not found | `wk version` fails | `brew install workato/tap/wk` or `scoop install wk` |
+| `wk` not found | `wk version` fails | `brew install workato-devs/tap/wk` or `scoop install wk` |
 | Node version | `node --version` < 20 | `nvm use 20` or re-run bootstrap |
 | `wk` auth fails | `make workato-login` errors | Check token in root `.env`, re-run `make workato-login` |
 | SF CLI missing | `bin/sf` not found | `make setup tool=salesforce` |

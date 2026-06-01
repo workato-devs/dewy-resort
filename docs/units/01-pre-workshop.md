@@ -49,12 +49,14 @@ parent: Workshop Units
 
 ### Required Software
 
-| Software | Minimum Version | Check Command |
-|----------|-----------------|---------------|
-| Node.js | 20+ | `node --version` |
-| Git | Any recent | `git --version` |
-| make | Any | `make --version` |
-| Workato CLI (`wk`) | Any | `wk version` |
+| Software | Minimum Version | Check Command | Install |
+|----------|-----------------|---------------|---------|
+| [Homebrew](https://brew.sh) (macOS/Linux) | Any | `brew --version` | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
+| [Scoop](https://scoop.sh) (Windows) | Any | `scoop --version` | `irm get.scoop.sh \| iex` |
+| Node.js | 20+ | `node --version` | |
+| Git | Any recent | `git --version` | |
+| make | Any | `make --version` | |
+| Workato CLI (`wk`) | Any | `wk version` | See below |
 
 ### Install the Workato CLI
 
@@ -63,12 +65,13 @@ The `wk` CLI must be installed before the workshop. The setup script will check 
 #### macOS / Linux
 
 ```bash
-brew install workato/tap/wk
+brew install workato-devs/tap/wk
 ```
 
 #### Windows
 
 ```powershell
+scoop bucket add workato-devs https://github.com/workato-devs/scoop-bucket
 scoop install wk
 ```
 
@@ -77,16 +80,6 @@ Verify it's installed: `wk version`
 ### Recommended
 - VS Code or preferred IDE
 - Terminal access (iTerm2, Terminal.app, Windows Terminal)
-
-### macOS / Linux
-
-- **[Homebrew](https://brew.sh)** — required for installing `wk` and other dependencies
-- Install: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-
-### Windows
-
-- **[Scoop](https://scoop.sh)** — required for installing `wk` and other dependencies
-- Install: `irm get.scoop.sh | iex`
 
 
 ---
@@ -147,7 +140,7 @@ Please complete these steps before the workshop on [Date]:
    - You'll use +guest and +manager aliases during the workshop
 
 5. Install the Workato CLI:
-   - macOS/Linux: brew install workato/tap/wk
+   - macOS/Linux: brew install workato-devs/tap/wk
    - Windows: scoop install wk
    - Verify: wk version
 
