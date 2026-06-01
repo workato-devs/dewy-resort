@@ -96,7 +96,7 @@ This enables AI agents to handle edge cases and dynamic scenarios intelligently.
 
 The Workato recipes are organized into three categories:
 
-#### 1. **Atomic Salesforce Recipes** (`workato/atomic-salesforce-recipes/`) - Atomic Skills
+#### 1. **Atomic Salesforce Recipes** (`workato/recipes/atomic-salesforce-recipes/`) - Atomic Skills
 
 Low-level, single-purpose operations that AI agents can compose at runtime:
 
@@ -124,7 +124,7 @@ Low-level, single-purpose operations that AI agents can compose at runtime:
 - Handle edge cases with proper authority
 - Enable dynamic scenario handling
 
-#### 2. **Atomic Stripe Recipes** (`workato/atomic-stripe-recipes/`) - Optional Atomic Skills
+#### 2. **Atomic Stripe Recipes** (`workato/recipes/atomic-stripe-recipes/`) - Optional Atomic Skills
 
 Low-level payment operations for AI agent composition:
 
@@ -137,7 +137,7 @@ Low-level payment operations for AI agent composition:
 
 **Total: 6 atomic Stripe recipes (MCP atomic skills)**
 
-#### 3. **Orchestrator Recipes** (`workato/orchestrator-recipes/`) - High-level Workflows
+#### 3. **Orchestrator Recipes** (`workato/recipes/orchestrator-recipes/`) - High-level Workflows
 
 Complex, validated workflows for common scenarios (exposed as MCP tools):
 
@@ -203,96 +203,98 @@ This persona-based organization enables AI agents to access only the tools appro
 
 Before setting up Workato, ensure you have completed:
 
-1. ✅ **Salesforce Setup** - Custom objects must be deployed first
-   - See [SALESFORCE_SETUP.md](./SALESFORCE_SETUP.md)
+1. ✅ **Salesforce Setup** - Custom objects deployed and seed data imported
+   - See [SALESFORCE_SETUP.md](../../vendor/salesforce/docs/SALESFORCE_SETUP.md)
    - Verify objects exist: `Booking__c`, `Hotel_Room__c`, `Payment_Transaction__c`, `SMS_Notification__c`
 
-2. ✅ **Workato Account** - Trial or paid account
-   - Sign up at https://www.workato.com/trial
+2. ✅ **Workato Sandbox Account** - Trial/Developer Sandbox with API Platform access
+   - You should have received a sandbox URL and API token from your facilitator
 
-3. ✅ **Workato CLI Installed**
-   - Run `make setup tool=workato` to install
+3. ✅ **wk CLI Installed**
+   - macOS/Linux: `brew install workato/tap/wk`
+   - Windows: `scoop install wk`
+   - Run `make setup tool=workato` to verify
 
-4. ✅ **Environment Variables Configured**
-   ```bash
-   WORKATO_API_TOKEN=your_api_token_here
-   WORKATO_API_EMAIL=your_email@example.com
-   ```
-
-5. ⚠️ **Optional: Stripe Account** (if using payment features)
-   - Test account at https://dashboard.stripe.com/register
-
-6. ⚠️ **Optional: Twilio Account** (SMS recipes not yet released)
-   - Sign up at https://www.twilio.com/try-twilio
+4. ✅ **Stripe Developer Account** (required for payment features)
+   - Sign up at https://dashboard.stripe.com/register
+   - Have your **test mode** secret key ready (`sk_test_...`)
 
 ---
 
 ## Installation Steps
 
-### Step 1: Install Workato CLI
+### Step 1: Install wk CLI
 
 ```bash
-# Install Workato CLI (if not already installed)
-make setup tool=workato
+# macOS/Linux
+brew install workato/tap/wk
+
+# Windows
+scoop install wk
 
 # Verify installation
-make status tool=workato
+make setup tool=workato
 ```
 
-You should see the Workato CLI version and authentication status.
+### Step 2: Add Your API Token
 
-### Step 2: Configure Workato API Token
+Open the `.env` file in the project root and paste your Workato API token:
 
-1. Log in to your Workato account: https://app.trial.workato.com (if using a Developer sandbox--recommended)
-2. Navigate to **Settings** → **API Keys & Clients**
-3. Create a new API key with these permissions:
-   - **Projects** → **Project Assets** :
-      - Projects & folders, Connections, Recipes, Recipe Versions (select all)
-   - **Projects** → **Recipe Lifecycle Management**:
-      - Recipe lifecycle management, Export manifests (select all)
-   - **Tools** → **API Platform**:
-      - Collections & endpoints (select everything except 2 OpenAPI-related perms)
-   - **Admin** → **Workspace Details**:
-      - Workspace details (select all)
-4. Save changes
-5. Copy the API token
-6. Add to your `.env` file:
+```
+WORKATO_API_TOKEN=wrkatrial-eyJ0eXAiOi...
+```
+
+Your facilitator will provide this token for your sandbox.
+
+### Step 3: Authenticate wk CLI
 
 ```bash
-WORKATO_API_TOKEN=your_api_token_here
-WORKATO_API_EMAIL=your_email@example.com
+make workato-login
 ```
 
-### Step 3: Deploy All Recipes
+This reads the token from `.env` and creates a keychain-backed auth profile. Verify with:
 
-This command initializes Workato folders/projects and deploys all recipes:
+```bash
+wk auth status
+```
+
+**Expected output:**
+```
+Profile:     workshop
+Workspace:   Your Name
+Environment: dev
+Region:      trial
+API:         connected
+```
+
+### Step 4: Initialize Project
 
 ```bash
 make workato-init
 ```
 
+This creates the local project scaffold so the CLI knows where your recipes live.
+
+### Step 5: Push Recipes
+
+```bash
+make push
+```
+
 **What this does:**
-- Creates project folders in Workato
-- Pushes all 33 recipes (15 Salesforce + 6 Stripe + 12 orchestrators)
-- Creates connection definitions in `Workspace-Connections` folder
+- Deploys all recipes to your Workato workspace (15 Salesforce + 6 Stripe + 12 orchestrators + supporting recipes)
+- Creates the folder structure (`atomic-salesforce-recipes`, `atomic-stripe-recipes`, `orchestrator-recipes`, etc.)
+- Lint warnings are expected and will not block the push
 
-**Expected output:**
-```
-Initializing Workato projects...
-✓ Created project: atomic-salesforce-recipes
-✓ Created project: atomic-stripe-recipes
-✓ Created project: orchestrator-recipes
-✓ Created project: Workspace-Connections
-✓ Pushed 33 recipes successfully
-```
+**Expected output:** A list of `.recipe.json` files with `created` status.
 
-### Step 4: Configure Connections in Workato UI
+### Step 6: Activate Connections in Workato UI
 
-After deploying recipes, you must authenticate each connection in the Workato UI.
+⚠️ **Manual step** — connections must be activated in the Workato UI before any recipe can run.
 
-1. **Log in to Workato**: https://app.trial.workato.com (if using Dev Sandbox--recommended)
-2. **Navigate to Projects** → **Workspace-Connections**
-3. **Authenticate each connection:**
+1. **Log in to Workato**: Use your sandbox URL (e.g., https://app.trial.workato.com)
+2. **Navigate to Projects** → **Workspace Connections**
+3. **Activate each connection:**
 
 #### Salesforce Connection (Required)
 
@@ -300,80 +302,89 @@ After deploying recipes, you must authenticate each connection in the Workato UI
 2. Click **Connect** or **Authenticate**
 3. Log in to your Salesforce org (the same org you deployed metadata to)
 4. Authorize Workato to access your Salesforce org
-5. **⚠️ CRITICAL**: Do NOT rename the connection - keep the default name
+5. **⚠️ CRITICAL**: Do NOT rename the connection — keep the default name
 
-#### Stripe Connection (Optional)
+#### Stripe Connection (Required for payment features)
 
 1. Click on the **Stripe** connection
 2. Click **Connect** or **Authenticate**
 3. Select **API key** as the authentication type
-4. **Get your Stripe Secret API Key:**
-   - Open the [Stripe Dashboard](https://dashboard.stripe.com/) in a new tab
-   - Ensure you're in **Test mode** (toggle in the top-right corner)
-   - Navigate to **Developers** → **API keys**
-   - Under "Standard keys", find the **Secret key**
-   - Click **Reveal test key** to show the full key
-   - Copy the key (starts with `sk_test_`)
-5. **Paste the Secret API Key** into Workato's connection field
-6. Click **Connect** to complete authentication
-7. **⚠️ CRITICAL**: Do NOT rename the connection - keep the default name
+4. Paste your Stripe **test mode** secret key (`sk_test_...`)
+5. Click **Connect** to complete authentication
+6. **⚠️ CRITICAL**: Do NOT rename the connection — keep the default name
 
-**Note**: Always use **test mode** keys for workshop environments. Never use live/production keys (`sk_live_`) in development.
+**Why connection names matter:** Recipes reference connections by name. Renaming a connection breaks every recipe that uses it.
 
-#### Twilio Connection (Optional)
-
-1. Click on the **Twilio** connection
-2. Click **Connect** or **Authenticate**
-3. Enter your Twilio Account SID and Auth Token
-4. **⚠️ CRITICAL**: Do NOT rename the connection
-
-**Why connection names matter:**
-Recipes reference connections by name. Renaming connections will break recipe execution and cause authentication errors.
-
-### Step 5: Start Recipes (Automated)
-
-After configuring connections, start all recipes using the automated script:
+### Step 7: Start Recipes (First Pass)
 
 ```bash
 make start-recipes
 ```
 
+This starts all stopped recipes. Most should start successfully.
+
+**If 4 recipes fail to start** (known platform caching issue), see [Manual Recipe Activation](#manual-recipe-activation) below, then run `make start-recipes` again to pick up the stragglers.
+
+**If all recipes start**, skip ahead to Step 8.
+
+### Step 8: Set Up API Platform
+
+```bash
+make setup-api
+```
+
 **What this does:**
-- Fetches all deployed recipes from Workato
-- Sorts recipes by ID (ascending order)
-- Starts each recipe sequentially
-- Reports success/failure for each recipe
+- Creates two API collections: `dewy-resort-guest` (7 endpoints) and `dewy-resort-manager` (10 endpoints)
+- Maps each endpoint to its backing orchestrator recipe
 
-**Expected results:**
-- If you configured **Salesforce only**: 4 Salesforce recipes remain inactive (manually activated), and all Stripe-dependent recipes inactive (11 total)
-- If you configured **Salesforce + Stripe**: Just 4 Salesforce recipes (manually activated) remain inactive
-
-**Sample output:**
+**Expected output:**
 ```
-========================================
-Starting Workato Recipes
-========================================
-
-Found 33 recipes
-
-Recipe ID: 12345 - Create booking orchestrator
-  ✓ Started successfully
-
-Recipe ID: 12346 - Search bookings by room and dates
-  ✗ Failed to start: Connection not configured
-
-...
-
-========================================
-Summary
-========================================
-Total recipes: 33
-Started: 29
-Already running: 0
-Failed: 4
-
-⚠️  Some recipes failed to start
+API Platform setup complete.
+  - Guest collection: dewy-resort-guest (7 endpoints)
+  - Manager collection: dewy-resort-manager (10 endpoints)
 ```
+
+### Step 9: Enable API Endpoints
+
+```bash
+make enable-api-endpoints
+```
+
+This activates all API endpoints so they can receive traffic. All recipes must be running first — if any endpoint fails with "underlying recipe is inactive", start the missing recipe and re-run this command.
+
+### Step 10: Set Up MCP Servers
+
+```bash
+make setup-mcp
+```
+
+**What this does:**
+- Creates two MCP servers: `dewy-resort-guest` and `dewy-resort-manager`
+- Retrieves MCP URLs and tokens
+- Writes connection details to `app/.env`
+
+**Expected output:**
+```
+MCP servers created.
+  Guest MCP:   https://...dewy-resort-guest-v1?wkt_token=...
+  Manager MCP: https://...dewy-resort-manager-v1?wkt_token=...
+  Values saved to app/.env
+```
+
+The full MCP URLs can be used directly with Claude, Codex, or any MCP-compatible client.
+
+### Step 11: Verify
+
+Test that the MCP servers respond:
+
+```bash
+# Replace with your actual MCP URL from the output above
+curl -s -X POST "YOUR_MCP_URL" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python3 -m json.tool
+```
+
+You should see a list of tools (7 for guest, 10 for manager).
 
 ---
 
@@ -394,7 +405,7 @@ These recipes use the **"Execute SOQL query"** action in Salesforce, which requi
 
 #### Why Manual Activation is Needed
 
-These recipes require manual activation due to a **metadata caching issue** in Workato. When recipes with dynamic SOQL queries are deployed via the CLI, the Salesforce connection metadata may not be properly cached. Opening the recipe in the builder and re-selecting the connection refreshes the metadata cache, allowing the recipes to start successfully.
+These recipes require manual activation due to a **metadata caching issue** in Workato. When recipes with dynamic SOQL queries are deployed via the CLI, the Salesforce connection is not automatically linked. Opening the recipe's **Connections** tab and selecting your Salesforce connection refreshes the metadata cache, allowing the recipe to start.
 
 ---
 
@@ -408,35 +419,23 @@ For **each** of the 4 Salesforce SOQL recipes:
 
 1. **Navigate to the recipe:**
    - Log in to Workato: https://app.trial.workato.com (if using Developer Sandbox -- recommended)
-   - Go to **Projects** → **atomic-salesforce-recipes**
-   - Find the recipe (e.g., "Search bookings by room and dates")
+   - Go to **Projects** → find the recipe's project (e.g., **orchestrator-recipes** or **atomic-salesforce-recipes**)
+   - Click on the recipe name to open its detail page
 
-2. **Open the recipe editor:**
-   - Click on the recipe name
-   - Click **"Edit Recipe"** button (top right)
-   - Wait for the recipe builder to load
+2. **Link the Salesforce connection:**
+   - Click the **Connections** tab (between "Jobs" and "Versions")
+   - In the left panel, you'll see **"Salesforce connection"** with a red **"Requires connection"** warning
+   - In the main panel under "Showing active connections", click your Salesforce connection (e.g., **"SF Dev Account"**)
+   - A green **"Connection updated successfully"** banner appears at the top
 
-3. **Configure the Salesforce action:**
-   - In the recipe canvas, locate the **Salesforce** action (usually the second step)
-   - Click on the action to select it
-   - In the right-hand panel, click **"Edit"**
-   - Select your **Salesforce connection** from the dropdown (e.g., "SF Dev Account" or your connection name)
-   - Verify the SOQL query appears correctly
-   - Click **"Done"** or **"Save"** in the action panel
+3. **Repeat for remaining recipes:**
+   - Return to the project listing and repeat steps 1-2 for each recipe
 
-4. **Save the recipe:**
-   - Click **"Save"** in the top right of the recipe builder
-   - Wait for the save confirmation
-   - Click **"Exit"** to return to the recipe details page
-
-5. **Start the recipe:**
-   - On the recipe details page, click **"Start Recipe"** (top right)
-   - Wait for confirmation that the recipe is running
-   - Verify the status shows "Running"
-
-6. **Repeat for remaining recipes:**
-   - Return to **Projects** → **atomic-salesforce-recipes**
-   - Repeat steps 1-5 for the next recipe
+4. **Start all recipes:**
+   - Once all 4 recipes have their connections linked, run:
+     ```bash
+     make start-recipes
+     ```
 
 ---
 
@@ -500,7 +499,7 @@ curl -X POST "https://apim.workato.com/your-collection-id/search_room_by_number"
 **Cause**: The SOQL query references Salesforce objects or fields that don't exist in your org.
 
 **Solution**:
-1. Verify Salesforce metadata is deployed (see [SALESFORCE_SETUP.md](./SALESFORCE_SETUP.md))
+1. Verify Salesforce metadata is deployed (see [SALESFORCE_SETUP.md](../../vendor/salesforce/docs/SALESFORCE_SETUP.md))
 2. Check that custom objects exist:
    ```bash
    bin/sf org open --target-org myDevOrg
@@ -546,14 +545,12 @@ curl -X POST "https://apim.workato.com/your-collection-id/search_room_by_number"
 
 ### API Endpoint Returns 401 Unauthorized
 
-**Cause**: API token is missing, expired, or incorrect.
+**Cause**: MCP token is missing, expired, or the MCP server wasn't created.
 
 **Solution**:
-1. Verify `SALESFORCE_API_AUTH_TOKEN` in `.env` matches your Workato API key
-2. Check API key permissions in Workato:
-   - Go to **Settings** → **API Keys & Clients**
-   - Ensure "Execute recipes" permission is enabled
-3. Regenerate API key if necessary
+1. Re-run `make setup-mcp-env` to refresh tokens in `app/.env`
+2. Verify MCP servers exist: `wk mcp servers list`
+3. If no servers exist, run `make setup-mcp` to create them
 
 ---
 
@@ -579,15 +576,18 @@ curl -X POST "https://apim.workato.com/your-collection-id/search_room_by_number"
 
 ### make workato-init Fails
 
-**Cause**: Workato API token not configured or expired.
+**Cause**: wk CLI not authenticated or session expired.
 
 **Solution**:
-1. Check `.env` file has `WORKATO_API_TOKEN` set
-2. Verify token is valid:
+1. Verify authentication:
    ```bash
-   make status tool=workato
+   wk auth status
    ```
-3. If authentication still fails, check that you have granted all permissions to your API client in Workato settings
+2. Re-authenticate if needed:
+   ```bash
+   make workato-login
+   ```
+3. If authentication still fails, check that `WORKATO_API_TOKEN` in `.env` is correct and has the required permissions
 
 ---
 
@@ -595,10 +595,9 @@ curl -X POST "https://apim.workato.com/your-collection-id/search_room_by_number"
 
 After completing Workato setup:
 
-1. ✅ **Configure hotel app** - Add Workato API Collection URL to `.env`
-2. ✅ **Start development server** - Run `npm run dev`
-3. ⚠️ **Optional: Configure Cognito** - See [COGNITO_SETUP.md](./COGNITO_SETUP.md) (for workshop convenience)
-4. ⚠️ **Optional: Configure Bedrock AI** - See Bedrock documentation (future: bring your own API key)
+1. ✅ **Verify `app/.env`** — MCP URLs and tokens were written by `make setup-mcp`. Confirm `MCP_GUEST_MCP_URL` and `MCP_MANAGER_MCP_URL` are present.
+2. ⚠️ **Configure SF API collection** — The hotel app needs `SALESFORCE_API_AUTH_TOKEN` and `SALESFORCE_API_COLLECTION_URL` in `app/.env` (not yet automated).
+3. ✅ **Start development server** — Run `npm run dev`
 
 ---
 
@@ -606,6 +605,48 @@ After completing Workato setup:
 
 - [Workato Developer Docs](https://docs.workato.com/developing-connectors.html)
 - [Workato API Reference](https://docs.workato.com/oem/oem-api.html)
-- [Workato CLI Guide](https://docs.workato.com/workato-cli.html)
-- [Salesforce Setup Guide](./SALESFORCE_SETUP.md)
-- [Project README](../README.md)
+- [wk CLI Documentation](https://docs.workato.com/wk-cli.html)
+- [Salesforce Setup Guide](../../vendor/salesforce/docs/SALESFORCE_SETUP.md)
+- [Project README](../../README.md)
+
+---
+
+## Workshop Facilitator Runlist
+
+Quick checklist for workshop facilitators to verify before and during the session.
+
+### Pre-Workshop (Facilitator)
+
+1. **Provision sandboxes** — Each attendee (or pair) needs a Workato trial sandbox with API Platform access.
+2. **Generate API tokens** — Create a `WORKATO_API_TOKEN` for each sandbox (Settings → API Keys & Clients). Distribute to attendees.
+3. **Salesforce + Stripe pre-reqs** — Ensure SF org is deployed with custom objects and seed data, and attendees have Stripe test-mode keys.
+
+### Attendee Setup Flow
+
+| Step | Command | Manual? | Notes |
+|------|---------|---------|-------|
+| 1 | `brew install workato/tap/wk` | — | `scoop install wk` on Windows |
+| 2 | Paste token in `.env` | ✋ | `WORKATO_API_TOKEN=wrkatrial-...` |
+| 3 | `make workato-login` | — | Creates keychain profile `workshop` |
+| 4 | `make workato-init` | — | Initializes project scaffold |
+| 5 | `make push` | — | Deploys all recipes; lint warnings are OK |
+| 6 | Activate connections in UI | ✋ | Salesforce (required) + Stripe (required for payments) |
+| 7 | `make start-recipes` | — | First pass — most recipes start |
+| 8 | Fix 4 caching recipes (if needed) | ✋ | See [Manual Recipe Activation](#manual-recipe-activation) |
+| 9 | `make start-recipes` | — | Second pass to pick up stragglers (skip if Step 7 started all) |
+| 10 | `make setup-api` | — | Creates API collections + endpoints |
+| 11 | `make enable-api-endpoints` | — | Activates all endpoints |
+| 12 | `make setup-mcp` | — | Creates MCP servers, writes tokens to `app/.env` |
+
+### Key Things to Know
+
+1. **wk CLI installation** — `brew install workato/tap/wk` (macOS/Linux) or `scoop install wk` (Windows). No Python, no npm. Single Go binary.
+2. **Token-based auth** — Attendees paste `WORKATO_API_TOKEN` in `.env`, then `make workato-login` creates a non-interactive keychain profile. No browser-based OAuth needed.
+3. **Push tolerates lint warnings** — `wk push` returns exit code 2 for lint warnings. The Makefile handles this gracefully; warnings do not block the push.
+4. **Connection activation is a manual gate** — No recipe or endpoint can run until connections are activated in the Workato UI. This must happen before `make start-recipes`.
+5. **Caching issue (4 recipes)** — Some recipes using dynamic SOQL may fail to start on first attempt. Opening the recipe's Connections tab in the UI and re-selecting the Salesforce connection fixes it. This is intermittent — it may not happen on every sandbox.
+6. **Endpoint enablement requires running recipes** — `make enable-api-endpoints` will fail for any endpoint whose backing recipe is not running. Fix the recipe first, then re-run.
+7. **MCP tokens are stable** — `make setup-mcp-env` reads existing tokens via `wk mcp servers get`. It does not rotate tokens, so it's safe to re-run.
+8. **Windows parity** — All Make targets work on Windows. PowerShell equivalents exist for scripts in `vendor/workato/scripts/cli/`. Use `scoop` instead of `brew` for wk installation.
+9. **TODO: SF API collection token** — The hotel app also needs `SALESFORCE_API_AUTH_TOKEN` and `SALESFORCE_API_COLLECTION_URL` in `app/.env`. These are not yet automated and must be configured manually.
+10. **Verify everything works** — After setup, `curl` the MCP URL with `{"jsonrpc":"2.0","id":1,"method":"tools/list"}` — you should see 7 guest tools and 10 manager tools.

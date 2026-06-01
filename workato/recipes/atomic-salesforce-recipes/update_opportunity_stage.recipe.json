@@ -1,102 +1,19 @@
 {
-  "name": "Update opportunity stage",
-  "version": 1,
-  "private": true,
-  "concurrency": 1,
   "code": {
-    "number": 0,
-    "provider": "workato_recipe_function",
-    "name": "execute",
     "as": "trigger",
-    "keyword": "trigger",
-    "input": {
-      "parameters_schema_json": "[{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Salesforce Opportunity ID\"},{\"name\":\"stage_name\",\"label\":\"Stage name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"New opportunity stage (e.g., Closed Won)\"},{\"name\":\"close_date\",\"label\":\"Close date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":false,\"hint\":\"Date opportunity closed (ISO 8601 format)\"},{\"name\":\"payment_id\",\"label\":\"Payment ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe charge ID for reconciliation\"}]",
-      "result_schema_json": "[{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"stage_name\",\"label\":\"Stage name\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"payment_id\",\"label\":\"Payment ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"updated\",\"label\":\"Updated\",\"type\":\"boolean\",\"control_type\":\"checkbox\"}]"
-    },
-    "extended_output_schema": [
-      {
-        "label": "Parameters",
-        "name": "parameters",
-        "properties": [
-          {
-            "control_type": "text",
-            "label": "Opportunity ID",
-            "name": "opportunity_id",
-            "type": "string",
-            "optional": false,
-            "hint": "Salesforce Opportunity ID"
-          },
-          {
-            "control_type": "text",
-            "label": "Stage name",
-            "name": "stage_name",
-            "type": "string",
-            "optional": false,
-            "hint": "New opportunity stage (e.g., Closed Won)"
-          },
-          {
-            "control_type": "date",
-            "label": "Close date",
-            "render_input": "date_conversion",
-            "parse_output": "date_conversion",
-            "name": "close_date",
-            "type": "date",
-            "optional": false,
-            "hint": "Date opportunity closed (ISO 8601 format)"
-          },
-          {
-            "control_type": "text",
-            "label": "Payment ID",
-            "name": "payment_id",
-            "type": "string",
-            "optional": false,
-            "hint": "Stripe charge ID for reconciliation"
-          }
-        ],
-        "type": "object"
-      }
-    ],
     "block": [
       {
-        "number": 1,
-        "keyword": "try",
-        "input": {
-        },
         "block": [
           {
-            "number": 2,
-            "provider": "salesforce",
-            "name": "update_sobject",
             "as": "update_opportunity",
-            "keyword": "action",
-            "toggleCfg": {
-              "StageName": false,
-              "CloseDate": true,
-              "Payment_ID__c": true
-            },
-            "input": {
-              "sobject_name": "Opportunity",
-              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"opportunity_id\"]}')}",
-              "StageName": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"stage_name\"]}')}",
-              "CloseDate": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"close_date\"]}')",
-              "Payment_ID__c": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"payment_id\"]}')"
-            },
-            "extended_output_schema": [
-              {
-                "control_type": "text",
-                "label": "ID",
-                "name": "id",
-                "type": "string"
-              }
-            ],
             "extended_input_schema": [
               {
                 "control_type": "text",
                 "hint": "Salesforce internal ID of Opportunity to update",
+                "key_scope": "opportunity",
                 "label": "Opportunity ID",
                 "name": "id",
-                "type": "string",
-                "key_scope": "opportunity"
+                "type": "string"
               },
               {
                 "control_type": "text",
@@ -104,9 +21,9 @@
                 "label": "Account ID",
                 "name": "AccountId",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "number",
@@ -115,9 +32,9 @@
                 "name": "Amount",
                 "optional": true,
                 "parse_output": "float_conversion",
-                "type": "number",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "number"
               },
               {
                 "control_type": "text",
@@ -125,9 +42,9 @@
                 "label": "Campaign ID",
                 "name": "CampaignId",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "date",
@@ -136,10 +53,10 @@
                 "name": "CloseDate",
                 "optional": true,
                 "parse_output": "parse_iso8601_date",
-                "type": "date_time",
                 "render_input": "render_iso8601_date",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "date_time"
               },
               {
                 "control_type": "text-area",
@@ -147,9 +64,9 @@
                 "label": "Description",
                 "name": "Description",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "select",
@@ -159,24 +76,24 @@
                 "optional": true,
                 "pick_list": "sobject_field_values_list",
                 "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"ForecastCategoryName\""
+                  "field_name": "\"ForecastCategoryName\"",
+                  "sobject_name": "\"Opportunity\""
                 },
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
                 "toggle_field": {
                   "control_type": "text",
-                  "label": "Forecast Category",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
                   "custom": false,
+                  "label": "Forecast Category",
+                  "name": "ForecastCategoryName",
+                  "optional": true,
                   "sfdc_createable": true,
                   "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "ForecastCategoryName"
+                  "toggle_hint": "Enter custom value",
+                  "type": "string"
                 },
                 "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "type": "string"
               },
               {
                 "control_type": "select",
@@ -186,35 +103,35 @@
                 "optional": true,
                 "pick_list": "sobject_field_values_list",
                 "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"LeadSource\""
+                  "field_name": "\"LeadSource\"",
+                  "sobject_name": "\"Opportunity\""
                 },
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
                 "toggle_field": {
                   "control_type": "text",
-                  "label": "Lead Source",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
                   "custom": false,
+                  "label": "Lead Source",
+                  "name": "LeadSource",
+                  "optional": true,
                   "sfdc_createable": true,
                   "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "LeadSource"
+                  "toggle_hint": "Enter custom value",
+                  "type": "string"
                 },
                 "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "type": "string"
               },
               {
                 "control_type": "text",
                 "custom": false,
+                "event_title": true,
                 "label": "Name",
                 "name": "Name",
                 "optional": true,
-                "type": "string",
-                "event_title": true,
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "text",
@@ -222,9 +139,9 @@
                 "label": "Next Step",
                 "name": "NextStep",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "select",
@@ -234,24 +151,24 @@
                 "optional": true,
                 "pick_list": "sobject_field_values_list",
                 "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"Type\""
+                  "field_name": "\"Type\"",
+                  "sobject_name": "\"Opportunity\""
                 },
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
                 "toggle_field": {
                   "control_type": "text",
-                  "label": "Opportunity Type",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
                   "custom": false,
+                  "label": "Opportunity Type",
+                  "name": "Type",
+                  "optional": true,
                   "sfdc_createable": true,
                   "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Type"
+                  "toggle_hint": "Enter custom value",
+                  "type": "string"
                 },
                 "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "type": "string"
               },
               {
                 "control_type": "text",
@@ -259,9 +176,9 @@
                 "label": "Owner ID",
                 "name": "OwnerId",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "text",
@@ -269,9 +186,9 @@
                 "label": "Payment ID",
                 "name": "Payment_ID__c",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "text",
@@ -279,9 +196,9 @@
                 "label": "Price Book ID",
                 "name": "Pricebook2Id",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "checkbox",
@@ -289,23 +206,23 @@
                 "label": "Private",
                 "name": "IsPrivate",
                 "optional": true,
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
                 "toggle_field": {
-                  "label": "Private",
                   "control_type": "text",
-                  "toggle_hint": "Use custom value",
-                  "render_input": null,
-                  "parse_output": null,
-                  "optional": true,
                   "custom": false,
+                  "label": "Private",
+                  "name": "IsPrivate",
+                  "optional": true,
+                  "parse_output": null,
+                  "render_input": null,
                   "sfdc_createable": true,
                   "sfdc_updateable": true,
-                  "type": "boolean",
-                  "name": "IsPrivate"
+                  "toggle_hint": "Use custom value",
+                  "type": "boolean"
                 },
                 "toggle_hint": "Select from option list",
-                "type": "boolean",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "type": "boolean"
               },
               {
                 "control_type": "text",
@@ -313,9 +230,9 @@
                 "label": "Probability (%)",
                 "name": "Probability",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "number",
@@ -324,9 +241,9 @@
                 "name": "TotalOpportunityQuantity",
                 "optional": true,
                 "parse_output": "float_conversion",
-                "type": "number",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "number"
               },
               {
                 "control_type": "select",
@@ -336,24 +253,24 @@
                 "optional": true,
                 "pick_list": "sobject_field_values_list",
                 "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"StageName\""
+                  "field_name": "\"StageName\"",
+                  "sobject_name": "\"Opportunity\""
                 },
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
                 "toggle_field": {
                   "control_type": "text",
-                  "label": "Stage",
-                  "toggle_hint": "Enter custom value",
                   "custom": false,
+                  "label": "Stage",
+                  "name": "StageName",
+                  "optional": true,
                   "sfdc_createable": true,
                   "sfdc_updateable": true,
-                  "optional": true,
-                  "type": "string",
-                  "name": "StageName"
+                  "toggle_hint": "Enter custom value",
+                  "type": "string"
                 },
                 "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "type": "string"
               },
               {
                 "control_type": "date",
@@ -362,10 +279,10 @@
                 "name": "Arrival_Date__c",
                 "optional": true,
                 "parse_output": "parse_iso8601_date",
-                "type": "date_time",
                 "render_input": "render_iso8601_date",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "date_time"
               },
               {
                 "control_type": "text",
@@ -373,9 +290,9 @@
                 "label": "Current Generator(s)",
                 "name": "CurrentGenerators__c",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "select",
@@ -385,24 +302,24 @@
                 "optional": true,
                 "pick_list": "sobject_field_values_list",
                 "pick_list_params": {
-                  "sobject_name": "\"Opportunity\"",
-                  "field_name": "\"DeliveryInstallationStatus__c\""
+                  "field_name": "\"DeliveryInstallationStatus__c\"",
+                  "sobject_name": "\"Opportunity\""
                 },
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
                 "toggle_field": {
                   "control_type": "text",
-                  "label": "Delivery/Installation Status",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
                   "custom": true,
+                  "label": "Delivery/Installation Status",
+                  "name": "DeliveryInstallationStatus__c",
+                  "optional": true,
                   "sfdc_createable": true,
                   "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "DeliveryInstallationStatus__c"
+                  "toggle_hint": "Enter custom value",
+                  "type": "string"
                 },
                 "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
+                "type": "string"
               },
               {
                 "control_type": "date",
@@ -411,10 +328,10 @@
                 "name": "Departure_Date__c",
                 "optional": true,
                 "parse_output": "parse_iso8601_date",
-                "type": "date_time",
                 "render_input": "render_iso8601_date",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "date_time"
               },
               {
                 "control_type": "text",
@@ -422,9 +339,9 @@
                 "label": "Main Competitor(s)",
                 "name": "MainCompetitors__c",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "text",
@@ -432,9 +349,9 @@
                 "label": "Order Number",
                 "name": "OrderNumber__c",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               },
               {
                 "control_type": "text",
@@ -442,67 +359,46 @@
                 "label": "Tracking Number",
                 "name": "TrackingNumber__c",
                 "optional": true,
-                "type": "string",
                 "sfdc_createable": true,
-                "sfdc_updateable": true
+                "sfdc_updateable": true,
+                "type": "string"
               }
             ],
+            "extended_output_schema": [
+              {
+                "control_type": "text",
+                "label": "ID",
+                "name": "id",
+                "type": "string"
+              }
+            ],
+            "input": {
+              "CloseDate": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"close_date\"]}')",
+              "Payment_ID__c": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"payment_id\"]}')",
+              "StageName": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"stage_name\"]}')}",
+              "id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"opportunity_id\"]}')}",
+              "sobject_name": "Opportunity"
+            },
+            "keyword": "action",
+            "name": "update_sobject",
+            "number": 2,
+            "provider": "salesforce",
+            "toggleCfg": {
+              "CloseDate": true,
+              "Payment_ID__c": true,
+              "StageName": false
+            },
+            "uuid": "update-opportunity-action-001",
             "visible_config_fields": [
               "sobject_name",
               "id",
               "StageName",
               "CloseDate",
               "Payment_ID__c"
-            ],
-            "uuid": "update-opportunity-action-001"
+            ]
           },
           {
-            "number": 3,
-            "provider": "workato_recipe_function",
-            "name": "return_result",
             "as": "return_success",
-            "keyword": "action",
-            "input": {
-              "result": {
-                "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"opportunity_id\"]}')}",
-                "stage_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"stage_name\"]}')}",
-                "payment_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"payment_id\"]}')}",
-                "updated": "true"
-              }
-            },
-            "extended_output_schema": [
-              {
-                "label": "Result",
-                "name": "result",
-                "properties": [
-                  {
-                    "control_type": "text",
-                    "label": "Opportunity ID",
-                    "name": "opportunity_id",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "text",
-                    "label": "Stage name",
-                    "name": "stage_name",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "text",
-                    "label": "Payment ID",
-                    "name": "payment_id",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "checkbox",
-                    "label": "Updated",
-                    "name": "updated",
-                    "type": "boolean"
-                  }
-                ],
-                "type": "object"
-              }
-            ],
             "extended_input_schema": [
               {
                 "label": "Result",
@@ -536,58 +432,116 @@
                 "type": "object"
               }
             ],
+            "extended_output_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "control_type": "text",
+                    "label": "Opportunity ID",
+                    "name": "opportunity_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Stage name",
+                    "name": "stage_name",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Payment ID",
+                    "name": "payment_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Updated",
+                    "name": "updated",
+                    "type": "boolean"
+                  }
+                ],
+                "type": "object"
+              }
+            ],
+            "input": {
+              "result": {
+                "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"opportunity_id\"]}')}",
+                "payment_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"payment_id\"]}')}",
+                "stage_name": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"stage_name\"]}')}",
+                "updated": "true"
+              }
+            },
+            "keyword": "action",
+            "name": "return_result",
+            "number": 3,
+            "provider": "workato_recipe_function",
             "uuid": "return-success-001"
           },
           {
-            "number": 4,
-            "provider": null,
-            "name": "catch",
             "as": "update_opportunity_catch",
-            "keyword": "catch",
-            "input": {
-              "max_retry_count": "0",
-              "retry_interval": "2"
-            },
             "block": [
               {
-                "number": 5,
-                "provider": "logger",
-                "name": "log_message",
                 "as": "log_error",
-                "keyword": "action",
-                "input": {
-                  "message": "Error updating opportunity stage: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"update_opportunity_catch\",\"path\":[\"message\"]}')}",
-                  "user_logs_enabled": "false"
-                },
                 "extended_input_schema": [
                   {
                     "control_type": "switch",
                     "default": false,
                     "disable_formula": true,
                     "extends_schema": true,
-                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "hint": "                Send a copy of the message to Workato logs.\n                \u003ca href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\"\u003e\n                  Learn more\n                \u003c/a\u003e\n",
                     "label": "Send to Workato log service",
                     "name": "user_logs_enabled",
                     "optional": true,
                     "type": "string"
                   }
                 ],
+                "input": {
+                  "message": "Error updating opportunity stage: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"update_opportunity_catch\",\"path\":[\"message\"]}')}",
+                  "user_logs_enabled": "false"
+                },
+                "keyword": "action",
+                "name": "log_message",
+                "number": 5,
+                "provider": "logger",
                 "uuid": "log-error-001"
               },
               {
-                "number": 6,
-                "provider": "workato_recipe_function",
-                "name": "return_result",
                 "as": "return_error",
-                "keyword": "action",
-                "input": {
-                  "result": {
-                    "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"opportunity_id\"]}')}",
-                    "stage_name": "=null",
-                    "payment_id": "=null",
-                    "updated": "false"
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Opportunity ID",
+                        "name": "opportunity_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Stage name",
+                        "name": "stage_name",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Payment ID",
+                        "name": "payment_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Updated",
+                        "name": "updated",
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "object"
                   }
-                },
+                ],
                 "extended_output_schema": [
                   {
                     "label": "Result",
@@ -621,72 +575,115 @@
                     "type": "object"
                   }
                 ],
-                "extended_input_schema": [
-                  {
-                    "label": "Result",
-                    "name": "result",
-                    "properties": [
-                      {
-                        "control_type": "text",
-                        "label": "Opportunity ID",
-                        "name": "opportunity_id",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Stage name",
-                        "name": "stage_name",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Payment ID",
-                        "name": "payment_id",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "checkbox",
-                        "label": "Updated",
-                        "name": "updated",
-                        "type": "boolean"
-                      }
-                    ],
-                    "type": "object"
+                "input": {
+                  "result": {
+                    "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"opportunity_id\"]}')}",
+                    "payment_id": "=null",
+                    "stage_name": "=null",
+                    "updated": "false"
                   }
-                ],
+                },
+                "keyword": "action",
+                "name": "return_result",
+                "number": 6,
+                "provider": "workato_recipe_function",
                 "uuid": "return-error-001"
               }
             ],
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "keyword": "catch",
+            "number": 4,
             "uuid": "update-opportunity-catch-001"
           }
         ],
+        "input": {},
+        "keyword": "try",
+        "number": 1,
         "uuid": "try-001"
       }
     ],
-    "uuid": "b2c3d4e5-6f7a-8901-bcde-fa1234567890"
+    "extended_output_schema": [
+      {
+        "label": "Parameters",
+        "name": "parameters",
+        "properties": [
+          {
+            "control_type": "text",
+            "hint": "Salesforce Opportunity ID",
+            "label": "Opportunity ID",
+            "name": "opportunity_id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "hint": "New opportunity stage (e.g., Closed Won)",
+            "label": "Stage name",
+            "name": "stage_name",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "date",
+            "hint": "Date opportunity closed (ISO 8601 format)",
+            "label": "Close date",
+            "name": "close_date",
+            "optional": false,
+            "parse_output": "date_conversion",
+            "render_input": "date_conversion",
+            "type": "date"
+          },
+          {
+            "control_type": "text",
+            "hint": "Stripe charge ID for reconciliation",
+            "label": "Payment ID",
+            "name": "payment_id",
+            "optional": false,
+            "type": "string"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "input": {
+      "parameters_schema_json": "[{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Salesforce Opportunity ID\"},{\"name\":\"stage_name\",\"label\":\"Stage name\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"New opportunity stage (e.g., Closed Won)\"},{\"name\":\"close_date\",\"label\":\"Close date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":false,\"hint\":\"Date opportunity closed (ISO 8601 format)\"},{\"name\":\"payment_id\",\"label\":\"Payment ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe charge ID for reconciliation\"}]",
+      "result_schema_json": "[{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"stage_name\",\"label\":\"Stage name\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"payment_id\",\"label\":\"Payment ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"updated\",\"label\":\"Updated\",\"type\":\"boolean\",\"control_type\":\"checkbox\"}]"
+    },
+    "keyword": "trigger",
+    "name": "execute",
+    "number": 0,
+    "provider": "workato_recipe_function",
+    "uuid": "update-opp-trigger-001"
   },
+  "concurrency": 1,
   "config": [
     {
+      "account_id": null,
       "keyword": "application",
       "provider": "workato_recipe_function",
-      "skip_validation": false,
-      "account_id": null
+      "skip_validation": false
     },
     {
+      "account_id": {
+        "folder": "Workspace Connections",
+        "name": "SF Dev Account",
+        "zip_name": "Workspace Connections/sf_dev_account.connection.json"
+      },
       "keyword": "application",
       "provider": "salesforce",
-      "skip_validation": false,
-      "account_id": {
-        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
-        "name": "SF Dev Account",
-        "folder": "Workspace Connections"
-      }
+      "skip_validation": false
     },
     {
+      "account_id": null,
       "keyword": "application",
       "provider": "logger",
-      "skip_validation": false,
-      "account_id": null
+      "skip_validation": false
     }
-  ]
+  ],
+  "name": "Update opportunity stage",
+  "private": true,
+  "version": 2
 }

@@ -1,0 +1,7 @@
+{
+  "name": "Search cases on behalf of staff",
+  "method": "POST",
+  "path": "search-cases-on-behalf-of-staff",
+  "recipe_name": "search_cases_on_behalf_of_staff",
+  "description": "Search all service cases with staff-level access. Optional guest_email, status_filter (New/In Progress/Closed), priority_filter (Low/Medium/High/Urgent), case_type_filter (Maintenance/Facilities/Service Request/Housekeeping), room_number, limit (default: 50). Returns array of cases with full details including guest contact info."
+}

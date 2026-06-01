@@ -172,7 +172,7 @@ Write-Host "This script will:" -ForegroundColor Cyan
 Write-Host "  1. Install winget (if needed)"
 Write-Host "  2. Install Git (if needed)"
 Write-Host "  3. Clone the Dewy Resort repository"
-Write-Host "  4. Run the full setup (Python, Workato CLI, Salesforce CLI)"
+Write-Host "  4. Run the full setup (wk CLI, Salesforce CLI)"
 Write-Host ""
 
 $reply = Read-Host "Continue? [Y/n]"

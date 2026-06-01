@@ -1,0 +1,7 @@
+{
+  "name": "Manage booking orchestrator",
+  "method": "POST",
+  "path": "manage-booking-orchestrator",
+  "recipe_name": "manage_booking_orchestrator",
+  "description": "Update existing booking by external_id. Resolves guest_email→contact_id and room_number→room_id automatically. Requires external_id; optional guest_email, room_number, check_in_date, check_out_date, number_of_guests, special_requests. Returns updated booking details or error codes (400: booking/guest/room not found)."
+}

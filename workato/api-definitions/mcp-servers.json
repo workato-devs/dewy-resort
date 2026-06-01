@@ -1,0 +1,16 @@
+{
+  "servers": [
+    {
+      "name": "dewy-resort-guest",
+      "api_collection": "dewy-resort-guest",
+      "description": "MCP server for hotel guests to manage their stay at Dewy Resort. Provides self-service tools for check-in, checkout, booking management, and service requests. Guests can view their own room and case information but cannot access other guests' data or staff-only operations.",
+      "persona": "guest"
+    },
+    {
+      "name": "dewy-resort-manager",
+      "api_collection": "dewy-resort-manager",
+      "description": "MCP server for hotel managers to manage operations at Dewy Resort. Provides tools for guest check-in/checkout, booking management, maintenance requests, case management, and compensation workflows. Managers have elevated access to view all rooms, all cases, and process refunds.",
+      "persona": "manager"
+    }
+  ]
+}

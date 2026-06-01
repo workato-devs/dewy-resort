@@ -1,0 +1,7 @@
+{
+  "name": "Search rooms on behalf of guest",
+  "method": "POST",
+  "path": "search-rooms-on-behalf-of-guest",
+  "recipe_name": "search_rooms_on_behalf_of_guest",
+  "description": "Search rooms associated with a guest's bookings. Requires guest_email; optional filter (current/historical/all, default: current), limit (default: 10). Returns array of rooms with room_number, status, room_type, floor, nightly_rate, max_occupancy, plus count and filter_applied."
+}

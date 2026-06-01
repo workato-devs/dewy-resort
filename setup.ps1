@@ -89,175 +89,24 @@ function Install-Winget {
     return $false
 }
 
-function Get-PythonScriptsPath {
-    # Find Python Scripts directory - check both Roaming and Local
-    $possiblePaths = @(
-        "$env:APPDATA\Python\Python313\Scripts",
-        "$env:APPDATA\Python\Python312\Scripts",
-        "$env:APPDATA\Python\Python311\Scripts",
-        "$env:LOCALAPPDATA\Programs\Python\Python313\Scripts",
-        "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts",
-        "$env:LOCALAPPDATA\Programs\Python\Python311\Scripts",
-        "$env:USERPROFILE\AppData\Roaming\Python\Python313\Scripts",
-        "$env:USERPROFILE\AppData\Roaming\Python\Python312\Scripts",
-        "$env:USERPROFILE\AppData\Roaming\Python\Python311\Scripts",
-        "$env:USERPROFILE\AppData\Local\Programs\Python\Python311\Scripts"
-    )
-    
-    foreach ($path in $possiblePaths) {
-        if (Test-Path $path) {
-            return $path
-        }
-    }
-    return $null
-}
-
-function Test-PathContains {
-    param([string]$Directory)
-    
-    $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-    $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
-    $fullPath = "$machinePath;$currentPath"
-    
-    return $fullPath -split ';' | Where-Object { $_ -eq $Directory }
-}
-
-function Add-ToUserPath {
-    param([string]$Directory)
-    
-    Write-Host "Adding to user PATH: $Directory" -ForegroundColor Yellow
-    
-    try {
-        $currentUserPath = [Environment]::GetEnvironmentVariable("Path", "User")
-        if ($currentUserPath) {
-            $newPath = "$currentUserPath;$Directory"
-        } else {
-            $newPath = $Directory
-        }
-        
-        [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
-        
-        # Also update current session
-        $env:Path = "$env:Path;$Directory"
-        
-        Write-Host "[OK] Added to user PATH" -ForegroundColor Green
-        return $true
-    } catch {
-        Write-Host "[ERROR] Failed to update user PATH: $($_.Exception.Message)" -ForegroundColor Red
-        return $false
-    }
-}
-
-function Add-ToMachinePath {
-    param([string]$Directory)
-    
-    # This requires elevation - spawn a new elevated process
-    Write-Host "Adding to system PATH requires Administrator privileges..." -ForegroundColor Yellow
-    
-    $scriptBlock = @"
-        `$currentPath = [Environment]::GetEnvironmentVariable('Path', 'Machine')
-        `$newPath = "`$currentPath;$Directory"
-        [Environment]::SetEnvironmentVariable('Path', `$newPath, 'Machine')
-        Write-Host '[OK] Added to system PATH' -ForegroundColor Green
-"@
-    
-    try {
-        Start-Process powershell -Verb RunAs -ArgumentList "-Command", $scriptBlock -Wait
-        
-        # Refresh current session PATH
-        $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
-        
-        return $true
-    } catch {
-        Write-Host "[ERROR] Failed to elevate privileges: $($_.Exception.Message)" -ForegroundColor Red
-        return $false
-    }
-}
-
-function Ensure-PythonInPath {
-    $scriptsPath = Get-PythonScriptsPath
-    
-    if (-not $scriptsPath) {
-        Write-Host "[WARN] Could not find Python Scripts directory" -ForegroundColor Yellow
-        return $true  # Continue anyway, might work
-    }
-    
-    if (Test-PathContains -Directory $scriptsPath) {
-        Write-Host "[OK] Python Scripts directory already in PATH" -ForegroundColor Green
-        return $true
-    }
-    
+function Check-WkCli {
     Write-Host ""
-    Write-Host "Python Scripts directory not in PATH: $scriptsPath" -ForegroundColor Yellow
-    Write-Host ""
-    
-    # Try user PATH first (no admin required)
-    if (Add-ToUserPath -Directory $scriptsPath) {
-        return $true
-    }
-    
-    # If user PATH failed, offer to try machine PATH (requires admin)
-    Write-Host ""
-    $reply = Read-Host "Try adding to system PATH? (requires Administrator) [y/N]"
-    if ($reply -match '^[Yy]$') {
-        return Add-ToMachinePath -Directory $scriptsPath
-    }
-    
-    Write-Host "[WARN] Python Scripts not in PATH. You may need to add it manually:" -ForegroundColor Yellow
-    Write-Host "  $scriptsPath" -ForegroundColor Yellow
-    return $true  # Continue anyway
-}
+    Write-Host "Checking for wk CLI..." -ForegroundColor Yellow
 
-function Install-Python {
-    Write-Host ""
-    Write-Host "Checking for Python 3.11+..." -ForegroundColor Yellow
-    
-    # Check for Python
-    $pythonCmd = $null
-    foreach ($cmd in @("python", "python3", "py")) {
-        try {
-            $versionOutput = & $cmd --version 2>&1
-            if ($versionOutput -match "Python (\d+)\.(\d+)") {
-                $major = [int]$matches[1]
-                $minor = [int]$matches[2]
-                if ($major -ge 3 -and $minor -ge 11) {
-                    $pythonCmd = $cmd
-                    Write-Host "[OK] Python $major.$minor detected (using '$cmd')" -ForegroundColor Green
-                    
-                    # Ensure Scripts directory is in PATH
-                    Ensure-PythonInPath | Out-Null
-                    return $true
-                } else {
-                    Write-Host "[INFO] Python $major.$minor found but 3.11+ required" -ForegroundColor Yellow
-                }
-            }
-        } catch { }
-    }
-    
-    Write-Host "Python 3.11+ not found. Installing via winget..." -ForegroundColor Yellow
-    
-    try {
-        winget install Python.Python.3.11 --accept-source-agreements --accept-package-agreements
-        if ($LASTEXITCODE -ne 0) {
-            throw "winget install failed with exit code $LASTEXITCODE"
-        }
-        
-        # Refresh PATH from registry
-        $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
-        
-        Write-Host "[OK] Python 3.11 installed successfully" -ForegroundColor Green
-        
-        # Ensure Scripts directory is in PATH
-        if (-not (Ensure-PythonInPath)) {
-            Write-Host "[WARN] Could not add Python Scripts to PATH automatically" -ForegroundColor Yellow
-            Write-Host "You may need to restart PowerShell or add it manually" -ForegroundColor Yellow
-        }
-        
+    if (Get-Command wk -ErrorAction SilentlyContinue) {
+        $version = & wk version 2>$null
+        Write-Host "[OK] wk CLI available: $version" -ForegroundColor Green
         return $true
-    } catch {
-        Write-Host "[ERROR] Failed to install Python: $($_.Exception.Message)" -ForegroundColor Red
-        return $false
     }
+
+    Write-Host "wk CLI not found." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Install it:" -ForegroundColor Yellow
+    Write-Host "  scoop install wk"
+    Write-Host ""
+    Write-Host "Then authenticate:" -ForegroundColor Yellow
+    Write-Host "  wk auth login"
+    return $false
 }
 
 function Install-Git {
@@ -495,13 +344,11 @@ function Install-Prerequisites {
         # Don't fail - make is optional for basic setup
     }
     
-    # Step 4: Check/Install Python
-    if (-not (Install-Python)) {
-        Write-Host ""
-        Write-Host "[ERROR] Cannot proceed without Python 3.11+" -ForegroundColor Red
-        return $false
+    # Step 4: Check wk CLI
+    if (-not (Check-WkCli)) {
+        Write-Host "[WARN] wk CLI not found. Workato setup will require it." -ForegroundColor Yellow
     }
-    
+
     # Step 5: Check/Install Node.js v20
     if (-not (Install-NodeJS)) {
         Write-Host ""
@@ -516,23 +363,18 @@ function Install-Prerequisites {
 }
 
 function Show-Help {
-    Write-Host "Available Commands:" -ForegroundColor Cyan
+    Write-Host "Next steps:" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "Setup Commands:"
-    Write-Host "  .\setup.ps1 -Tool all         Setup all CLIs (workato + salesforce)"
-    Write-Host "  .\setup.ps1 -Tool workato     Setup only Workato CLI"
-    Write-Host "  .\setup.ps1 -Tool salesforce  Setup only Salesforce CLI"
+    Write-Host "  1. wk auth login                    # Authenticate with Workato"
+    Write-Host "  2. make workato-init                # Initialize wk project"
+    Write-Host "  3. make start-recipes               # Start all recipes"
+    Write-Host "  4. cd app; cp .env.example .env     # Configure app"
+    Write-Host "  5. npm install; npm run dev          # Start dev server"
     Write-Host ""
-    Write-Host "Workato Commands:"
-    Write-Host "  .\workato\scripts\cli\start_workato_recipes.ps1     Start all recipes"
-    Write-Host "  .\workato\scripts\cli\stop_workato_recipes.ps1      Stop all recipes"
-    Write-Host ""
-    Write-Host "Salesforce Commands:"
-    Write-Host "  .\vendor\salesforce\scripts\deploy.ps1 -TargetOrg <alias>  Deploy to Salesforce"
-    Write-Host ""
-    Write-Host "Dev Server Commands:"
-    Write-Host "  .\app\scripts\dev-tools\server.ps1 -Action start    Start dev server"
-    Write-Host "  .\app\scripts\dev-tools\server.ps1 -Action stop     Stop dev server"
+    Write-Host "Other commands:" -ForegroundColor Cyan
+    Write-Host "  make help                           # Show all available commands"
+    Write-Host "  make sf-deploy org=<alias>          # Deploy Salesforce metadata"
+    Write-Host "  make doctor                         # Verify CLI installations"
     Write-Host ""
 }
 

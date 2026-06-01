@@ -1,15 +1,17 @@
 {
-  "name": "Search contacts",
-  "recipe_id": {
-    "zip_name": "search_contacts.recipe.json",
-    "name": "Search contacts"
-  },
   "api_group_id": {
-    "zip_name": "sf_api_collection.api_group.json",
-    "name": "sf-api-collection"
+    "folder": "",
+    "name": "sf-api-collection",
+    "zip_name": "sf_api_collection.api_group.json"
   },
-  "method": "POST",
-  "path": "search-contacts",
   "legacy": false,
+  "method": "POST",
+  "name": "Search contacts",
+  "path": "search-contacts",
+  "recipe_id": {
+    "folder": "",
+    "name": "Search contacts",
+    "zip_name": "search_contacts.recipe.json"
+  },
   "validate_request": false
 }

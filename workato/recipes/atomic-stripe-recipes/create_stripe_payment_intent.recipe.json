@@ -1,167 +1,15 @@
 {
-  "name": "Create Stripe payment intent",
-  "version": 1,
-  "private": true,
-  "concurrency": 1,
   "code": {
-    "number": 0,
-    "provider": "workato_recipe_function",
-    "name": "execute",
     "as": "trigger",
-    "keyword": "trigger",
-    "input": {
-      "parameters_schema_json": "[{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":false,\"hint\":\"Amount in cents (USD)\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Three-letter ISO currency code\"},{\"name\":\"customer_id\",\"label\":\"Customer ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe customer ID\"},{\"name\":\"description\",\"label\":\"Description\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Payment description (user-facing)\"},{\"name\":\"guest_id\",\"label\":\"Guest ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Internal guest/contact ID (metadata)\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking confirmation number (metadata)\"},{\"name\":\"idempotency_token\",\"label\":\"Idempotency token\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Client-generated UUID\"}]",
-      "result_schema_json": "[{\"name\":\"payment_intent_id\",\"label\":\"Payment intent ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"client_secret\",\"label\":\"Client secret\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"integer\",\"control_type\":\"integer\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"created\",\"label\":\"Created\",\"type\":\"boolean\",\"control_type\":\"checkbox\"}]"
-    },
-    "extended_output_schema": [
-      {
-        "label": "Parameters",
-        "name": "parameters",
-        "properties": [
-          {
-            "control_type": "integer",
-            "label": "Amount",
-            "parse_output": "integer_conversion",
-            "name": "amount",
-            "type": "integer",
-            "optional": false,
-            "hint": "Amount in cents (USD)"
-          },
-          {
-            "control_type": "text",
-            "label": "Currency",
-            "name": "currency",
-            "type": "string",
-            "optional": false,
-            "hint": "Three-letter ISO currency code"
-          },
-          {
-            "control_type": "text",
-            "label": "Customer ID",
-            "name": "customer_id",
-            "type": "string",
-            "optional": false,
-            "hint": "Stripe customer ID"
-          },
-          {
-            "control_type": "text",
-            "label": "Description",
-            "name": "description",
-            "type": "string",
-            "optional": false,
-            "hint": "Payment description (user-facing)"
-          },
-          {
-            "control_type": "text",
-            "label": "Guest ID",
-            "name": "guest_id",
-            "type": "string",
-            "optional": false,
-            "hint": "Internal guest/contact ID (metadata)"
-          },
-          {
-            "control_type": "text",
-            "label": "Booking number",
-            "name": "booking_number",
-            "type": "string",
-            "optional": true,
-            "hint": "Booking confirmation number (metadata)"
-          },
-          {
-            "control_type": "text",
-            "label": "Idempotency token",
-            "name": "idempotency_token",
-            "type": "string",
-            "optional": false,
-            "hint": "Client-generated UUID"
-          }
-        ],
-        "type": "object"
-      }
-    ],
     "block": [
       {
-        "number": 1,
-        "keyword": "try",
-        "input": {
-        },
         "block": [
           {
-            "number": 2,
-            "provider": "stripe",
-            "name": "__adhoc_http_action",
             "as": "create_payment_intent",
-            "keyword": "action",
-            "input": {
-              "mnemonic": "Create payment intent",
-              "path": "/v1/payment_intents",
-              "verb": "post",
-              "response_type": "json",
-              "input": {
-                "schema": "[{\"name\":\"amount\",\"type\":\"string\",\"optional\":false,\"label\":\"Amount\",\"hint\":\"Amount in cents\",\"details\":{\"real_name\":\"amount\"},\"control_type\":\"text\"},{\"name\":\"currency\",\"type\":\"string\",\"optional\":false,\"label\":\"Currency\",\"hint\":\"Three-letter ISO code\",\"details\":{\"real_name\":\"currency\"},\"control_type\":\"text\"},{\"name\":\"customer\",\"type\":\"string\",\"optional\":false,\"label\":\"Customer\",\"hint\":\"Customer ID\",\"details\":{\"real_name\":\"customer\"},\"control_type\":\"text\"},{\"name\":\"description\",\"type\":\"string\",\"optional\":false,\"label\":\"Description\",\"hint\":\"Payment description\",\"details\":{\"real_name\":\"description\"},\"control_type\":\"text\"},{\"name\":\"metadata[guest_id]\",\"type\":\"string\",\"optional\":false,\"label\":\"Metadata guest ID\",\"hint\":\"Guest ID\",\"details\":{\"real_name\":\"metadata[guest_id]\"},\"control_type\":\"text\"},{\"name\":\"metadata[booking_number]\",\"type\":\"string\",\"optional\":true,\"label\":\"Metadata booking number\",\"hint\":\"Booking number\",\"details\":{\"real_name\":\"metadata[booking_number]\"},\"control_type\":\"text\"},{\"name\":\"metadata[source]\",\"type\":\"string\",\"optional\":false,\"label\":\"Metadata source\",\"hint\":\"Source system\",\"details\":{\"real_name\":\"metadata[source]\"},\"control_type\":\"text\"},{\"name\":\"automatic_payment_methods[enabled]\",\"type\":\"string\",\"optional\":false,\"label\":\"Automatic payment methods enabled\",\"hint\":\"Enable automatic payment methods\",\"details\":{\"real_name\":\"automatic_payment_methods[enabled]\"},\"control_type\":\"text\"},{\"name\":\"automatic_payment_methods[allow_redirects]\",\"type\":\"string\",\"optional\":false,\"label\":\"Automatic payment methods allow redirects\",\"hint\":\"Allow redirect payment methods\",\"details\":{\"real_name\":\"automatic_payment_methods[allow_redirects]\"},\"control_type\":\"text\"}]",
-                "data": {
-                  "amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"amount\"]}')}",
-                  "currency": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"currency\"]}')}",
-                  "customer": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"customer_id\"]}')}",
-                  "description": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"description\"]}')}",
-                  "metadata_guest_id_": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"guest_id\"]}')}",
-                  "metadata_booking_number_": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"booking_number\"]}')}",
-                  "metadata_source_": "hotel_checkout",
-                  "automatic_payment_methods_enabled_": "true",
-                  "automatic_payment_methods_allow_redirects_": "never"
-                }
-              },
-              "output": "[{\"name\":\"id\",\"type\":\"string\",\"label\":\"Payment Intent ID\"},{\"name\":\"client_secret\",\"type\":\"string\",\"label\":\"Client Secret\"},{\"name\":\"status\",\"type\":\"string\",\"label\":\"Status\"},{\"name\":\"amount\",\"type\":\"integer\",\"label\":\"Amount\"},{\"name\":\"currency\",\"type\":\"string\",\"label\":\"Currency\"}]",
-              "request_headers": [
-                {
-                  "name": "Idempotency-Key",
-                  "value": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"idempotency_token\"]}')}"
-                }
-              ],
-              "request_type": "urlencoded"
-            },
-            "extended_output_schema": [
-              {
-                "control_type": "text",
-                "label": "Payment Intent ID",
-                "name": "id",
-                "optional": true,
-                "type": "string"
-              },
-              {
-                "control_type": "text",
-                "label": "Client Secret",
-                "name": "client_secret",
-                "optional": true,
-                "type": "string"
-              },
-              {
-                "control_type": "text",
-                "label": "Status",
-                "name": "status",
-                "optional": true,
-                "type": "string"
-              },
-              {
-                "control_type": "text",
-                "label": "Amount",
-                "name": "amount",
-                "optional": true,
-                "parse_output": "integer_conversion",
-                "type": "integer"
-              },
-              {
-                "control_type": "text",
-                "label": "Currency",
-                "name": "currency",
-                "optional": true,
-                "type": "string"
-              }
-            ],
             "extended_input_schema": [
               {
                 "control_type": "text",
-                "hint": "Base URI is <b>https://api.stripe.com/v1/</b> - path will be appended to this URI. Use absolute URI to override this base URI.",
+                "hint": "Base URI is \u003cb\u003ehttps://api.stripe.com/v1/\u003c/b\u003e - path will be appended to this URI. Use absolute URI to override this base URI.",
                 "label": "Path",
                 "name": "path",
                 "optional": false,
@@ -241,132 +89,132 @@
                 "optional": true,
                 "properties": [
                   {
-                    "control_type": "schema-designer",
-                    "label": "Request body parameters",
-                    "extends_schema": true,
-                    "schema_neutral": true,
-                    "sample_data_type": "json_input",
-                    "sticky": false,
                     "add_field_label": "Add request body parameter",
+                    "control_type": "schema-designer",
+                    "extends_schema": true,
+                    "label": "Request body parameters",
+                    "name": "schema",
                     "optional": true,
-                    "type": "string",
-                    "name": "schema"
+                    "sample_data_type": "json_input",
+                    "schema_neutral": true,
+                    "sticky": false,
+                    "type": "string"
                   },
                   {
+                    "label": "Data",
+                    "name": "data",
+                    "optional": true,
                     "properties": [
                       {
                         "control_type": "text",
-                        "label": "Amount",
-                        "optional": false,
-                        "hint": "Amount in cents",
                         "details": {
                           "real_name": "amount"
                         },
+                        "hint": "Amount in cents",
+                        "label": "Amount",
+                        "name": "amount",
+                        "optional": false,
                         "sticky": true,
-                        "type": "string",
-                        "name": "amount"
+                        "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Currency",
-                        "optional": false,
-                        "hint": "Three-letter ISO code",
                         "details": {
                           "real_name": "currency"
                         },
+                        "hint": "Three-letter ISO code",
+                        "label": "Currency",
+                        "name": "currency",
+                        "optional": false,
                         "sticky": true,
-                        "type": "string",
-                        "name": "currency"
+                        "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Customer",
-                        "optional": false,
-                        "hint": "Customer ID",
                         "details": {
                           "real_name": "customer"
                         },
+                        "hint": "Customer ID",
+                        "label": "Customer",
+                        "name": "customer",
+                        "optional": false,
                         "sticky": true,
-                        "type": "string",
-                        "name": "customer"
+                        "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Description",
-                        "optional": false,
-                        "hint": "Payment description",
                         "details": {
                           "real_name": "description"
                         },
+                        "hint": "Payment description",
+                        "label": "Description",
+                        "name": "description",
+                        "optional": false,
                         "sticky": true,
-                        "type": "string",
-                        "name": "description"
+                        "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Metadata guest ID",
-                        "optional": false,
-                        "hint": "Guest ID",
                         "details": {
                           "real_name": "metadata[guest_id]"
                         },
+                        "hint": "Guest ID",
+                        "label": "Metadata guest ID",
+                        "name": "metadata_guest_id_",
+                        "optional": false,
                         "sticky": true,
-                        "type": "string",
-                        "name": "metadata_guest_id_"
+                        "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Metadata booking number",
-                        "optional": true,
-                        "hint": "Booking number",
                         "details": {
                           "real_name": "metadata[booking_number]"
                         },
+                        "hint": "Booking number",
+                        "label": "Metadata booking number",
+                        "name": "metadata_booking_number_",
+                        "optional": true,
                         "sticky": true,
-                        "type": "string",
-                        "name": "metadata_booking_number_"
+                        "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Metadata source",
-                        "optional": false,
-                        "hint": "Source system",
                         "details": {
                           "real_name": "metadata[source]"
                         },
+                        "hint": "Source system",
+                        "label": "Metadata source",
+                        "name": "metadata_source_",
+                        "optional": false,
                         "sticky": true,
-                        "type": "string",
-                        "name": "metadata_source_"
+                        "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Automatic payment methods enabled",
-                        "optional": false,
-                        "hint": "Enable automatic payment methods",
                         "details": {
                           "real_name": "automatic_payment_methods[enabled]"
                         },
+                        "hint": "Enable automatic payment methods",
+                        "label": "Automatic payment methods enabled",
+                        "name": "automatic_payment_methods_enabled_",
+                        "optional": false,
                         "sticky": true,
-                        "type": "string",
-                        "name": "automatic_payment_methods_enabled_"
+                        "type": "string"
                       },
                       {
                         "control_type": "text",
-                        "label": "Automatic payment methods allow redirects",
-                        "optional": false,
-                        "hint": "Allow redirect payment methods",
                         "details": {
                           "real_name": "automatic_payment_methods[allow_redirects]"
                         },
+                        "hint": "Allow redirect payment methods",
+                        "label": "Automatic payment methods allow redirects",
+                        "name": "automatic_payment_methods_allow_redirects_",
+                        "optional": false,
                         "sticky": true,
-                        "type": "string",
-                        "name": "automatic_payment_methods_allow_redirects_"
+                        "type": "string"
                       }
                     ],
-                    "label": "Data",
-                    "optional": true,
-                    "type": "object",
-                    "name": "data"
+                    "type": "object"
                   }
                 ],
                 "type": "object"
@@ -384,16 +232,16 @@
                   {
                     "control_type": "text",
                     "label": "Name",
+                    "name": "name",
                     "optional": true,
-                    "type": "string",
-                    "name": "name"
+                    "type": "string"
                   },
                   {
                     "control_type": "text",
                     "label": "Value",
+                    "name": "value",
                     "optional": true,
-                    "type": "string",
-                    "name": "value"
+                    "type": "string"
                   }
                 ],
                 "type": "array"
@@ -405,9 +253,9 @@
                 "name": "output",
                 "optional": true,
                 "sample_data_type": "json_http",
+                "schema_neutral": true,
                 "sticky": true,
-                "type": "string",
-                "schema_neutral": true
+                "type": "string"
               },
               {
                 "control_type": "schema-designer",
@@ -416,9 +264,9 @@
                 "name": "response_headers",
                 "optional": true,
                 "sample_data_type": "json_http",
+                "schema_neutral": true,
                 "sticky": false,
-                "type": "string",
-                "schema_neutral": true
+                "type": "string"
               },
               {
                 "control_type": "checkbox",
@@ -430,6 +278,77 @@
                 "type": "number"
               }
             ],
+            "extended_output_schema": [
+              {
+                "control_type": "text",
+                "label": "Payment Intent ID",
+                "name": "id",
+                "optional": true,
+                "type": "string"
+              },
+              {
+                "control_type": "text",
+                "label": "Client Secret",
+                "name": "client_secret",
+                "optional": true,
+                "type": "string"
+              },
+              {
+                "control_type": "text",
+                "label": "Status",
+                "name": "status",
+                "optional": true,
+                "type": "string"
+              },
+              {
+                "control_type": "text",
+                "label": "Amount",
+                "name": "amount",
+                "optional": true,
+                "parse_output": "integer_conversion",
+                "type": "integer"
+              },
+              {
+                "control_type": "text",
+                "label": "Currency",
+                "name": "currency",
+                "optional": true,
+                "type": "string"
+              }
+            ],
+            "input": {
+              "input": {
+                "data": {
+                  "amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"amount\"]}')}",
+                  "automatic_payment_methods_allow_redirects_": "never",
+                  "automatic_payment_methods_enabled_": "true",
+                  "currency": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"currency\"]}')}",
+                  "customer": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"customer_id\"]}')}",
+                  "description": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"description\"]}')}",
+                  "metadata_booking_number_": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"booking_number\"]}')}",
+                  "metadata_guest_id_": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"guest_id\"]}')}",
+                  "metadata_source_": "hotel_checkout"
+                },
+                "schema": "[{\"name\":\"amount\",\"type\":\"string\",\"optional\":false,\"label\":\"Amount\",\"hint\":\"Amount in cents\",\"details\":{\"real_name\":\"amount\"},\"control_type\":\"text\"},{\"name\":\"currency\",\"type\":\"string\",\"optional\":false,\"label\":\"Currency\",\"hint\":\"Three-letter ISO code\",\"details\":{\"real_name\":\"currency\"},\"control_type\":\"text\"},{\"name\":\"customer\",\"type\":\"string\",\"optional\":false,\"label\":\"Customer\",\"hint\":\"Customer ID\",\"details\":{\"real_name\":\"customer\"},\"control_type\":\"text\"},{\"name\":\"description\",\"type\":\"string\",\"optional\":false,\"label\":\"Description\",\"hint\":\"Payment description\",\"details\":{\"real_name\":\"description\"},\"control_type\":\"text\"},{\"name\":\"metadata[guest_id]\",\"type\":\"string\",\"optional\":false,\"label\":\"Metadata guest ID\",\"hint\":\"Guest ID\",\"details\":{\"real_name\":\"metadata[guest_id]\"},\"control_type\":\"text\"},{\"name\":\"metadata[booking_number]\",\"type\":\"string\",\"optional\":true,\"label\":\"Metadata booking number\",\"hint\":\"Booking number\",\"details\":{\"real_name\":\"metadata[booking_number]\"},\"control_type\":\"text\"},{\"name\":\"metadata[source]\",\"type\":\"string\",\"optional\":false,\"label\":\"Metadata source\",\"hint\":\"Source system\",\"details\":{\"real_name\":\"metadata[source]\"},\"control_type\":\"text\"},{\"name\":\"automatic_payment_methods[enabled]\",\"type\":\"string\",\"optional\":false,\"label\":\"Automatic payment methods enabled\",\"hint\":\"Enable automatic payment methods\",\"details\":{\"real_name\":\"automatic_payment_methods[enabled]\"},\"control_type\":\"text\"},{\"name\":\"automatic_payment_methods[allow_redirects]\",\"type\":\"string\",\"optional\":false,\"label\":\"Automatic payment methods allow redirects\",\"hint\":\"Allow redirect payment methods\",\"details\":{\"real_name\":\"automatic_payment_methods[allow_redirects]\"},\"control_type\":\"text\"}]"
+              },
+              "mnemonic": "Create payment intent",
+              "output": "[{\"name\":\"id\",\"type\":\"string\",\"label\":\"Payment Intent ID\"},{\"name\":\"client_secret\",\"type\":\"string\",\"label\":\"Client Secret\"},{\"name\":\"status\",\"type\":\"string\",\"label\":\"Status\"},{\"name\":\"amount\",\"type\":\"integer\",\"label\":\"Amount\"},{\"name\":\"currency\",\"type\":\"string\",\"label\":\"Currency\"}]",
+              "path": "/v1/payment_intents",
+              "request_headers": [
+                {
+                  "name": "Idempotency-Key",
+                  "value": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"idempotency_token\"]}')}"
+                }
+              ],
+              "request_type": "urlencoded",
+              "response_type": "json",
+              "verb": "post"
+            },
+            "keyword": "action",
+            "name": "__adhoc_http_action",
+            "number": 2,
+            "provider": "stripe",
+            "uuid": "pi-create-action-002",
             "visible_config_fields": [
               "mnemonic",
               "verb",
@@ -442,84 +361,10 @@
               "request_headers",
               "output",
               "response_headers"
-            ],
-            "uuid": "b1b2c3d4-e5f6-7890-abcd-111111111111"
+            ]
           },
           {
-            "number": 3,
-            "provider": "workato_recipe_function",
-            "name": "return_result",
             "as": "return_success",
-            "keyword": "action",
-            "toggleCfg": {
-              "result.created": true
-            },
-            "input": {
-              "result": {
-                "payment_intent_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"id\"]}')}",
-                "client_secret": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"client_secret\"]}')}",
-                "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"status\"]}')}",
-                "amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"amount\"]}')}",
-                "currency": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"currency\"]}')}",
-                "created": "true"
-              }
-            },
-            "extended_output_schema": [
-              {
-                "label": "Result",
-                "name": "result",
-                "properties": [
-                  {
-                    "control_type": "text",
-                    "label": "Payment intent ID",
-                    "name": "payment_intent_id",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "text",
-                    "label": "Client secret",
-                    "name": "client_secret",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "text",
-                    "label": "Status",
-                    "name": "status",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "integer",
-                    "label": "Amount",
-                    "parse_output": "integer_conversion",
-                    "name": "amount",
-                    "type": "integer"
-                  },
-                  {
-                    "control_type": "text",
-                    "label": "Currency",
-                    "name": "currency",
-                    "type": "string"
-                  },
-                  {
-                    "control_type": "checkbox",
-                    "label": "Created",
-                    "render_input": "boolean_conversion",
-                    "parse_output": "boolean_conversion",
-                    "name": "created",
-                    "type": "boolean",
-                    "toggle_hint": "Select from option list",
-                    "toggle_field": {
-                      "label": "Created",
-                      "control_type": "text",
-                      "toggle_hint": "Use custom value",
-                      "name": "created",
-                      "type": "boolean"
-                    }
-                  }
-                ],
-                "type": "object"
-              }
-            ],
             "extended_input_schema": [
               {
                 "label": "Result",
@@ -546,8 +391,8 @@
                   {
                     "control_type": "integer",
                     "label": "Amount",
-                    "parse_output": "integer_conversion",
                     "name": "amount",
+                    "parse_output": "integer_conversion",
                     "type": "integer"
                   },
                   {
@@ -559,107 +404,103 @@
                   {
                     "control_type": "checkbox",
                     "label": "Created",
-                    "render_input": "boolean_conversion",
-                    "parse_output": "boolean_conversion",
                     "name": "created",
-                    "type": "boolean",
-                    "toggle_hint": "Select from option list",
+                    "parse_output": "boolean_conversion",
+                    "render_input": "boolean_conversion",
                     "toggle_field": {
-                      "label": "Created",
                       "control_type": "text",
-                      "toggle_hint": "Use custom value",
+                      "label": "Created",
                       "name": "created",
+                      "toggle_hint": "Use custom value",
                       "type": "boolean"
-                    }
+                    },
+                    "toggle_hint": "Select from option list",
+                    "type": "boolean"
                   }
                 ],
                 "type": "object"
               }
             ],
-            "uuid": "b1b2c3d4-e5f6-7890-abcd-222222222222"
-          },
-          {
-            "number": 4,
-            "as": "error",
-            "keyword": "catch",
-            "input": {
-            },
-            "block": [
+            "extended_output_schema": [
               {
-                "number": 5,
-                "provider": "workato_recipe_function",
-                "name": "return_result",
-                "as": "return_error",
-                "keyword": "action",
-                "toggleCfg": {
-                  "result.created": true
-                },
-                "input": {
-                  "result": {
-                    "payment_intent_id": "=null",
-                    "client_secret": "=null",
-                    "status": "=null",
-                    "amount": "=null",
-                    "currency": "=null",
-                    "created": "false"
-                  }
-                },
-                "extended_output_schema": [
+                "label": "Result",
+                "name": "result",
+                "properties": [
                   {
-                    "label": "Result",
-                    "name": "result",
-                    "properties": [
-                      {
-                        "control_type": "text",
-                        "label": "Payment intent ID",
-                        "name": "payment_intent_id",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Client secret",
-                        "name": "client_secret",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Status",
-                        "name": "status",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "integer",
-                        "label": "Amount",
-                        "parse_output": "integer_conversion",
-                        "name": "amount",
-                        "type": "integer"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Currency",
-                        "name": "currency",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "checkbox",
-                        "label": "Created",
-                        "render_input": "boolean_conversion",
-                        "parse_output": "boolean_conversion",
-                        "name": "created",
-                        "type": "boolean",
-                        "toggle_hint": "Select from option list",
-                        "toggle_field": {
-                          "label": "Created",
-                          "control_type": "text",
-                          "toggle_hint": "Use custom value",
-                          "name": "created",
-                          "type": "boolean"
-                        }
-                      }
-                    ],
-                    "type": "object"
+                    "control_type": "text",
+                    "label": "Payment intent ID",
+                    "name": "payment_intent_id",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Client secret",
+                    "name": "client_secret",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Status",
+                    "name": "status",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "integer",
+                    "label": "Amount",
+                    "name": "amount",
+                    "parse_output": "integer_conversion",
+                    "type": "integer"
+                  },
+                  {
+                    "control_type": "text",
+                    "label": "Currency",
+                    "name": "currency",
+                    "type": "string"
+                  },
+                  {
+                    "control_type": "checkbox",
+                    "label": "Created",
+                    "name": "created",
+                    "parse_output": "boolean_conversion",
+                    "render_input": "boolean_conversion",
+                    "toggle_field": {
+                      "control_type": "text",
+                      "label": "Created",
+                      "name": "created",
+                      "toggle_hint": "Use custom value",
+                      "type": "boolean"
+                    },
+                    "toggle_hint": "Select from option list",
+                    "type": "boolean"
                   }
                 ],
+                "type": "object"
+              }
+            ],
+            "input": {
+              "result": {
+                "amount": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"amount\"]}')}",
+                "client_secret": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"client_secret\"]}')}",
+                "created": "true",
+                "currency": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"currency\"]}')}",
+                "payment_intent_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"id\"]}')}",
+                "status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"stripe\",\"line\":\"create_payment_intent\",\"path\":[\"status\"]}')}"
+              }
+            },
+            "keyword": "action",
+            "name": "return_result",
+            "number": 3,
+            "provider": "workato_recipe_function",
+            "toggleCfg": {
+              "result.created": true
+            },
+            "uuid": "pi-return-success-003"
+          },
+          {
+            "as": "error",
+            "block": [
+              {
+                "as": "return_error",
                 "extended_input_schema": [
                   {
                     "label": "Result",
@@ -686,8 +527,8 @@
                       {
                         "control_type": "integer",
                         "label": "Amount",
-                        "parse_output": "integer_conversion",
                         "name": "amount",
+                        "parse_output": "integer_conversion",
                         "type": "integer"
                       },
                       {
@@ -699,50 +540,207 @@
                       {
                         "control_type": "checkbox",
                         "label": "Created",
-                        "render_input": "boolean_conversion",
-                        "parse_output": "boolean_conversion",
                         "name": "created",
-                        "type": "boolean",
-                        "toggle_hint": "Select from option list",
+                        "parse_output": "boolean_conversion",
+                        "render_input": "boolean_conversion",
                         "toggle_field": {
-                          "label": "Created",
                           "control_type": "text",
-                          "toggle_hint": "Use custom value",
+                          "label": "Created",
                           "name": "created",
+                          "toggle_hint": "Use custom value",
                           "type": "boolean"
-                        }
+                        },
+                        "toggle_hint": "Select from option list",
+                        "type": "boolean"
                       }
                     ],
                     "type": "object"
                   }
                 ],
-                "uuid": "b1b2c3d4-e5f6-7890-abcd-333333333333"
+                "extended_output_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Payment intent ID",
+                        "name": "payment_intent_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Client secret",
+                        "name": "client_secret",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Status",
+                        "name": "status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "integer",
+                        "label": "Amount",
+                        "name": "amount",
+                        "parse_output": "integer_conversion",
+                        "type": "integer"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Currency",
+                        "name": "currency",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "checkbox",
+                        "label": "Created",
+                        "name": "created",
+                        "parse_output": "boolean_conversion",
+                        "render_input": "boolean_conversion",
+                        "toggle_field": {
+                          "control_type": "text",
+                          "label": "Created",
+                          "name": "created",
+                          "toggle_hint": "Use custom value",
+                          "type": "boolean"
+                        },
+                        "toggle_hint": "Select from option list",
+                        "type": "boolean"
+                      }
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "input": {
+                  "result": {
+                    "amount": "=null",
+                    "client_secret": "=null",
+                    "created": "false",
+                    "currency": "=null",
+                    "payment_intent_id": "=null",
+                    "status": "=null"
+                  }
+                },
+                "keyword": "action",
+                "name": "return_result",
+                "number": 5,
+                "provider": "workato_recipe_function",
+                "toggleCfg": {
+                  "result.created": true
+                },
+                "uuid": "pi-return-error-005"
               }
             ],
-            "uuid": "b1b2c3d4-e5f6-7890-abcd-888888888888"
+            "input": {},
+            "keyword": "catch",
+            "number": 4,
+            "uuid": "pi-catch-004"
           }
         ],
-        "uuid": "b1b2c3d4-e5f6-7890-abcd-999999999999"
+        "input": {},
+        "keyword": "try",
+        "number": 1,
+        "uuid": "pi-try-001"
       }
     ],
-    "uuid": "b1b2c3d4-e5f6-7890-abcd-000000000000"
+    "extended_output_schema": [
+      {
+        "label": "Parameters",
+        "name": "parameters",
+        "properties": [
+          {
+            "control_type": "integer",
+            "hint": "Amount in cents (USD)",
+            "label": "Amount",
+            "name": "amount",
+            "optional": false,
+            "parse_output": "integer_conversion",
+            "type": "integer"
+          },
+          {
+            "control_type": "text",
+            "hint": "Three-letter ISO currency code",
+            "label": "Currency",
+            "name": "currency",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "hint": "Stripe customer ID",
+            "label": "Customer ID",
+            "name": "customer_id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "hint": "Payment description (user-facing)",
+            "label": "Description",
+            "name": "description",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "hint": "Internal guest/contact ID (metadata)",
+            "label": "Guest ID",
+            "name": "guest_id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "hint": "Booking confirmation number (metadata)",
+            "label": "Booking number",
+            "name": "booking_number",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "hint": "Client-generated UUID",
+            "label": "Idempotency token",
+            "name": "idempotency_token",
+            "optional": false,
+            "type": "string"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "input": {
+      "parameters_schema_json": "[{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"integer\",\"control_type\":\"integer\",\"optional\":false,\"hint\":\"Amount in cents (USD)\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Three-letter ISO currency code\"},{\"name\":\"customer_id\",\"label\":\"Customer ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Stripe customer ID\"},{\"name\":\"description\",\"label\":\"Description\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Payment description (user-facing)\"},{\"name\":\"guest_id\",\"label\":\"Guest ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Internal guest/contact ID (metadata)\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking confirmation number (metadata)\"},{\"name\":\"idempotency_token\",\"label\":\"Idempotency token\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Client-generated UUID\"}]",
+      "result_schema_json": "[{\"name\":\"payment_intent_id\",\"label\":\"Payment intent ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"client_secret\",\"label\":\"Client secret\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"status\",\"label\":\"Status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"amount\",\"label\":\"Amount\",\"type\":\"integer\",\"control_type\":\"integer\"},{\"name\":\"currency\",\"label\":\"Currency\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"created\",\"label\":\"Created\",\"type\":\"boolean\",\"control_type\":\"checkbox\"}]"
+    },
+    "keyword": "trigger",
+    "name": "execute",
+    "number": 0,
+    "provider": "workato_recipe_function",
+    "uuid": "pi-trigger-000"
   },
+  "concurrency": 1,
   "config": [
     {
+      "account_id": null,
       "keyword": "application",
       "provider": "workato_recipe_function",
-      "skip_validation": false,
-      "account_id": null
+      "skip_validation": false
     },
     {
+      "account_id": {
+        "folder": "Workspace Connections",
+        "name": "Stripe Dev Account",
+        "zip_name": "Workspace Connections/stripe_dev_account.connection.json"
+      },
       "keyword": "application",
       "provider": "stripe",
-      "account_id": {
-        "zip_name": "Workspace Connections/stripe_dev_account.connection.json",
-        "name": "Stripe Dev Account",
-        "folder": "Workspace Connections"
-      },
       "skip_validation": false
     }
-  ]
+  ],
+  "name": "Create Stripe payment intent",
+  "private": true,
+  "version": 1
 }

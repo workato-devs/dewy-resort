@@ -1,17 +1,17 @@
 {
-  "name": "Search rooms",
-  "recipe_id": {
-    "zip_name": "search_rooms.recipe.json",
-    "name": "Search rooms",
-    "folder": ""
-  },
   "api_group_id": {
-    "zip_name": "sf_api_collection.api_group.json",
+    "folder": "",
     "name": "sf-api-collection",
-    "folder": ""
+    "zip_name": "sf_api_collection.api_group.json"
   },
-  "method": "POST",
-  "path": "search-rooms",
   "legacy": false,
+  "method": "POST",
+  "name": "Search rooms",
+  "path": "search-rooms",
+  "recipe_id": {
+    "folder": "",
+    "name": "Search rooms",
+    "zip_name": "search_rooms.recipe.json"
+  },
   "validate_request": false
 }

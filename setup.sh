@@ -49,11 +49,12 @@ for arg in "$@"; do
             echo "Available Commands (after setup):"
             echo ""
             echo "  Workato:"
-            echo "    ./workato/scripts/cli/start_workato_recipes.sh"
-            echo "    ./workato/scripts/cli/stop_workato_recipes.sh"
+            echo "    make workato-init             # Initialize wk project"
+            echo "    make start-recipes            # Start all recipes"
+            echo "    make stop-recipes             # Stop all recipes"
             echo ""
             echo "  Salesforce:"
-            echo "    ./vendor/salesforce/scripts/deploy.sh <org-alias>"
+            echo "    make sf-deploy org=<alias>    # Deploy metadata"
             echo ""
             echo "  Dev Server:"
             echo "    cd app && npm run dev"
@@ -246,69 +247,18 @@ install_node() {
     echo -e "${GREEN}✓${NC} Node.js v20 installed"
 }
 
-# Install Python 3.11+
-install_python() {
-    # On macOS, we must use Homebrew Python, not system Python
-    if [ "$OS" = "macos" ]; then
-        # Check for Homebrew Python specifically
-        for cmd in /opt/homebrew/bin/python3.13 /opt/homebrew/bin/python3.12 /opt/homebrew/bin/python3.11 \
-                   /usr/local/bin/python3.13 /usr/local/bin/python3.12 /usr/local/bin/python3.11; do
-            if [ -x "$cmd" ]; then
-                local version=$($cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-                echo -e "${GREEN}✓${NC} Python $version available (Homebrew: $cmd)"
-                return 0
-            fi
-        done
-        
-        # No Homebrew Python found, install it
-        echo -e "${YELLOW}Installing Python 3.11 via Homebrew...${NC}"
-        brew install python@3.11
-        
-        # Also install pipx for package management
-        echo -e "${YELLOW}Installing pipx...${NC}"
-        brew install pipx
-        pipx ensurepath 2>/dev/null || true
-        
-        echo -e "${GREEN}✓${NC} Python 3.11 installed via Homebrew"
+# Check for wk CLI
+check_wk() {
+    if command_exists wk; then
+        echo -e "${GREEN}✓${NC} wk CLI available: $(wk version)"
         return 0
     fi
-    
-    # Linux: check for Python 3.11+
-    for cmd in python3.13 python3.12 python3.11 python3; do
-        if command_exists "$cmd"; then
-            local version=$($cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null)
-            local major=$(echo "$version" | cut -d. -f1)
-            local minor=$(echo "$version" | cut -d. -f2)
-            
-            if [ "$major" = "3" ] && [ "$minor" -ge "11" ]; then
-                echo -e "${GREEN}✓${NC} Python $version available (using $cmd)"
-                return 0
-            fi
-        fi
-    done
-    
-    echo -e "${YELLOW}Installing Python 3.11+...${NC}"
-    
-    case "$DISTRO" in
-        ubuntu|debian|pop)
-            sudo apt-get update
-            sudo apt-get install -y python3.11 python3-pip 2>/dev/null || \
-            sudo apt-get install -y python3 python3-pip
-            ;;
-        fedora|rhel|centos)
-            sudo dnf install -y python3.11 python3-pip 2>/dev/null || \
-            sudo dnf install -y python3 python3-pip
-            ;;
-        arch|manjaro)
-            sudo pacman -S --noconfirm python python-pip
-            ;;
-        *)
-            echo -e "${RED}Please install Python 3.11+ manually${NC}"
-            return 1
-            ;;
-    esac
-    
-    echo -e "${GREEN}✓${NC} Python installed"
+
+    echo -e "${YELLOW}wk CLI not found${NC}"
+    echo -e "  Install it:"
+    echo -e "    macOS:   ${CYAN}brew install workato/tap/wk${NC}"
+    echo -e "    Linux:   ${CYAN}brew install workato/tap/wk${NC}"
+    return 1
 }
 
 # Install prerequisites
@@ -330,7 +280,7 @@ install_prerequisites() {
     install_git || return 1
     install_make || return 1
     install_node || return 1
-    install_python || return 1
+    check_wk || true
     
     echo ""
     echo -e "${GREEN}✓${NC} All prerequisites satisfied"
@@ -340,12 +290,25 @@ install_prerequisites() {
 # Setup Workato CLI
 setup_workato() {
     echo ""
-    echo -e "${BLUE}--- Setting up Workato CLI ---${NC}"
-    
-    if [ -f "workato/scripts/cli/workato-setup.sh" ]; then
-        bash workato/scripts/cli/workato-setup.sh
+    echo -e "${BLUE}--- Verifying Workato CLI (wk) ---${NC}"
+
+    if command_exists wk; then
+        echo -e "${GREEN}✓${NC} wk CLI available: $(wk version)"
+        echo -e "  Checking auth..."
+        if wk auth status >/dev/null 2>&1; then
+            echo -e "${GREEN}✓${NC} Authenticated"
+        else
+            echo -e "${YELLOW}Not authenticated. Run: wk auth login${NC}"
+        fi
     else
-        echo -e "${RED}Workato setup script not found${NC}"
+        echo -e "${YELLOW}wk CLI not installed.${NC}"
+        echo ""
+        echo "  Install it:"
+        echo "    macOS/Linux: brew install workato/tap/wk"
+        echo "    Windows:     scoop install wk"
+        echo ""
+        echo "  Then authenticate:"
+        echo "    wk auth login"
         return 1
     fi
 }
@@ -412,11 +375,11 @@ main() {
     echo -e "${GREEN}========================================${NC}"
     echo ""
     echo "Next steps:"
-    echo "  cd app"
-    echo "  cp .env.example .env"
-    echo "  # Edit .env with your configuration"
-    echo "  npm install"
-    echo "  npm run dev"
+    echo "  1. wk auth login                  # Authenticate with Workato"
+    echo "  2. make workato-init              # Initialize wk project"
+    echo "  3. make start-recipes             # Start all recipes"
+    echo "  4. cd app && cp .env.example .env # Configure app"
+    echo "  5. cd app && npm install && npm run dev"
     echo ""
 }
 

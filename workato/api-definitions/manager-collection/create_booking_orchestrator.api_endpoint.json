@@ -1,0 +1,7 @@
+{
+  "name": "Create booking orchestrator",
+  "method": "POST",
+  "path": "create-booking-orchestrator",
+  "recipe_name": "create_booking_orchestrator",
+  "description": "Create new hotel booking: upserts guest contact, validates room availability for date range, creates Opportunity and Booking__c records, marks room Reserved. Requires guest_email, guest_first_name, guest_last_name, room_number, check_in_date, check_out_date; optional guest_phone, number_of_guests (default: 1), special_requests, booking_external_id. Returns booking confirmation or error codes (400: room not found, 409: room not available for dates)."
+}

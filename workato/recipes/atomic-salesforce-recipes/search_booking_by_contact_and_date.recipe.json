@@ -1,79 +1,279 @@
 {
-  "name": "Search booking by contact and date",
-  "version": 1,
-  "private": true,
-  "concurrency": 1,
   "code": {
-    "number": 0,
-    "provider": "workato_recipe_function",
-    "name": "execute",
     "as": "trigger",
-    "keyword": "trigger",
-    "input": {
-      "parameters_schema_json": "[{\"name\":\"contact_id\",\"label\":\"Contact ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Salesforce Contact ID\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":false,\"hint\":\"Check-in date (ISO 8601 format)\"},{\"name\":\"status\",\"label\":\"Booking status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking status to filter by (default: Reserved)\"}]",
-      "result_schema_json": "[{\"name\":\"bookings\",\"label\":\"Bookings\",\"type\":\"array\",\"of\":\"object\",\"properties\":[{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_id\",\"label\":\"Room ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_status\",\"label\":\"Room status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_type\",\"label\":\"Room type\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"floor\",\"label\":\"Floor\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"check_out_date\",\"label\":\"Check-out date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"total_nights\",\"label\":\"Total nights\",\"type\":\"number\",\"control_type\":\"number\"}]}]"
-    },
-    "extended_output_schema": [
-      {
-        "label": "Parameters",
-        "name": "parameters",
-        "properties": [
-          {
-            "control_type": "text",
-            "label": "Contact ID",
-            "name": "contact_id",
-            "type": "string",
-            "optional": false,
-            "hint": "Salesforce Contact ID"
-          },
-          {
-            "control_type": "date",
-            "label": "Check-in date",
-            "render_input": "date_conversion",
-            "parse_output": "date_conversion",
-            "name": "check_in_date",
-            "type": "date",
-            "optional": false,
-            "hint": "Check-in date (ISO 8601 format)"
-          },
-          {
-            "control_type": "text",
-            "label": "Booking status",
-            "name": "status",
-            "type": "string",
-            "optional": true,
-            "hint": "Booking status to filter by (default: Reserved)"
-          }
-        ],
-        "type": "object"
-      }
-    ],
     "block": [
       {
-        "number": 1,
-        "keyword": "try",
-        "input": {
-        },
         "block": [
           {
-            "number": 2,
-            "provider": "salesforce",
-            "name": "search_sobjects",
             "as": "search_booking",
-            "keyword": "action",
             "dynamicPickListSelection": {
               "Status__c": "Reserved"
             },
-            "toggleCfg": {
-              "Status__c": true
-            },
-            "input": {
-              "sobject_name": "Booking__c",
-              "limit": "2",
-              "Primary_Guest__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_id\"]}')}",
-              "Check_In_Date__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"check_in_date\"]}')}",
-              "Status__c": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}') : 'Reserved'"
-            },
+            "extended_input_schema": [
+              {
+                "control_type": "text",
+                "custom": false,
+                "event_title": true,
+                "label": "Booking Number",
+                "name": "Name",
+                "optional": true,
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "string"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Created By ID",
+                "name": "CreatedById",
+                "optional": true,
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "string"
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Created Date",
+                "name": "CreatedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "date_time"
+              },
+              {
+                "control_type": "checkbox",
+                "custom": false,
+                "label": "Deleted",
+                "name": "IsDeleted",
+                "ngIf": "false",
+                "optional": true,
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "toggle_field": {
+                  "control_type": "text",
+                  "custom": false,
+                  "label": "Deleted",
+                  "name": "IsDeleted",
+                  "ngIf": "false",
+                  "optional": true,
+                  "parse_output": null,
+                  "render_input": null,
+                  "sfdc_createable": false,
+                  "sfdc_updateable": false,
+                  "toggle_hint": "Use custom value",
+                  "type": "boolean"
+                },
+                "toggle_hint": "Select from option list",
+                "type": "boolean"
+              },
+              {
+                "control_type": "date",
+                "custom": false,
+                "label": "Last Activity Date",
+                "name": "LastActivityDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_date",
+                "render_input": "render_iso8601_date",
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "date_time"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Last Modified By ID",
+                "name": "LastModifiedById",
+                "optional": true,
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "string"
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Last Modified Date",
+                "name": "LastModifiedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "date_time"
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Last Referenced Date",
+                "name": "LastReferencedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "date_time"
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "Last Viewed Date",
+                "name": "LastViewedDate",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "date_time"
+              },
+              {
+                "control_type": "text",
+                "custom": false,
+                "label": "Record ID",
+                "name": "Id",
+                "optional": true,
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "string"
+              },
+              {
+                "control_type": "date_time",
+                "custom": false,
+                "label": "System Modstamp",
+                "name": "SystemModstamp",
+                "optional": true,
+                "parse_output": "parse_iso8601_timestamp",
+                "render_input": "render_iso8601_timestamp",
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "date_time"
+              },
+              {
+                "control_type": "date",
+                "custom": true,
+                "label": "Check-In Date",
+                "name": "Check_In_Date__c",
+                "optional": true,
+                "parse_output": "parse_iso8601_date",
+                "render_input": "render_iso8601_date",
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
+                "type": "date_time"
+              },
+              {
+                "control_type": "date",
+                "custom": true,
+                "label": "Check-Out Date",
+                "name": "Check_Out_Date__c",
+                "optional": true,
+                "parse_output": "parse_iso8601_date",
+                "render_input": "render_iso8601_date",
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
+                "type": "date_time"
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "External ID",
+                "name": "External_ID__c",
+                "optional": true,
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
+                "type": "string"
+              },
+              {
+                "control_type": "number",
+                "custom": true,
+                "label": "Number of Guests",
+                "name": "Number_of_Guests__c",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
+                "type": "number"
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Opportunity",
+                "name": "Opportunity__c",
+                "optional": true,
+                "sfdc_createable": true,
+                "sfdc_updateable": false,
+                "type": "string"
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Primary Guest",
+                "name": "Primary_Guest__c",
+                "optional": true,
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
+                "type": "string"
+              },
+              {
+                "control_type": "text",
+                "custom": true,
+                "label": "Room",
+                "name": "Room__c",
+                "optional": true,
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
+                "type": "string"
+              },
+              {
+                "control_type": "select",
+                "custom": true,
+                "label": "Status",
+                "name": "Status__c",
+                "optional": true,
+                "pick_list": "sobject_field_values_list",
+                "pick_list_params": {
+                  "field_name": "\"Status__c\"",
+                  "sobject_name": "\"Booking__c\""
+                },
+                "sfdc_createable": true,
+                "sfdc_updateable": true,
+                "toggle_field": {
+                  "control_type": "text",
+                  "custom": true,
+                  "label": "Status",
+                  "name": "Status__c",
+                  "optional": true,
+                  "sfdc_createable": true,
+                  "sfdc_updateable": true,
+                  "toggle_hint": "Enter custom value",
+                  "type": "string"
+                },
+                "toggle_hint": "Select from list",
+                "type": "string"
+              },
+              {
+                "control_type": "number",
+                "custom": true,
+                "label": "Total Nights",
+                "name": "Total_Nights__c",
+                "optional": true,
+                "parse_output": "float_conversion",
+                "sfdc_createable": false,
+                "sfdc_updateable": false,
+                "type": "number"
+              },
+              {
+                "control_type": "checkbox",
+                "disable_formula": true,
+                "extends_schema": true,
+                "hint": "Select \u003cb\u003eYes\u003c/b\u003e to obtain data from notes, attachments and files associated to the queried records. Default value is \u003cb\u003eYes\u003c/b\u003e.",
+                "label": "Select combined attachments",
+                "name": "include_combined_attachments",
+                "optional": true,
+                "support_pills": false,
+                "type": "boolean"
+              }
+            ],
             "extended_output_schema": [
               {
                 "label": "Bookings",
@@ -82,399 +282,389 @@
                 "properties": [
                   {
                     "control_type": "text",
-                    "label": "Booking Number",
-                    "optional": true,
-                    "event_title": true,
                     "custom": false,
+                    "event_title": true,
+                    "label": "Booking Number",
+                    "name": "Name",
+                    "optional": true,
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "string",
-                    "name": "Name"
+                    "type": "string"
                   },
                   {
                     "control_type": "text",
-                    "label": "Created By ID",
-                    "foreign_key": "User",
-                    "fetch_with": "get_custom_object(id, sobject_name: User)",
-                    "join_point_label": "Created  by",
-                    "optional": true,
                     "custom": false,
+                    "fetch_with": "get_custom_object(id, sobject_name: User)",
+                    "foreign_key": "User",
+                    "join_point_label": "Created  by",
+                    "label": "Created By ID",
+                    "name": "CreatedById",
+                    "optional": true,
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "string",
-                    "name": "CreatedById"
+                    "type": "string"
                   },
                   {
-                    "name": "get_custom_object+CreatedById",
-                    "type": "object",
-                    "label": "Created  by",
-                    "fetch_with": "get_custom_object(CreatedById>id, sobject_name: User)",
+                    "fetch_with": "get_custom_object(CreatedById\u003eid, sobject_name: User)",
                     "join_point": true,
-                    "properties": [
-
-                    ]
+                    "label": "Created  by",
+                    "name": "get_custom_object+CreatedById",
+                    "properties": [],
+                    "type": "object"
                   },
                   {
                     "control_type": "date_time",
-                    "label": "Created Date",
-                    "render_input": "render_iso8601_timestamp",
-                    "parse_output": "parse_iso8601_timestamp",
-                    "optional": true,
                     "custom": false,
+                    "label": "Created Date",
+                    "name": "CreatedDate",
+                    "optional": true,
+                    "parse_output": "parse_iso8601_timestamp",
+                    "render_input": "render_iso8601_timestamp",
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "date_time",
-                    "name": "CreatedDate"
+                    "type": "date_time"
                   },
                   {
                     "control_type": "checkbox",
-                    "label": "Deleted",
-                    "optional": true,
                     "custom": false,
+                    "label": "Deleted",
+                    "name": "IsDeleted",
+                    "optional": true,
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "toggle_hint": "Select from option list",
                     "toggle_field": {
-                      "label": "Deleted",
                       "control_type": "text",
-                      "toggle_hint": "Use custom value",
-                      "render_input": null,
-                      "parse_output": null,
-                      "optional": true,
                       "custom": false,
+                      "label": "Deleted",
+                      "name": "IsDeleted",
+                      "optional": true,
+                      "parse_output": null,
+                      "render_input": null,
                       "sfdc_createable": false,
                       "sfdc_updateable": false,
-                      "type": "boolean",
-                      "name": "IsDeleted"
+                      "toggle_hint": "Use custom value",
+                      "type": "boolean"
                     },
-                    "type": "boolean",
-                    "name": "IsDeleted"
+                    "toggle_hint": "Select from option list",
+                    "type": "boolean"
                   },
                   {
                     "control_type": "date",
+                    "custom": false,
                     "label": "Last Activity Date",
-                    "render_input": "render_iso8601_date",
-                    "parse_output": "parse_iso8601_date",
+                    "name": "LastActivityDate",
                     "optional": true,
-                    "custom": false,
+                    "parse_output": "parse_iso8601_date",
+                    "render_input": "render_iso8601_date",
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "date_time",
-                    "name": "LastActivityDate"
+                    "type": "date_time"
                   },
                   {
                     "control_type": "text",
-                    "label": "Last Modified By ID",
-                    "foreign_key": "User",
+                    "custom": false,
                     "fetch_with": "get_custom_object(id, sobject_name: User)",
+                    "foreign_key": "User",
                     "join_point_label": "Last  modified  by",
+                    "label": "Last Modified By ID",
+                    "name": "LastModifiedById",
                     "optional": true,
-                    "custom": false,
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "string",
-                    "name": "LastModifiedById"
+                    "type": "string"
                   },
                   {
-                    "name": "get_custom_object+LastModifiedById",
-                    "type": "object",
-                    "label": "Last  modified  by",
-                    "fetch_with": "get_custom_object(LastModifiedById>id, sobject_name: User)",
+                    "fetch_with": "get_custom_object(LastModifiedById\u003eid, sobject_name: User)",
                     "join_point": true,
-                    "properties": [
-
-                    ]
+                    "label": "Last  modified  by",
+                    "name": "get_custom_object+LastModifiedById",
+                    "properties": [],
+                    "type": "object"
                   },
                   {
                     "control_type": "date_time",
+                    "custom": false,
                     "label": "Last Modified Date",
-                    "render_input": "render_iso8601_timestamp",
-                    "parse_output": "parse_iso8601_timestamp",
+                    "name": "LastModifiedDate",
                     "optional": true,
-                    "custom": false,
+                    "parse_output": "parse_iso8601_timestamp",
+                    "render_input": "render_iso8601_timestamp",
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "date_time",
-                    "name": "LastModifiedDate"
+                    "type": "date_time"
                   },
                   {
                     "control_type": "date_time",
+                    "custom": false,
                     "label": "Last Referenced Date",
-                    "render_input": "render_iso8601_timestamp",
-                    "parse_output": "parse_iso8601_timestamp",
+                    "name": "LastReferencedDate",
                     "optional": true,
-                    "custom": false,
+                    "parse_output": "parse_iso8601_timestamp",
+                    "render_input": "render_iso8601_timestamp",
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "date_time",
-                    "name": "LastReferencedDate"
+                    "type": "date_time"
                   },
                   {
                     "control_type": "date_time",
+                    "custom": false,
                     "label": "Last Viewed Date",
-                    "render_input": "render_iso8601_timestamp",
-                    "parse_output": "parse_iso8601_timestamp",
+                    "name": "LastViewedDate",
                     "optional": true,
-                    "custom": false,
+                    "parse_output": "parse_iso8601_timestamp",
+                    "render_input": "render_iso8601_timestamp",
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "date_time",
-                    "name": "LastViewedDate"
+                    "type": "date_time"
                   },
                   {
                     "control_type": "text",
-                    "label": "Record ID",
-                    "optional": true,
                     "custom": false,
+                    "label": "Record ID",
+                    "name": "Id",
+                    "optional": true,
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "string",
-                    "name": "Id"
+                    "type": "string"
                   },
                   {
                     "control_type": "date_time",
-                    "label": "System Modstamp",
-                    "render_input": "render_iso8601_timestamp",
-                    "parse_output": "parse_iso8601_timestamp",
-                    "optional": true,
                     "custom": false,
+                    "label": "System Modstamp",
+                    "name": "SystemModstamp",
+                    "optional": true,
+                    "parse_output": "parse_iso8601_timestamp",
+                    "render_input": "render_iso8601_timestamp",
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "date_time",
-                    "name": "SystemModstamp"
+                    "type": "date_time"
                   },
                   {
                     "control_type": "date",
+                    "custom": true,
                     "label": "Check-In Date",
-                    "render_input": "render_iso8601_date",
-                    "parse_output": "parse_iso8601_date",
+                    "name": "Check_In_Date__c",
                     "optional": true,
-                    "custom": true,
+                    "parse_output": "parse_iso8601_date",
+                    "render_input": "render_iso8601_date",
                     "sfdc_createable": true,
                     "sfdc_updateable": true,
-                    "type": "date_time",
-                    "name": "Check_In_Date__c"
+                    "type": "date_time"
                   },
                   {
                     "control_type": "date",
-                    "label": "Check-Out Date",
-                    "render_input": "render_iso8601_date",
-                    "parse_output": "parse_iso8601_date",
-                    "optional": true,
                     "custom": true,
+                    "label": "Check-Out Date",
+                    "name": "Check_Out_Date__c",
+                    "optional": true,
+                    "parse_output": "parse_iso8601_date",
+                    "render_input": "render_iso8601_date",
                     "sfdc_createable": true,
                     "sfdc_updateable": true,
-                    "type": "date_time",
-                    "name": "Check_Out_Date__c"
+                    "type": "date_time"
                   },
                   {
                     "control_type": "text",
-                    "label": "External ID",
-                    "optional": true,
                     "custom": true,
+                    "label": "External ID",
+                    "name": "External_ID__c",
+                    "optional": true,
                     "sfdc_createable": true,
                     "sfdc_updateable": true,
-                    "type": "string",
-                    "name": "External_ID__c"
+                    "type": "string"
                   },
                   {
                     "control_type": "number",
-                    "label": "Number of Guests",
-                    "parse_output": "float_conversion",
-                    "optional": true,
                     "custom": true,
+                    "label": "Number of Guests",
+                    "name": "Number_of_Guests__c",
+                    "optional": true,
+                    "parse_output": "float_conversion",
                     "sfdc_createable": true,
                     "sfdc_updateable": true,
-                    "type": "number",
-                    "name": "Number_of_Guests__c"
+                    "type": "number"
                   },
                   {
                     "control_type": "text",
-                    "label": "Opportunity",
-                    "foreign_key": "Opportunity",
-                    "fetch_with": "get_custom_object(id, sobject_name: Opportunity)",
-                    "join_point_label": "Opportunity",
                     "custom": true,
+                    "fetch_with": "get_custom_object(id, sobject_name: Opportunity)",
+                    "foreign_key": "Opportunity",
+                    "join_point_label": "Opportunity",
+                    "label": "Opportunity",
+                    "name": "Opportunity__c",
                     "sfdc_createable": true,
                     "sfdc_updateable": false,
-                    "type": "string",
-                    "name": "Opportunity__c"
+                    "type": "string"
                   },
                   {
-                    "name": "get_custom_object+Opportunity__c",
-                    "type": "object",
+                    "fetch_with": "get_custom_object(Opportunity__c\u003eid, sobject_name: Opportunity)",
+                    "join_point": true,
                     "label": "Opportunity",
-                    "fetch_with": "get_custom_object(Opportunity__c>id, sobject_name: Opportunity)",
-                    "join_point": true,
-                    "properties": [
-
-                    ]
+                    "name": "get_custom_object+Opportunity__c",
+                    "properties": [],
+                    "type": "object"
                   },
                   {
                     "control_type": "text",
-                    "label": "Primary Guest",
-                    "foreign_key": "Contact",
+                    "custom": true,
                     "fetch_with": "get_custom_object(id, sobject_name: Contact)",
+                    "foreign_key": "Contact",
                     "join_point_label": "Primary  guest",
+                    "label": "Primary Guest",
+                    "name": "Primary_Guest__c",
                     "optional": true,
-                    "custom": true,
                     "sfdc_createable": true,
                     "sfdc_updateable": true,
-                    "type": "string",
-                    "name": "Primary_Guest__c"
+                    "type": "string"
                   },
                   {
-                    "name": "get_custom_object+Primary_Guest__c",
-                    "type": "object",
-                    "label": "Primary  guest",
-                    "fetch_with": "get_custom_object(Primary_Guest__c>id, sobject_name: Contact)",
+                    "fetch_with": "get_custom_object(Primary_Guest__c\u003eid, sobject_name: Contact)",
                     "join_point": true,
-                    "properties": [
-
-                    ]
+                    "label": "Primary  guest",
+                    "name": "get_custom_object+Primary_Guest__c",
+                    "properties": [],
+                    "type": "object"
                   },
                   {
                     "control_type": "text",
-                    "label": "Room",
-                    "foreign_key": "Hotel_Room__c",
-                    "fetch_with": "get_custom_object(id, sobject_name: Hotel_Room__c)",
-                    "join_point_label": "Room",
-                    "optional": true,
                     "custom": true,
+                    "fetch_with": "get_custom_object(id, sobject_name: Hotel_Room__c)",
+                    "foreign_key": "Hotel_Room__c",
+                    "join_point_label": "Room",
+                    "label": "Room",
+                    "name": "Room__c",
+                    "optional": true,
                     "sfdc_createable": true,
                     "sfdc_updateable": true,
-                    "type": "string",
-                    "name": "Room__c"
+                    "type": "string"
                   },
                   {
-                    "name": "get_custom_object+Room__c",
-                    "type": "object",
-                    "label": "Room",
-                    "fetch_with": "get_custom_object(Room__c>id, sobject_name: Hotel_Room__c)",
+                    "fetch_with": "get_custom_object(Room__c\u003eid, sobject_name: Hotel_Room__c)",
                     "join_point": true,
-                    "properties": [
-
-                    ]
+                    "label": "Room",
+                    "name": "get_custom_object+Room__c",
+                    "properties": [],
+                    "type": "object"
                   },
                   {
                     "control_type": "text-area",
-                    "label": "Special Requests",
-                    "optional": true,
                     "custom": true,
+                    "label": "Special Requests",
+                    "name": "Special_Requests__c",
+                    "optional": true,
                     "sfdc_createable": true,
                     "sfdc_updateable": true,
-                    "type": "string",
-                    "name": "Special_Requests__c"
+                    "type": "string"
                   },
                   {
                     "control_type": "select",
+                    "custom": true,
                     "label": "Status",
+                    "name": "Status__c",
+                    "optional": true,
                     "pick_list": "sobject_field_values_list",
                     "pick_list_params": {
-                      "sobject_name": "\"Booking__c\"",
-                      "field_name": "\"Status__c\""
+                      "field_name": "\"Status__c\"",
+                      "sobject_name": "\"Booking__c\""
                     },
-                    "toggle_hint": "Select from list",
-                    "toggle_field": {
-                      "control_type": "text",
-                      "label": "Status",
-                      "toggle_hint": "Enter custom value",
-                      "optional": true,
-                      "custom": true,
-                      "sfdc_createable": true,
-                      "sfdc_updateable": true,
-                      "type": "string",
-                      "name": "Status__c"
-                    },
-                    "optional": true,
-                    "custom": true,
                     "sfdc_createable": true,
                     "sfdc_updateable": true,
-                    "type": "string",
-                    "name": "Status__c"
+                    "toggle_field": {
+                      "control_type": "text",
+                      "custom": true,
+                      "label": "Status",
+                      "name": "Status__c",
+                      "optional": true,
+                      "sfdc_createable": true,
+                      "sfdc_updateable": true,
+                      "toggle_hint": "Enter custom value",
+                      "type": "string"
+                    },
+                    "toggle_hint": "Select from list",
+                    "type": "string"
                   },
                   {
                     "control_type": "number",
-                    "label": "Total Nights",
-                    "parse_output": "float_conversion",
-                    "optional": true,
                     "custom": true,
+                    "label": "Total Nights",
+                    "name": "Total_Nights__c",
+                    "optional": true,
+                    "parse_output": "float_conversion",
                     "sfdc_createable": false,
                     "sfdc_updateable": false,
-                    "type": "number",
-                    "name": "Total_Nights__c"
+                    "type": "number"
                   },
                   {
+                    "label": "Combined attachments",
+                    "name": "CombinedAttachments",
                     "properties": [
                       {
                         "control_type": "number",
                         "label": "Total size",
+                        "name": "totalSize",
                         "parse_output": "integer_conversion",
-                        "type": "integer",
-                        "name": "totalSize"
+                        "type": "integer"
                       },
                       {
                         "label": "Files",
+                        "name": "records",
                         "of": "object",
                         "properties": [
                           {
                             "control_type": "text",
                             "label": "ID",
-                            "type": "string",
-                            "name": "Id"
+                            "name": "Id",
+                            "type": "string"
                           },
                           {
                             "control_type": "number",
                             "label": "Content size",
+                            "name": "ContentSize",
                             "parse_output": "integer_conversion",
-                            "type": "integer",
-                            "name": "ContentSize"
+                            "type": "integer"
                           },
                           {
                             "control_type": "url",
                             "label": "Content URL",
-                            "type": "string",
-                            "name": "ContentUrl"
+                            "name": "ContentUrl",
+                            "type": "string"
                           },
                           {
                             "control_type": "text",
                             "label": "File extension",
-                            "type": "string",
-                            "name": "FileExtension"
+                            "name": "FileExtension",
+                            "type": "string"
                           },
                           {
                             "control_type": "text",
                             "label": "File type",
-                            "type": "string",
-                            "name": "FileType"
+                            "name": "FileType",
+                            "type": "string"
                           },
                           {
                             "control_type": "text",
                             "label": "Parent ID",
-                            "type": "string",
-                            "name": "ParentId"
+                            "name": "ParentId",
+                            "type": "string"
                           },
                           {
                             "control_type": "text",
                             "label": "Record type",
-                            "type": "string",
-                            "name": "RecordType"
+                            "name": "RecordType",
+                            "type": "string"
                           },
                           {
                             "control_type": "text",
                             "label": "Title",
-                            "type": "string",
-                            "name": "Title"
+                            "name": "Title",
+                            "type": "string"
                           }
                         ],
-                        "type": "array",
-                        "name": "records"
+                        "type": "array"
                       }
                     ],
-                    "label": "Combined attachments",
                     "sfdc_field_type": "CombinedAttachment",
-                    "type": "object",
-                    "name": "CombinedAttachments"
+                    "type": "object"
                   }
                 ],
                 "type": "array"
@@ -487,303 +677,112 @@
                 "type": "integer"
               }
             ],
-            "extended_input_schema": [
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Booking Number",
-                "name": "Name",
-                "optional": true,
-                "type": "string",
-                "event_title": true,
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Created By ID",
-                "name": "CreatedById",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Created Date",
-                "name": "CreatedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "checkbox",
-                "custom": false,
-                "label": "Deleted",
-                "name": "IsDeleted",
-                "ngIf": "false",
-                "optional": true,
-                "toggle_field": {
-                  "label": "Deleted",
-                  "control_type": "text",
-                  "toggle_hint": "Use custom value",
-                  "render_input": null,
-                  "parse_output": null,
-                  "optional": true,
-                  "custom": false,
-                  "sfdc_createable": false,
-                  "sfdc_updateable": false,
-                  "ngIf": "false",
-                  "type": "boolean",
-                  "name": "IsDeleted"
-                },
-                "toggle_hint": "Select from option list",
-                "type": "boolean",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date",
-                "custom": false,
-                "label": "Last Activity Date",
-                "name": "LastActivityDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_date",
-                "type": "date_time",
-                "render_input": "render_iso8601_date",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Last Modified By ID",
-                "name": "LastModifiedById",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Last Modified Date",
-                "name": "LastModifiedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Last Referenced Date",
-                "name": "LastReferencedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "Last Viewed Date",
-                "name": "LastViewedDate",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": false,
-                "label": "Record ID",
-                "name": "Id",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date_time",
-                "custom": false,
-                "label": "System Modstamp",
-                "name": "SystemModstamp",
-                "optional": true,
-                "parse_output": "parse_iso8601_timestamp",
-                "type": "date_time",
-                "render_input": "render_iso8601_timestamp",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "date",
-                "custom": true,
-                "label": "Check-In Date",
-                "name": "Check_In_Date__c",
-                "optional": true,
-                "parse_output": "parse_iso8601_date",
-                "type": "date_time",
-                "render_input": "render_iso8601_date",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "date",
-                "custom": true,
-                "label": "Check-Out Date",
-                "name": "Check_Out_Date__c",
-                "optional": true,
-                "parse_output": "parse_iso8601_date",
-                "type": "date_time",
-                "render_input": "render_iso8601_date",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "External ID",
-                "name": "External_ID__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": true,
-                "label": "Number of Guests",
-                "name": "Number_of_Guests__c",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Opportunity",
-                "name": "Opportunity__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Primary Guest",
-                "name": "Primary_Guest__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "text",
-                "custom": true,
-                "label": "Room",
-                "name": "Room__c",
-                "optional": true,
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "select",
-                "custom": true,
-                "label": "Status",
-                "name": "Status__c",
-                "optional": true,
-                "pick_list": "sobject_field_values_list",
-                "pick_list_params": {
-                  "sobject_name": "\"Booking__c\"",
-                  "field_name": "\"Status__c\""
-                },
-                "toggle_field": {
-                  "control_type": "text",
-                  "label": "Status",
-                  "toggle_hint": "Enter custom value",
-                  "optional": true,
-                  "custom": true,
-                  "sfdc_createable": true,
-                  "sfdc_updateable": true,
-                  "type": "string",
-                  "name": "Status__c"
-                },
-                "toggle_hint": "Select from list",
-                "type": "string",
-                "sfdc_createable": true,
-                "sfdc_updateable": true
-              },
-              {
-                "control_type": "number",
-                "custom": true,
-                "label": "Total Nights",
-                "name": "Total_Nights__c",
-                "optional": true,
-                "parse_output": "float_conversion",
-                "type": "number",
-                "sfdc_createable": false,
-                "sfdc_updateable": false
-              },
-              {
-                "control_type": "checkbox",
-                "disable_formula": true,
-                "extends_schema": true,
-                "hint": "Select <b>Yes</b> to obtain data from notes, attachments and files associated to the queried records. Default value is <b>Yes</b>.",
-                "label": "Select combined attachments",
-                "name": "include_combined_attachments",
-                "optional": true,
-                "support_pills": false,
-                "type": "boolean"
-              }
-            ],
+            "input": {
+              "Check_In_Date__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"check_in_date\"]}')}",
+              "Primary_Guest__c": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"contact_id\"]}')}",
+              "Status__c": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}').present? ? _dp('{\"pill_type\":\"output\",\"provider\":\"workato_recipe_function\",\"line\":\"trigger\",\"path\":[\"parameters\",\"status\"]}') : 'Reserved'",
+              "limit": "2",
+              "sobject_name": "Booking__c"
+            },
+            "keyword": "action",
+            "name": "search_sobjects",
+            "number": 2,
+            "provider": "salesforce",
+            "toggleCfg": {
+              "Status__c": true
+            },
+            "uuid": "search-booking-action-001",
             "visible_config_fields": [
               "sobject_name",
               "limit",
               "Primary_Guest__c",
               "Check_In_Date__c",
               "Status__c"
-            ],
-            "uuid": "search-booking-action-001"
+            ]
           },
           {
-            "number": 3,
-            "provider": "workato_recipe_function",
-            "name": "return_result",
             "as": "return_bookings",
-            "keyword": "action",
-            "input": {
-              "result": {
-                "bookings": {
-                  "____source": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\"]}')}",
-                  "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Id\"]}')}",
-                  "booking_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Name\"]}')}",
-                  "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Room__c\"]}')}",
-                  "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Name\"]}')}",
-                  "room_status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Status__c\"]}')}",
-                  "room_type": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Room_Type__c\"]}')}",
-                  "floor": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Floor__c\"]}')}",
-                  "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Opportunity__c\"]}')}",
-                  "check_out_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Check_Out_Date__c\"]}')}",
-                  "total_nights": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Total_Nights__c\"]}')}"
-                }
+            "extended_input_schema": [
+              {
+                "label": "Result",
+                "name": "result",
+                "properties": [
+                  {
+                    "label": "Bookings",
+                    "name": "bookings",
+                    "of": "object",
+                    "properties": [
+                      {
+                        "control_type": "text",
+                        "label": "Booking ID",
+                        "name": "booking_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Booking number",
+                        "name": "booking_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Room ID",
+                        "name": "room_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Room number",
+                        "name": "room_number",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Room status",
+                        "name": "room_status",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Room type",
+                        "name": "room_type",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Floor",
+                        "name": "floor",
+                        "parse_output": "float_conversion",
+                        "type": "number"
+                      },
+                      {
+                        "control_type": "text",
+                        "label": "Opportunity ID",
+                        "name": "opportunity_id",
+                        "type": "string"
+                      },
+                      {
+                        "control_type": "date",
+                        "label": "Check-out date",
+                        "name": "check_out_date",
+                        "parse_output": "date_conversion",
+                        "render_input": "date_conversion",
+                        "type": "date"
+                      },
+                      {
+                        "control_type": "number",
+                        "label": "Total nights",
+                        "name": "total_nights",
+                        "parse_output": "float_conversion",
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  }
+                ],
+                "type": "object"
               }
-            },
+            ],
             "extended_output_schema": [
               {
                 "label": "Result",
@@ -792,7 +791,6 @@
                   {
                     "label": "Bookings",
                     "name": "bookings",
-                    "type": "array",
                     "of": "object",
                     "properties": [
                       {
@@ -834,8 +832,8 @@
                       {
                         "control_type": "number",
                         "label": "Floor",
-                        "parse_output": "float_conversion",
                         "name": "floor",
+                        "parse_output": "float_conversion",
                         "type": "number"
                       },
                       {
@@ -847,166 +845,159 @@
                       {
                         "control_type": "date",
                         "label": "Check-out date",
-                        "render_input": "date_conversion",
-                        "parse_output": "date_conversion",
                         "name": "check_out_date",
+                        "parse_output": "date_conversion",
+                        "render_input": "date_conversion",
                         "type": "date"
                       },
                       {
                         "control_type": "number",
                         "label": "Total nights",
-                        "parse_output": "float_conversion",
                         "name": "total_nights",
+                        "parse_output": "float_conversion",
                         "type": "number"
                       }
-                    ]
+                    ],
+                    "type": "array"
                   }
                 ],
                 "type": "object"
               }
             ],
-            "extended_input_schema": [
-              {
-                "label": "Result",
-                "name": "result",
-                "properties": [
-                  {
-                    "label": "Bookings",
-                    "name": "bookings",
-                    "type": "array",
-                    "of": "object",
-                    "properties": [
-                      {
-                        "control_type": "text",
-                        "label": "Booking ID",
-                        "name": "booking_id",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Booking number",
-                        "name": "booking_number",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Room ID",
-                        "name": "room_id",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Room number",
-                        "name": "room_number",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Room status",
-                        "name": "room_status",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Room type",
-                        "name": "room_type",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "number",
-                        "label": "Floor",
-                        "parse_output": "float_conversion",
-                        "name": "floor",
-                        "type": "number"
-                      },
-                      {
-                        "control_type": "text",
-                        "label": "Opportunity ID",
-                        "name": "opportunity_id",
-                        "type": "string"
-                      },
-                      {
-                        "control_type": "date",
-                        "label": "Check-out date",
-                        "render_input": "date_conversion",
-                        "parse_output": "date_conversion",
-                        "name": "check_out_date",
-                        "type": "date"
-                      },
-                      {
-                        "control_type": "number",
-                        "label": "Total nights",
-                        "parse_output": "float_conversion",
-                        "name": "total_nights",
-                        "type": "number"
-                      }
-                    ]
-                  }
-                ],
-                "type": "object"
+            "input": {
+              "result": {
+                "bookings": {
+                  "____source": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\"]}')}",
+                  "booking_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Id\"]}')}",
+                  "booking_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Name\"]}')}",
+                  "check_out_date": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Check_Out_Date__c\"]}')}",
+                  "floor": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Floor__c\"]}')}",
+                  "opportunity_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Opportunity__c\"]}')}",
+                  "room_id": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Room__c\"]}')}",
+                  "room_number": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Name\"]}')}",
+                  "room_status": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Status__c\"]}')}",
+                  "room_type": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},{\"path_element_type\":\"join\",\"action\":\"get_custom_object\",\"src_key\":\"Room__c\",\"dst_key\":\"id\",\"args\":{\"sobject_name\":\"Hotel_Room__c\"}},\"Room_Type__c\"]}')}",
+                  "total_nights": "#{_dp('{\"pill_type\":\"output\",\"provider\":\"salesforce\",\"line\":\"search_booking\",\"path\":[\"Booking__c\",{\"path_element_type\":\"current_item\"},\"Total_Nights__c\"]}')}"
+                }
               }
-            ],
+            },
+            "keyword": "action",
+            "name": "return_result",
+            "number": 3,
+            "provider": "workato_recipe_function",
             "uuid": "return-bookings-001"
           },
           {
-            "number": 4,
-            "provider": null,
-            "name": "catch",
             "as": "search-booking-catch-001",
-            "keyword": "catch",
-            "input": {
-              "max_retry_count": "0",
-              "retry_interval": "2"
-            },
             "block": [
               {
-                "number": 5,
-                "provider": "logger",
-                "name": "log_message",
                 "as": "log_error",
-                "keyword": "action",
-                "input": {
-                  "message": "Error searching booking: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"search-booking-catch-001\",\"path\":[\"message\"]}')}",
-                  "user_logs_enabled": "false"
-                },
                 "extended_input_schema": [
                   {
                     "control_type": "switch",
                     "default": false,
                     "disable_formula": true,
                     "extends_schema": true,
-                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "hint": "                Send a copy of the message to Workato logs.\n                \u003ca href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\"\u003e\n                  Learn more\n                \u003c/a\u003e\n",
                     "label": "Send to Workato log service",
                     "name": "user_logs_enabled",
                     "optional": true,
                     "type": "string"
                   }
                 ],
+                "input": {
+                  "message": "Error searching booking: #{_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"search-booking-catch-001\",\"path\":[\"message\"]}')}",
+                  "user_logs_enabled": "false"
+                },
+                "keyword": "action",
+                "name": "log_message",
+                "number": 5,
+                "provider": "logger",
                 "uuid": "log-error-001"
               },
               {
-                "number": 6,
-                "provider": "workato_recipe_function",
-                "name": "return_result",
                 "as": "return_error",
-                "keyword": "action",
-                "input": {
-                  "result": {
-                    "bookings": {
-                      "____source": "=[]",
-                      "booking_id": "=null",
-                      "booking_number": "=null",
-                      "room_id": "=null",
-                      "room_number": "=null",
-                      "room_status": "=null",
-                      "room_type": "=null",
-                      "floor": "=null",
-                      "opportunity_id": "=null",
-                      "check_out_date": "=null",
-                      "total_nights": "=null"
-                    }
+                "extended_input_schema": [
+                  {
+                    "label": "Result",
+                    "name": "result",
+                    "properties": [
+                      {
+                        "label": "Bookings",
+                        "name": "bookings",
+                        "of": "object",
+                        "properties": [
+                          {
+                            "control_type": "text",
+                            "label": "Booking ID",
+                            "name": "booking_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Booking number",
+                            "name": "booking_number",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room ID",
+                            "name": "room_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room number",
+                            "name": "room_number",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room status",
+                            "name": "room_status",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Room type",
+                            "name": "room_type",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "number",
+                            "label": "Floor",
+                            "name": "floor",
+                            "parse_output": "float_conversion",
+                            "type": "number"
+                          },
+                          {
+                            "control_type": "text",
+                            "label": "Opportunity ID",
+                            "name": "opportunity_id",
+                            "type": "string"
+                          },
+                          {
+                            "control_type": "date",
+                            "label": "Check-out date",
+                            "name": "check_out_date",
+                            "parse_output": "date_conversion",
+                            "render_input": "date_conversion",
+                            "type": "date"
+                          },
+                          {
+                            "control_type": "number",
+                            "label": "Total nights",
+                            "name": "total_nights",
+                            "parse_output": "float_conversion",
+                            "type": "number"
+                          }
+                        ],
+                        "type": "array"
+                      }
+                    ],
+                    "type": "object"
                   }
-                },
+                ],
                 "extended_output_schema": [
                   {
                     "label": "Result",
@@ -1015,7 +1006,6 @@
                       {
                         "label": "Bookings",
                         "name": "bookings",
-                        "type": "array",
                         "of": "object",
                         "properties": [
                           {
@@ -1057,8 +1047,8 @@
                           {
                             "control_type": "number",
                             "label": "Floor",
-                            "parse_output": "float_conversion",
                             "name": "floor",
+                            "parse_output": "float_conversion",
                             "type": "number"
                           },
                           {
@@ -1070,138 +1060,135 @@
                           {
                             "control_type": "date",
                             "label": "Check-out date",
-                            "render_input": "date_conversion",
-                            "parse_output": "date_conversion",
                             "name": "check_out_date",
+                            "parse_output": "date_conversion",
+                            "render_input": "date_conversion",
                             "type": "date"
                           },
                           {
                             "control_type": "number",
                             "label": "Total nights",
-                            "parse_output": "float_conversion",
                             "name": "total_nights",
+                            "parse_output": "float_conversion",
                             "type": "number"
                           }
-                        ]
+                        ],
+                        "type": "array"
                       }
                     ],
                     "type": "object"
                   }
                 ],
-                "extended_input_schema": [
-                  {
-                    "label": "Result",
-                    "name": "result",
-                    "properties": [
-                      {
-                        "label": "Bookings",
-                        "name": "bookings",
-                        "type": "array",
-                        "of": "object",
-                        "properties": [
-                          {
-                            "control_type": "text",
-                            "label": "Booking ID",
-                            "name": "booking_id",
-                            "type": "string"
-                          },
-                          {
-                            "control_type": "text",
-                            "label": "Booking number",
-                            "name": "booking_number",
-                            "type": "string"
-                          },
-                          {
-                            "control_type": "text",
-                            "label": "Room ID",
-                            "name": "room_id",
-                            "type": "string"
-                          },
-                          {
-                            "control_type": "text",
-                            "label": "Room number",
-                            "name": "room_number",
-                            "type": "string"
-                          },
-                          {
-                            "control_type": "text",
-                            "label": "Room status",
-                            "name": "room_status",
-                            "type": "string"
-                          },
-                          {
-                            "control_type": "text",
-                            "label": "Room type",
-                            "name": "room_type",
-                            "type": "string"
-                          },
-                          {
-                            "control_type": "number",
-                            "label": "Floor",
-                            "parse_output": "float_conversion",
-                            "name": "floor",
-                            "type": "number"
-                          },
-                          {
-                            "control_type": "text",
-                            "label": "Opportunity ID",
-                            "name": "opportunity_id",
-                            "type": "string"
-                          },
-                          {
-                            "control_type": "date",
-                            "label": "Check-out date",
-                            "render_input": "date_conversion",
-                            "parse_output": "date_conversion",
-                            "name": "check_out_date",
-                            "type": "date"
-                          },
-                          {
-                            "control_type": "number",
-                            "label": "Total nights",
-                            "parse_output": "float_conversion",
-                            "name": "total_nights",
-                            "type": "number"
-                          }
-                        ]
-                      }
-                    ],
-                    "type": "object"
+                "input": {
+                  "result": {
+                    "bookings": {
+                      "____source": "=[]",
+                      "booking_id": "=null",
+                      "booking_number": "=null",
+                      "check_out_date": "=null",
+                      "floor": "=null",
+                      "opportunity_id": "=null",
+                      "room_id": "=null",
+                      "room_number": "=null",
+                      "room_status": "=null",
+                      "room_type": "=null",
+                      "total_nights": "=null"
+                    }
                   }
-                ],
+                },
+                "keyword": "action",
+                "name": "return_result",
+                "number": 6,
+                "provider": "workato_recipe_function",
                 "uuid": "return-error-001"
               }
             ],
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "keyword": "catch",
+            "number": 4,
             "uuid": "search-booking-catch-001"
           }
         ],
+        "input": {},
+        "keyword": "try",
+        "number": 1,
         "uuid": "try-001"
       }
     ],
-    "uuid": "c5430b5d-89a4-4acb-aaa6-6e188d5018eb"
+    "extended_output_schema": [
+      {
+        "label": "Parameters",
+        "name": "parameters",
+        "properties": [
+          {
+            "control_type": "text",
+            "hint": "Salesforce Contact ID",
+            "label": "Contact ID",
+            "name": "contact_id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "date",
+            "hint": "Check-in date (ISO 8601 format)",
+            "label": "Check-in date",
+            "name": "check_in_date",
+            "optional": false,
+            "parse_output": "date_conversion",
+            "render_input": "date_conversion",
+            "type": "date"
+          },
+          {
+            "control_type": "text",
+            "hint": "Booking status to filter by (default: Reserved)",
+            "label": "Booking status",
+            "name": "status",
+            "optional": true,
+            "type": "string"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "input": {
+      "parameters_schema_json": "[{\"name\":\"contact_id\",\"label\":\"Contact ID\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":false,\"hint\":\"Salesforce Contact ID\"},{\"name\":\"check_in_date\",\"label\":\"Check-in date\",\"type\":\"date\",\"control_type\":\"date\",\"optional\":false,\"hint\":\"Check-in date (ISO 8601 format)\"},{\"name\":\"status\",\"label\":\"Booking status\",\"type\":\"string\",\"control_type\":\"text\",\"optional\":true,\"hint\":\"Booking status to filter by (default: Reserved)\"}]",
+      "result_schema_json": "[{\"name\":\"bookings\",\"label\":\"Bookings\",\"type\":\"array\",\"of\":\"object\",\"properties\":[{\"name\":\"booking_id\",\"label\":\"Booking ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"booking_number\",\"label\":\"Booking number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_id\",\"label\":\"Room ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_number\",\"label\":\"Room number\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_status\",\"label\":\"Room status\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"room_type\",\"label\":\"Room type\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"floor\",\"label\":\"Floor\",\"type\":\"number\",\"control_type\":\"number\"},{\"name\":\"opportunity_id\",\"label\":\"Opportunity ID\",\"type\":\"string\",\"control_type\":\"text\"},{\"name\":\"check_out_date\",\"label\":\"Check-out date\",\"type\":\"date\",\"control_type\":\"date\"},{\"name\":\"total_nights\",\"label\":\"Total nights\",\"type\":\"number\",\"control_type\":\"number\"}]}]"
+    },
+    "keyword": "trigger",
+    "name": "execute",
+    "number": 0,
+    "provider": "workato_recipe_function",
+    "uuid": "search-booking-trigger-001"
   },
+  "concurrency": 1,
   "config": [
     {
+      "account_id": null,
       "keyword": "application",
       "provider": "workato_recipe_function",
-      "skip_validation": false,
-      "account_id": null
+      "skip_validation": false
     },
     {
+      "account_id": {
+        "folder": "Workspace Connections",
+        "name": "SF Dev Account",
+        "zip_name": "Workspace Connections/sf_dev_account.connection.json"
+      },
       "keyword": "application",
       "provider": "salesforce",
-      "skip_validation": false,
-      "account_id": {
-        "zip_name": "Workspace Connections/sf_dev_account.connection.json",
-        "name": "SF Dev Account",
-        "folder": "Workspace Connections"
-      }
+      "skip_validation": false
     },
     {
+      "account_id": null,
       "keyword": "application",
       "provider": "logger",
-      "skip_validation": false,
-      "account_id": null
+      "skip_validation": false
     }
-  ]
+  ],
+  "name": "Search booking by contact and date",
+  "private": true,
+  "version": 2
 }

@@ -1,0 +1,7 @@
+{
+  "name": "Compensate checkout failure",
+  "method": "POST",
+  "path": "compensate-checkout-failure",
+  "recipe_name": "compensate_checkout_failure",
+  "description": "Saga compensation for failed checkout: refunds Stripe payment and reverts Salesforce state (Booking→Checked In, Room→Occupied, Opportunity→Checked In). Requires payment_intent_id, guest_email, idempotency_token; optional reason (for audit). Returns refund_id/refund_amount/refund_status or error codes (404: payment not found, 422: payment not refundable)."
+}

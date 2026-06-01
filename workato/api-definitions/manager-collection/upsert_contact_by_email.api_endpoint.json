@@ -1,0 +1,7 @@
+{
+  "name": "Upsert contact by email",
+  "method": "POST",
+  "path": "upsert-contact-by-email",
+  "recipe_name": "upsert_contact_by_email",
+  "description": "Find or create Salesforce Contact by email. Requires email, first_name, last_name, contact_type (Guest/Manager/Vendor); optional phone, account_id (uses default if omitted). Returns contact_id, found (boolean), created (boolean). HTTP 200 if existing contact found, 201 if new contact created."
+}

@@ -1,196 +1,9 @@
 {
-  "name": "HA API: Control Light",
-  "description": "Control light devices with guest context - POST /api/services/light/{service}",
-  "version": 7,
-  "private": false,
-  "concurrency": 1,
   "code": {
-    "number": 0,
-    "provider": "workato_api_platform",
-    "name": "receive_request",
     "as": "trigger",
-    "keyword": "trigger",
-    "input": {
-      "request": {
-        "content_type": "json",
-        "schema": [
-          {
-            "name": "entity_id",
-            "type": "string",
-            "control_type": "text",
-            "label": "Entity ID",
-            "optional": false,
-            "hint": "Light entity ID (e.g., light.living_room)"
-          },
-          {
-            "name": "service",
-            "type": "string",
-            "control_type": "text",
-            "label": "Service",
-            "optional": false,
-            "hint": "Service name: turn_on, turn_off, toggle"
-          },
-          {
-            "name": "brightness",
-            "type": "integer",
-            "control_type": "integer",
-            "label": "Brightness",
-            "optional": true,
-            "hint": "Brightness level (0-255)"
-          },
-          {
-            "name": "hs_color",
-            "type": "array",
-            "of": "number",
-            "label": "HS Color",
-            "optional": true,
-            "hint": "Hue/Saturation color array [hue, saturation]"
-          },
-          {
-            "name": "rgb_color",
-            "type": "array",
-            "of": "integer",
-            "label": "RGB Color",
-            "optional": true,
-            "hint": "RGB color array [red, green, blue]"
-          }
-        ],
-        "headers": [
-          {
-            "name": "X-Guest-Name",
-            "type": "string",
-            "optional": true
-          },
-          {
-            "name": "X-Guest-Email",
-            "type": "string",
-            "optional": true
-          },
-          {
-            "name": "X-Guest-Room",
-            "type": "string",
-            "optional": true
-          }
-        ]
-      },
-      "response": {
-        "content_type": "json",
-        "responses": [
-          {
-            "name": "Success",
-            "http_status_code": "200",
-            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"data\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Data\",\"properties\":[]},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]"
-          },
-          {
-            "name": "Bad Request",
-            "http_status_code": "400",
-            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]"
-          },
-          {
-            "name": "Unauthorized",
-            "http_status_code": "401",
-            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]"
-          },
-          {
-            "name": "Forbidden",
-            "http_status_code": "403",
-            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]"
-          },
-          {
-            "name": "Not Found",
-            "http_status_code": "404",
-            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]"
-          },
-          {
-            "name": "Server Error",
-            "http_status_code": "500",
-            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]"
-          }
-        ]
-      }
-    },
-    "extended_output_schema": [
-      {
-        "label": "Request",
-        "name": "request",
-        "properties": [
-          {
-            "control_type": "text",
-            "label": "Entity ID",
-            "name": "entity_id",
-            "type": "string"
-          },
-          {
-            "control_type": "text",
-            "label": "Service",
-            "name": "service",
-            "type": "string"
-          },
-          {
-            "control_type": "integer",
-            "label": "Brightness",
-            "name": "brightness",
-            "type": "integer",
-            "optional": true
-          },
-          {
-            "label": "HS Color",
-            "name": "hs_color",
-            "type": "array",
-            "of": "number",
-            "optional": true
-          },
-          {
-            "label": "RGB Color",
-            "name": "rgb_color",
-            "type": "array",
-            "of": "integer",
-            "optional": true
-          }
-        ],
-        "type": "object"
-      },
-      {
-        "label": "Headers",
-        "name": "headers",
-        "properties": [
-          {
-            "control_type": "text",
-            "label": "X-Guest-Name",
-            "name": "X-Guest-Name",
-            "type": "string",
-            "optional": true
-          },
-          {
-            "control_type": "text",
-            "label": "X-Guest-Email",
-            "name": "X-Guest-Email",
-            "type": "string",
-            "optional": true
-          },
-          {
-            "control_type": "text",
-            "label": "X-Guest-Room",
-            "name": "X-Guest-Room",
-            "type": "string",
-            "optional": true
-          }
-        ],
-        "type": "object"
-      }
-    ],
     "block": [
       {
-        "number": 1,
-        "provider": "logger",
-        "name": "log_message",
         "as": "log-request-001",
-        "keyword": "action",
-        "input": {
-          "user_logs_enabled": true,
-          "message": "Guest =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}') controlling light =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}') with service =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"service\"]}')",
-          "log_level": "INFO"
-        },
         "extended_input_schema": [
           {
             "control_type": "select",
@@ -222,68 +35,57 @@
             "default": false,
             "disable_formula": true,
             "extends_schema": true,
-            "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+            "hint": "                Send a copy of the message to Workato logs.\n                \u003ca href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\"\u003e\n                  Learn more\n                \u003c/a\u003e\n",
             "label": "Send to Workato log service",
             "name": "user_logs_enabled",
             "optional": true,
             "type": "string"
           }
         ],
+        "input": {
+          "log_level": "INFO",
+          "message": "Guest =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}') controlling light =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}') with service =_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"service\"]}')",
+          "user_logs_enabled": true
+        },
+        "keyword": "action",
+        "name": "log_message",
+        "number": 1,
+        "provider": "logger",
         "uuid": "log-request-001"
       },
       {
-        "number": 2,
-        "keyword": "try",
-        "input": {
-        },
         "block": [
           {
-            "number": 3,
-            "provider": "nabu_casa_home_assistant_cloud__connector_2100002083_1768260720",
-            "name": "call_service",
             "as": "call-service-001",
-            "keyword": "action",
             "input": {
               "domain": "light",
               "service": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"service\"]}')",
               "service_data": {
-                "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}')",
                 "brightness": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"brightness\"]}')",
+                "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}')",
                 "hs_color": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"hs_color\"]}')",
                 "rgb_color": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"rgb_color\"]}')"
               }
             },
+            "keyword": "action",
+            "name": "call_service",
+            "number": 3,
+            "provider": "nabu_casa_home_assistant_cloud__connector_2100009826_1779813258",
             "uuid": "call-service-001"
           },
           {
-            "number": 4,
-            "provider": "nabu_casa_home_assistant_cloud__connector_2100002083_1768260720",
-            "name": "get_entity_state",
             "as": "get-state-001",
-            "keyword": "action",
             "input": {
               "entity_id": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"request\",\"entity_id\"]}')"
             },
+            "keyword": "action",
+            "name": "get_entity_state",
+            "number": 4,
+            "provider": "nabu_casa_home_assistant_cloud__connector_2100009826_1779813258",
             "uuid": "get-state-001"
           },
           {
-            "number": 5,
-            "provider": "workato_api_platform",
-            "name": "return_response",
             "as": "return-success-001",
-            "keyword": "action",
-            "input": {
-              "http_status_code": "200",
-              "response": {
-                "success": "true",
-                "data": "=_dp('{\"pill_type\":\"output\",\"provider\":\"nabu_casa_home_assistant_cloud__connector_2100002083_1768260720\",\"line\":\"get-state-001\",\"path\":[]}')",
-                "guest_context": {
-                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
-                }
-              }
-            },
             "extended_input_schema": [
               {
                 "change_on_blur": true,
@@ -320,28 +122,29 @@
                 "type": "string"
               }
             ],
+            "input": {
+              "http_status_code": "200",
+              "response": {
+                "data": "=_dp('{\"pill_type\":\"output\",\"provider\":\"nabu_casa_home_assistant_cloud__connector_2100009826_1779813258\",\"line\":\"get-state-001\",\"path\":[]}')",
+                "guest_context": {
+                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                },
+                "success": "true"
+              }
+            },
+            "keyword": "action",
+            "name": "return_response",
+            "number": 5,
+            "provider": "workato_api_platform",
             "uuid": "return-success-001"
           },
           {
-            "number": 6,
             "as": "catch-error-001",
-            "keyword": "catch",
-            "input": {
-              "max_retry_count": "0",
-              "retry_interval": "2"
-            },
             "block": [
               {
-                "number": 7,
-                "provider": "logger",
-                "name": "log_message",
                 "as": "log-error-001",
-                "keyword": "action",
-                "input": {
-                  "user_logs_enabled": true,
-                  "message": "Error controlling light: =_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                  "log_level": "ERROR"
-                },
                 "extended_input_schema": [
                   {
                     "control_type": "select",
@@ -373,56 +176,29 @@
                     "default": false,
                     "disable_formula": true,
                     "extends_schema": true,
-                    "hint": "                Send a copy of the message to Workato logs.\n                <a href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\">\n                  Learn more\n                </a>\n",
+                    "hint": "                Send a copy of the message to Workato logs.\n                \u003ca href=\"https://docs.workato.com/features/logging-service.html\" target=\"_blank\" class=\"ng-scope\"\u003e\n                  Learn more\n                \u003c/a\u003e\n",
                     "label": "Send to Workato log service",
                     "name": "user_logs_enabled",
                     "optional": true,
                     "type": "string"
                   }
                 ],
+                "input": {
+                  "log_level": "ERROR",
+                  "message": "Error controlling light: =_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                  "user_logs_enabled": true
+                },
+                "keyword": "action",
+                "name": "log_message",
+                "number": 7,
+                "provider": "logger",
                 "uuid": "log-error-001"
               },
               {
-                "number": 8,
-                "keyword": "if",
                 "as": "check-not-found",
-                "input": {
-                  "type": "compound",
-                  "operand": "or",
-                  "conditions": [
-                    {
-                      "operand": "contains",
-                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                      "rhs": "not found",
-                      "uuid": "cond-not-found-001"
-                    },
-                    {
-                      "operand": "contains",
-                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                      "rhs": "404",
-                      "uuid": "cond-404-001"
-                    }
-                  ]
-                },
                 "block": [
                   {
-                    "number": 9,
-                    "provider": "workato_api_platform",
-                    "name": "return_response",
                     "as": "return-404-001",
-                    "keyword": "action",
-                    "input": {
-                      "http_status_code": "404",
-                      "response": {
-                        "success": "false",
-                        "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                        "guest_context": {
-                          "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                          "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                          "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
-                        }
-                      }
-                    },
                     "extended_input_schema": [
                       {
                         "change_on_blur": true,
@@ -459,62 +235,32 @@
                         "type": "string"
                       }
                     ],
+                    "input": {
+                      "http_status_code": "404",
+                      "response": {
+                        "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                        "guest_context": {
+                          "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                          "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                          "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                        },
+                        "success": "false"
+                      }
+                    },
+                    "keyword": "action",
+                    "name": "return_response",
+                    "number": 9,
+                    "provider": "workato_api_platform",
                     "uuid": "return-404-001"
                   },
                   {
-                    "number": 10,
-                    "keyword": "else",
                     "as": "check-auth-errors",
-                    "input": {
-                    },
                     "block": [
                       {
-                        "number": 11,
-                        "keyword": "if",
                         "as": "check-unauthorized",
-                        "input": {
-                          "type": "compound",
-                          "operand": "or",
-                          "conditions": [
-                            {
-                              "operand": "contains",
-                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                              "rhs": "401",
-                              "uuid": "cond-401-001"
-                            },
-                            {
-                              "operand": "contains",
-                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                              "rhs": "Unauthorized",
-                              "uuid": "cond-unauth-001"
-                            },
-                            {
-                              "operand": "contains",
-                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                              "rhs": "Authentication failed",
-                              "uuid": "cond-auth-fail-001"
-                            }
-                          ]
-                        },
                         "block": [
                           {
-                            "number": 12,
-                            "provider": "workato_api_platform",
-                            "name": "return_response",
                             "as": "return-401-001",
-                            "keyword": "action",
-                            "input": {
-                              "http_status_code": "401",
-                              "response": {
-                                "success": "false",
-                                "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                                "guest_context": {
-                                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
-                                }
-                              }
-                            },
                             "extended_input_schema": [
                               {
                                 "change_on_blur": true,
@@ -551,56 +297,32 @@
                                 "type": "string"
                               }
                             ],
+                            "input": {
+                              "http_status_code": "401",
+                              "response": {
+                                "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                "guest_context": {
+                                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                                },
+                                "success": "false"
+                              }
+                            },
+                            "keyword": "action",
+                            "name": "return_response",
+                            "number": 12,
+                            "provider": "workato_api_platform",
                             "uuid": "return-401-001"
                           },
                           {
-                            "number": 13,
-                            "keyword": "else",
                             "as": "check-forbidden",
-                            "input": {
-                            },
                             "block": [
                               {
-                                "number": 14,
-                                "keyword": "if",
                                 "as": "check-403",
-                                "input": {
-                                  "type": "compound",
-                                  "operand": "or",
-                                  "conditions": [
-                                    {
-                                      "operand": "contains",
-                                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                                      "rhs": "403",
-                                      "uuid": "cond-403-001"
-                                    },
-                                    {
-                                      "operand": "contains",
-                                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                                      "rhs": "Forbidden",
-                                      "uuid": "cond-forbidden-001"
-                                    }
-                                  ]
-                                },
                                 "block": [
                                   {
-                                    "number": 15,
-                                    "provider": "workato_api_platform",
-                                    "name": "return_response",
                                     "as": "return-403-001",
-                                    "keyword": "action",
-                                    "input": {
-                                      "http_status_code": "403",
-                                      "response": {
-                                        "success": "false",
-                                        "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                                        "guest_context": {
-                                          "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                                          "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                                          "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
-                                        }
-                                      }
-                                    },
                                     "extended_input_schema": [
                                       {
                                         "change_on_blur": true,
@@ -637,121 +359,486 @@
                                         "type": "string"
                                       }
                                     ],
+                                    "input": {
+                                      "http_status_code": "403",
+                                      "response": {
+                                        "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                        "guest_context": {
+                                          "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                                          "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                                          "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                                        },
+                                        "success": "false"
+                                      }
+                                    },
+                                    "keyword": "action",
+                                    "name": "return_response",
+                                    "number": 15,
+                                    "provider": "workato_api_platform",
                                     "uuid": "return-403-001"
                                   },
                                   {
-                                    "number": 16,
-                                    "keyword": "else",
-                                    "as": "default-error",
-                                    "input": {
-                                    },
+                                    "as": "check-bad-request",
                                     "block": [
                                       {
-                                        "number": 17,
-                                        "provider": "workato_api_platform",
-                                        "name": "return_response",
-                                        "as": "return-500-001",
-                                        "keyword": "action",
-                                        "input": {
-                                          "http_status_code": "500",
-                                          "response": {
-                                            "success": "false",
-                                            "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
-                                            "guest_context": {
-                                              "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
-                                              "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
-                                              "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
-                                            }
-                                          }
-                                        },
-                                        "extended_input_schema": [
+                                        "as": "check-400",
+                                        "block": [
                                           {
-                                            "change_on_blur": true,
-                                            "control_type": "select",
-                                            "extends_schema": true,
-                                            "label": "Response",
-                                            "name": "http_status_code",
-                                            "pick_list": [
-                                              [
-                                                "Success",
-                                                "200"
-                                              ],
-                                              [
-                                                "Bad Request",
-                                                "400"
-                                              ],
-                                              [
-                                                "Unauthorized",
-                                                "401"
-                                              ],
-                                              [
-                                                "Forbidden",
-                                                "403"
-                                              ],
-                                              [
-                                                "Not Found",
-                                                "404"
-                                              ],
-                                              [
-                                                "Server Error",
-                                                "500"
-                                              ]
+                                            "as": "return-400-001",
+                                            "extended_input_schema": [
+                                              {
+                                                "change_on_blur": true,
+                                                "control_type": "select",
+                                                "extends_schema": true,
+                                                "label": "Response",
+                                                "name": "http_status_code",
+                                                "pick_list": [
+                                                  [
+                                                    "Success",
+                                                    "200"
+                                                  ],
+                                                  [
+                                                    "Bad Request",
+                                                    "400"
+                                                  ],
+                                                  [
+                                                    "Unauthorized",
+                                                    "401"
+                                                  ],
+                                                  [
+                                                    "Forbidden",
+                                                    "403"
+                                                  ],
+                                                  [
+                                                    "Not Found",
+                                                    "404"
+                                                  ],
+                                                  [
+                                                    "Server Error",
+                                                    "500"
+                                                  ]
+                                                ],
+                                                "type": "string"
+                                              }
                                             ],
-                                            "type": "string"
+                                            "input": {
+                                              "http_status_code": "400",
+                                              "response": {
+                                                "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                                "guest_context": {
+                                                  "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                                                  "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                                                  "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                                                },
+                                                "success": "false"
+                                              }
+                                            },
+                                            "keyword": "action",
+                                            "name": "return_response",
+                                            "number": 18,
+                                            "provider": "workato_api_platform",
+                                            "uuid": "return-400-001"
+                                          },
+                                          {
+                                            "as": "default-error",
+                                            "block": [
+                                              {
+                                                "as": "return-500-001",
+                                                "extended_input_schema": [
+                                                  {
+                                                    "change_on_blur": true,
+                                                    "control_type": "select",
+                                                    "extends_schema": true,
+                                                    "label": "Response",
+                                                    "name": "http_status_code",
+                                                    "pick_list": [
+                                                      [
+                                                        "Success",
+                                                        "200"
+                                                      ],
+                                                      [
+                                                        "Bad Request",
+                                                        "400"
+                                                      ],
+                                                      [
+                                                        "Unauthorized",
+                                                        "401"
+                                                      ],
+                                                      [
+                                                        "Forbidden",
+                                                        "403"
+                                                      ],
+                                                      [
+                                                        "Not Found",
+                                                        "404"
+                                                      ],
+                                                      [
+                                                        "Server Error",
+                                                        "500"
+                                                      ]
+                                                    ],
+                                                    "type": "string"
+                                                  }
+                                                ],
+                                                "input": {
+                                                  "http_status_code": "500",
+                                                  "response": {
+                                                    "error": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                                    "guest_context": {
+                                                      "email": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Email\"]}')",
+                                                      "name": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Name\"]}')",
+                                                      "room": "=_dp('{\"pill_type\":\"output\",\"provider\":\"workato_api_platform\",\"line\":\"trigger\",\"path\":[\"headers\",\"X-Guest-Room\"]}')"
+                                                    },
+                                                    "success": "false"
+                                                  }
+                                                },
+                                                "keyword": "action",
+                                                "name": "return_response",
+                                                "number": 20,
+                                                "provider": "workato_api_platform",
+                                                "uuid": "return-500-001"
+                                              }
+                                            ],
+                                            "input": {},
+                                            "keyword": "else",
+                                            "number": 19,
+                                            "uuid": "default-error"
                                           }
                                         ],
-                                        "uuid": "return-500-001"
+                                        "input": {
+                                          "conditions": [
+                                            {
+                                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                              "operand": "contains",
+                                              "rhs": "400",
+                                              "uuid": "cond-400-001"
+                                            },
+                                            {
+                                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                              "operand": "contains",
+                                              "rhs": "Bad Request",
+                                              "uuid": "cond-bad-request-001"
+                                            }
+                                          ],
+                                          "operand": "or",
+                                          "type": "compound"
+                                        },
+                                        "keyword": "if",
+                                        "number": 17,
+                                        "uuid": "check-400"
                                       }
                                     ],
-                                    "uuid": "default-error"
+                                    "input": {},
+                                    "keyword": "else",
+                                    "number": 16,
+                                    "uuid": "check-bad-request"
                                   }
                                 ],
+                                "input": {
+                                  "conditions": [
+                                    {
+                                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                      "operand": "contains",
+                                      "rhs": "403",
+                                      "uuid": "cond-403-001"
+                                    },
+                                    {
+                                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                                      "operand": "contains",
+                                      "rhs": "Forbidden",
+                                      "uuid": "cond-forbidden-001"
+                                    }
+                                  ],
+                                  "operand": "or",
+                                  "type": "compound"
+                                },
+                                "keyword": "if",
+                                "number": 14,
                                 "uuid": "check-403"
                               }
                             ],
+                            "input": {},
+                            "keyword": "else",
+                            "number": 13,
                             "uuid": "check-forbidden"
                           }
                         ],
+                        "input": {
+                          "conditions": [
+                            {
+                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                              "operand": "contains",
+                              "rhs": "401",
+                              "uuid": "cond-401-001"
+                            },
+                            {
+                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                              "operand": "contains",
+                              "rhs": "Unauthorized",
+                              "uuid": "cond-unauth-001"
+                            },
+                            {
+                              "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                              "operand": "contains",
+                              "rhs": "Authentication failed",
+                              "uuid": "cond-auth-fail-001"
+                            }
+                          ],
+                          "operand": "or",
+                          "type": "compound"
+                        },
+                        "keyword": "if",
+                        "number": 11,
                         "uuid": "check-unauthorized"
                       }
                     ],
+                    "input": {},
+                    "keyword": "else",
+                    "number": 10,
                     "uuid": "check-auth-errors"
                   }
                 ],
+                "input": {
+                  "conditions": [
+                    {
+                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                      "operand": "contains",
+                      "rhs": "not found",
+                      "uuid": "cond-not-found-001"
+                    },
+                    {
+                      "lhs": "=_dp('{\"pill_type\":\"output\",\"provider\":\"catch\",\"line\":\"catch-error-001\",\"path\":[\"message\"]}')",
+                      "operand": "contains",
+                      "rhs": "404",
+                      "uuid": "cond-404-001"
+                    }
+                  ],
+                  "operand": "or",
+                  "type": "compound"
+                },
+                "keyword": "if",
+                "number": 8,
                 "uuid": "check-not-found"
               }
             ],
+            "input": {
+              "max_retry_count": "0",
+              "retry_interval": "2"
+            },
+            "keyword": "catch",
+            "number": 6,
             "uuid": "catch-error-001"
           }
         ],
+        "input": {},
+        "keyword": "try",
+        "number": 2,
         "uuid": "try-main-001"
       }
     ],
+    "extended_output_schema": [
+      {
+        "label": "Request",
+        "name": "request",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "Entity ID",
+            "name": "entity_id",
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "label": "Service",
+            "name": "service",
+            "type": "string"
+          },
+          {
+            "control_type": "integer",
+            "label": "Brightness",
+            "name": "brightness",
+            "optional": true,
+            "type": "integer"
+          },
+          {
+            "label": "HS Color",
+            "name": "hs_color",
+            "of": "number",
+            "optional": true,
+            "type": "array"
+          },
+          {
+            "label": "RGB Color",
+            "name": "rgb_color",
+            "of": "integer",
+            "optional": true,
+            "type": "array"
+          }
+        ],
+        "type": "object"
+      },
+      {
+        "label": "Headers",
+        "name": "headers",
+        "properties": [
+          {
+            "control_type": "text",
+            "label": "X-Guest-Name",
+            "name": "X-Guest-Name",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "label": "X-Guest-Email",
+            "name": "X-Guest-Email",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "label": "X-Guest-Room",
+            "name": "X-Guest-Room",
+            "optional": true,
+            "type": "string"
+          }
+        ],
+        "type": "object"
+      }
+    ],
+    "input": {
+      "request": {
+        "content_type": "json",
+        "headers": [
+          {
+            "name": "X-Guest-Name",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Guest-Email",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Guest-Room",
+            "optional": true,
+            "type": "string"
+          }
+        ],
+        "schema": [
+          {
+            "control_type": "text",
+            "hint": "Light entity ID (e.g., light.living_room)",
+            "label": "Entity ID",
+            "name": "entity_id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "text",
+            "hint": "Service name: turn_on, turn_off, toggle",
+            "label": "Service",
+            "name": "service",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "control_type": "integer",
+            "hint": "Brightness level (0-255)",
+            "label": "Brightness",
+            "name": "brightness",
+            "optional": true,
+            "type": "integer"
+          },
+          {
+            "hint": "Hue/Saturation color array [hue, saturation]",
+            "label": "HS Color",
+            "name": "hs_color",
+            "of": "number",
+            "optional": true,
+            "type": "array"
+          },
+          {
+            "hint": "RGB color array [red, green, blue]",
+            "label": "RGB Color",
+            "name": "rgb_color",
+            "of": "integer",
+            "optional": true,
+            "type": "array"
+          }
+        ]
+      },
+      "response": {
+        "content_type": "json",
+        "responses": [
+          {
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"data\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Data\",\"properties\":[]},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]",
+            "http_status_code": "200",
+            "name": "Success"
+          },
+          {
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]",
+            "http_status_code": "400",
+            "name": "Bad Request"
+          },
+          {
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]",
+            "http_status_code": "401",
+            "name": "Unauthorized"
+          },
+          {
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]",
+            "http_status_code": "403",
+            "name": "Forbidden"
+          },
+          {
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]",
+            "http_status_code": "404",
+            "name": "Not Found"
+          },
+          {
+            "body_schema": "[{\"name\":\"success\",\"type\":\"boolean\",\"control_type\":\"checkbox\",\"label\":\"Success\"},{\"name\":\"error\",\"type\":\"string\",\"control_type\":\"text\",\"label\":\"Error\"},{\"name\":\"guest_context\",\"type\":\"object\",\"control_type\":\"text\",\"label\":\"Guest Context\",\"properties\":[]}]",
+            "http_status_code": "500",
+            "name": "Server Error"
+          }
+        ]
+      }
+    },
+    "keyword": "trigger",
+    "name": "receive_request",
+    "number": 0,
+    "provider": "workato_api_platform",
     "uuid": "trigger-001"
   },
+  "concurrency": 1,
   "config": [
     {
+      "account_id": null,
       "keyword": "application",
       "provider": "workato_api_platform",
-      "skip_validation": false,
-      "account_id": null
+      "skip_validation": false
     },
     {
+      "account_id": null,
       "keyword": "application",
       "provider": "logger",
-      "skip_validation": false,
-      "account_id": null
+      "skip_validation": false
     },
     {
-      "keyword": "application",
-      "provider": "nabu_casa_home_assistant_cloud__connector_2100002083_1768260720",
-      "skip_validation": false,
       "account_id": {
-        "zip_name": "my_nabu_casa_home_assistant_cloud_account.connection.json",
-        "name": "My Nabu Casa (Home Assistant Cloud) account",
+        "custom": true,
         "folder": "",
-        "custom": true
-      }
+        "name": "My Nabu Casa (Home Assistant Cloud) account",
+        "zip_name": "my_nabu_casa_home_assistant_cloud_account.connection.json"
+      },
+      "keyword": "application",
+      "provider": "nabu_casa_home_assistant_cloud__connector_2100009826_1779813258",
+      "skip_validation": false
     }
-  ]
+  ],
+  "description": "Control light devices with guest context - POST /api/services/light/{service}",
+  "name": "HA API: Control Light",
+  "private": false,
+  "version": 1
 }

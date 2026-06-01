@@ -1,0 +1,5 @@
+{
+  "name": "dewy-resort-guest",
+  "version": "1.0",
+  "description": "Self-service API endpoints for hotel guests to manage check-in, checkout, bookings, and service requests."
+}

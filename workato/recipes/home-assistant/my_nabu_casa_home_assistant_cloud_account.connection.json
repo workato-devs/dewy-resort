@@ -1,9 +1,9 @@
 {
   "name": "My Nabu Casa (Home Assistant Cloud) account",
   "provider": {
-    "zip_name": "nabu_casa_home_assistant_cloud.custom_adapter.json",
+    "folder": "",
     "name": "Nabu Casa (Home Assistant Cloud)",
-    "folder": ""
+    "zip_name": "nabu_casa_home_assistant_cloud.custom_adapter.json"
   },
   "root_folder": false
 }
