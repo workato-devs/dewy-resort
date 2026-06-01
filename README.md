@@ -219,10 +219,15 @@ curl -fsSL https://raw.githubusercontent.com/workato-devs/dewy-resort/main/boots
 
 **Windows (PowerShell):**
 ```powershell
-iwr -useb https://raw.githubusercontent.com/workato-devs/dewy-resort/main/bootstrap.ps1 | iex
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (curl https://raw.githubusercontent.com/workato-devs/dewy-resort/main/bootstrap.ps1 -UseBasicParsing)"
 ```
 
 The bootstrap script automatically installs all dependencies (Node.js v20, Git) and sets up the project.
+
+Then change into the project directory:
+```bash
+cd dewy-resort
+```
 
 ### Manual Setup
 
@@ -231,30 +236,34 @@ The bootstrap script automatically installs all dependencies (Node.js v20, Git) 
 - [Workato Developer sandbox](https://www.workato.com/sandbox) (free Developer sandbox)
 - [Salesforce Developer org](https://developer.salesforce.com/signup) (free Developer Edition)
 - [Stripe Developer account](https://dashboard.stripe.com/register) (Stripe Developer sign up)
+- Workato CLI (`wk`) — macOS/Linux: `brew install workato-devs/tap/wk` / Windows: `scoop bucket add workato-devs https://github.com/workato-devs/scoop-bucket && scoop install wk`
 
-### 1. Clone and Install
+### 1. Initialize Project
 
 ```bash
-git clone <repo-url>
-cd dewy-resort
-./setup.sh
-```
+# Copy env template
+cp .env.example app/.env
 
-Or use the one-liner bootstrap which does this automatically.
+# Install app dependencies and initialize local database
+cd app
+npm install
+npm run db:setup
+cd ..
+```
 
 ### 2. Deploy Salesforce Metadata ⭐
 
-Salesforce is the system of record - deploy it first.
+Salesforce is the system of record — deploy it first.
 
 ```bash
-# Install CLI (if not done via setup.sh)
-./setup.sh --tool=salesforce
+# Verify CLIs are installed
+make setup
 
-# Authenticate
-bin/sf org login web --alias myDevOrg
+# Authenticate to Salesforce (opens browser)
+sf org login web --alias myDevOrg
 
 # Deploy metadata and seed data
-./vendor/salesforce/scripts/deploy.sh myDevOrg
+make sf-deploy org=myDevOrg
 ```
 
 **📚 See:** [Salesforce Setup](./vendor/salesforce/docs/SALESFORCE_SETUP.md)
@@ -264,69 +273,49 @@ bin/sf org login web --alias myDevOrg
 Workato implements the enterprise MCP architecture.
 
 ```bash
-# Install wk CLI (if not done via setup.sh)
-# macOS/Linux: brew install workato/tap/wk
-# Windows: scoop install wk
-
 # Authenticate with your Workato workspace
-wk auth login
+make workato-login
 
-# Initialize Workato project and pull recipes
+# Initialize Workato project and push recipes
 make workato-init
+make push
+```
 
-# Configure connections in Workato UI (see guide)
+Next, configure connections in the Workato UI:
+1. Go to **Projects → Workspace Connections** and connect your **Salesforce** org
+2. Optionally connect **Stripe** (Sandbox mode, `sk_test_` key)
 
-# Start recipes
+```bash
+# Start all recipes
 make start-recipes
 ```
 
-**⚠️ IMPORTANT:** 4 recipes require manual activation in Workato UI (SOQL query configuration). See detailed guide.
+**⚠️ IMPORTANT:** 4 recipes with dynamic SOQL queries may need their Salesforce connection linked manually before they'll start. See the detailed guide for steps.
 
 **📚 See:** [Workato Setup](./vendor/workato/docs/WORKATO_SETUP.md)
 
-### 4. Configure Dewy Hotel Application
+### 4. Configure API & MCP
 
-Now configure the hotel app to call your deployed Workato recipes:
-
-```bash
-# Copy env template
-cp .env.example .env
-```
-
-**Add Workato API Collection endpoint to `.env`:**
+Set up API collections, endpoints, and MCP servers:
 
 ```bash
-# Salesforce API Collection URL (get from Workato UI)
-# In Workato: Navigate to any recipe → API Collection tab → Copy base URL
-SALESFORCE_API_COLLECTION_URL=https://apim.workato.com/your-collection-id
+# Create API collections, endpoints, and API client (writes credentials to app/.env)
+make setup-api
 
-# Use same token as deployment
-SALESFORCE_API_AUTH_TOKEN=your_token_from_step_3
+# Enable all API endpoints
+make enable-api-endpoints
+
+# Create MCP servers and write URLs/tokens to app/.env
+make setup-mcp
 ```
-
-**Initialize local database** (for hotel app sessions, UI state):
-
-```bash
-npm run db:setup
-```
-
-This single command creates the database, applies the schema, runs all migrations, and seeds demo data.
-
-**Note:** The local SQLite database stores hotel app-specific data (user sessions, device states). Backend data (bookings, rooms, cases) lives in Salesforce and is accessed via Workato recipes exposed as REST API endpoints.
-
-**About MCP:** The Workato recipes implement the orchestrator and atomic skill patterns that would be exposed as MCP tools. The hotel app currently calls these recipes directly via REST API. For AI agent integration, these same recipes would be exposed via  MCP server, so the recipes appear as tools to LLMs. This is what the hands-on workshop walks through in the initial unit. MCP servers are configured declaratively in Workato. 
 
 ### 5. Start Application
 
 ```bash
-npm run dev
+app/scripts/dev-tools/server.sh start
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
-
-**Test logins (mock mode):**
-- Guest: guest@example.com / password
-- Manager: manager@example.com / password
 
 ---
 
@@ -425,19 +414,19 @@ dewy-resort/
 
 ```bash
 # Setup
-./setup.sh                        # Install prerequisites + verify CLIs
-./setup.sh --tool=salesforce      # Install Salesforce CLI only
-./setup.sh --skip-deps            # Skip prerequisite checks
+make setup                        # Verify CLI installations
+make workato-login                # Authenticate wk CLI with API token
 
-# Workato (MCP Server) — requires wk CLI (brew install workato/tap/wk)
+# Workato (MCP Server) — requires wk CLI (brew install workato-devs/tap/wk)
 make workato-init                 # Initialize wk project & pull recipes
 make validate                     # Lint all recipes
 make push                         # Push recipes to workspace
 make pull                         # Pull recipes from workspace
 make start-recipes                # Start all recipes
 make stop-recipes                 # Stop all recipes
+make setup-api                    # Create API collections, endpoints & client
 make enable-api-endpoints         # Enable API endpoints
-make create-api-client            # Create API client & update .env
+make setup-mcp                    # Create MCP servers & write config to app/.env
 
 # Salesforce (Backend)
 make sf-deploy org=<alias>        # Deploy metadata and seed data
