@@ -223,31 +223,7 @@ make push
 4. Authenticate to your Salesforce Developer Edition org
 5. **WARNING: DO NOT rename the connection**
 
-### 3.5 Manual Activation (If Needed)
-
-Some recipes with dynamic SOQL queries may fail to start because their Salesforce connection isn't automatically linked. **If all your recipes started successfully in Step 3.7, skip to [Step 3.8](#38-set-up-api-platform).**
-
-The recipes that may need manual activation:
-
-1. `Search bookings by room and dates`
-2. `Search room by number`
-3. `Search rooms on behalf of staff`
-4. `Search rooms on behalf of guest`
-
-> **Tip:** The easiest way to find these is the **Recipes** page → **Inactive** filter, which lists only the recipes that didn't start. From there you can search by name to narrow further — e.g. searching `behalf` surfaces the two "on behalf of" recipes above.
-
-For **each** affected recipe:
-
-1. Open the recipe from the **Inactive** list (these live under **orchestrator-recipes** or **atomic-salesforce-recipes**)
-2. Click the recipe name to open its detail page
-3. Click the **Connections** tab (between "Jobs" and "Versions")
-4. In the left panel, you'll see **"Salesforce connection"** with a red **"Requires connection"** warning
-5. In the main panel under "Showing active connections", click your Salesforce connection
-6. A green **"Connection updated successfully"** banner confirms it worked
-
-Once all 4 are linked, run `make start-recipes` again to pick up the stragglers.
-
-### 3.6 Configure Stripe Connection (Optional)
+### 3.5 Configure Stripe Connection (Optional)
 
 1. Go to **Projects → Workspace Connections**
 2. Click the **Stripe** connection
@@ -271,19 +247,27 @@ Once all 4 are linked, run `make start-recipes` again to pick up the stragglers.
 {: .warning }
 > Always use **test mode** keys for workshop environments. Never use live/production keys (`sk_live_`).
 
-### 3.7 Start Recipes
+### 3.6 Start Recipes
 
 ```bash
 make start-recipes
 ```
 
-If all recipes start successfully, skip ahead to [Step 3.8](#38-set-up-api-platform). If some recipes fail to start, follow [Step 3.5](#35-manual-activation-if-needed) to link their connections, then run `make start-recipes` again.
-
 **NOTE:** If you did not set up or activate Stripe, some Stripe recipes will fail to start — that's expected.
 
 **CHECKPOINT:** All Salesforce recipes showing "Running" status
 
-### 3.8 Set Up API Platform
+<details markdown="block">
+<summary>A Salesforce recipe stayed "Inactive"? (rare)</summary>
+
+Occasionally a recipe with a dynamic SOQL query won't pick up the Salesforce connection on its own. If any remain **Inactive** after `make start-recipes`:
+
+1. On the **Recipes** page, use the **Inactive** filter to find them (searching `behalf` surfaces the usual culprits).
+2. Open each one → **Connections** tab → under "Showing active connections" click your **Salesforce connection** so the red *"Requires connection"* warning clears.
+3. Re-run `make start-recipes`.
+</details>
+
+### 3.7 Set Up API Platform
 
 ```bash
 make setup-api
@@ -291,7 +275,7 @@ make setup-api
 
 This creates two API collections (`dewy-resort-guest` and `dewy-resort-manager`), their endpoints, and an API client with credentials written to `app/.env`.
 
-### 3.9 Enable API Endpoints
+### 3.8 Enable API Endpoints
 
 ```bash
 make enable-api-endpoints
@@ -299,7 +283,7 @@ make enable-api-endpoints
 
 This activates all API endpoints so they can receive traffic. All recipes must be running first.
 
-### 3.10 Set Up MCP Servers
+### 3.9 Set Up MCP Servers
 
 ```bash
 make setup-mcp
@@ -343,7 +327,7 @@ You now have:
 | `wk` not found | Install: `brew install workato-devs/tap/wk` (macOS/Linux) or `scoop install wk` (Windows) |
 | `wk auth` fails | Re-run `make workato-login`, check token in root `.env` |
 | Salesforce login timeout | Re-run `sf org login web --alias myDevOrg` |
-| Recipes won't start | Manual activation (Step 3.5), then re-run `make start-recipes` |
+| Recipes won't start | Link the Salesforce connection (see the note under Step 3.6), then re-run `make start-recipes` |
 | "Connection not configured" | Verify Workspace Connections authenticated |
 | API Collection 401 | Check WORKATO_API_TOKEN in `.env` |
 | Room search returns empty | Verify SF seed data imported |
