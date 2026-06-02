@@ -60,22 +60,18 @@ This checks that the Workato CLI (`wk`) and Salesforce CLI (`sf`) are both insta
 
 ### 1.3 Create an .env file
 
-The project includes a `.env.example` file in the root directory with placeholder values for all required environment variables. Copy this file into the `app/` directory and save it as `.env`:
+The `app/` directory includes a `.env.example` file with placeholder values for all of the application's environment variables. Copy it to `app/.env`:
 
 #### Mac/Linux
 
 ```bash
-cp .env.example app/.env
+cp app/.env.example app/.env
 ```
 
 #### Windows
 
 ```powershell
-$copyParams = @{
-    Path        = ".env.example"
-    Destination = "app\.env"
-}
-Copy-Item @copyParams
+Copy-Item -Path app\.env.example -Destination app\.env
 ```
 
 > **Important:** This `.env` file will be used throughout the workshop. Future setup steps will have you update its values as you configure each service.
@@ -182,7 +178,21 @@ sf org open --target-org myDevOrg
 
 ### 3.2 Add Token to Environment
 
-Edit the `.env` file in the **project root** (not `app/.env`):
+First create the project-root `.env` from its template. This file is **separate** from `app/.env` — it is read only by the `wk` CLI:
+
+#### Mac/Linux
+
+```bash
+cp .env.example .env
+```
+
+#### Windows
+
+```powershell
+Copy-Item -Path .env.example -Destination .env
+```
+
+Then open the project-root `.env` (not `app/.env`) and paste the token you just copied:
 
 ```bash
 WORKATO_API_TOKEN=your_token_here
