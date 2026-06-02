@@ -234,9 +234,11 @@ The recipes that may need manual activation:
 3. `Search rooms on behalf of staff`
 4. `Search rooms on behalf of guest`
 
+> **Tip:** The easiest way to find these is the **Recipes** page → **Inactive** filter, which lists only the recipes that didn't start. From there you can search by name to narrow further — e.g. searching `behalf` surfaces the two "on behalf of" recipes above.
+
 For **each** affected recipe:
 
-1. Navigate to the recipe in Workato (under **orchestrator-recipes** or **atomic-salesforce-recipes**)
+1. Open the recipe from the **Inactive** list (these live under **orchestrator-recipes** or **atomic-salesforce-recipes**)
 2. Click the recipe name to open its detail page
 3. Click the **Connections** tab (between "Jobs" and "Versions")
 4. In the left panel, you'll see **"Salesforce connection"** with a red **"Requires connection"** warning
