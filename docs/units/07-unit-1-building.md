@@ -36,7 +36,7 @@ SALESFORCE_ENABLED=true
 Your facilitator will share the Cognito and Bedrock values via a password-protected link.
 **The password will be shown on screen by your facilitator.**
 
-🔐 **[Open the values (PrivateBin)](https://privatebin.net/?3782822ed656cd65#CGeJ4JdUR4PcT5zjuqQLLKgYLxBTUcdhGB8unzcSKuNo)**
+🔐 **[Open the values (PrivateBin)](https://privatebin.net/?77218df162f1b586#Cpox5RqQ1J2oGWfQf4bGXXZvVk2GqC21dC5XRHAFUDtF)**
 
 Open the link and enter the password shown on screen. Then copy each line from the file and replace the matching line in your local `app/.env` (including setting `AUTH_PROVIDER=cognito`).
 
