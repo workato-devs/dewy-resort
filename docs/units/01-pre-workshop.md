@@ -53,7 +53,7 @@ parent: Workshop Units
 |----------|-----------------|---------------|---------|
 | [Homebrew](https://brew.sh) (macOS/Linux) | Any | `brew --version` | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
 | [Scoop](https://scoop.sh) (Windows) | Any | `scoop --version` | `irm get.scoop.sh \| iex` |
-| Node.js | 20+ | `node --version` | |
+| Node.js | 20.x (LTS) | `node --version` | See platform-specific instructions below |
 | Git | Any recent | `git --version` | |
 | make | Any | `make --version` | |
 | Workato CLI (`wk`) | Any | `wk version` | See below |
@@ -76,6 +76,43 @@ scoop install wk
 ```
 
 Verify it's installed: `wk version`
+
+### Install Node.js
+
+#### macOS / Linux
+
+```bash
+brew install node@20
+```
+
+#### Windows
+
+{: .warning }
+> **Windows users: install Node.js 20 specifically.** Scoop's default `nodejs` (v26) and `nodejs-lts` (v24) packages are too new — native modules like `bcrypt` and `better-sqlite3` don't ship prebuilt Windows binaries for these versions, and compilation requires Visual Studio Build Tools. Node 20 has prebuilt binaries that work out of the box.
+
+```powershell
+scoop bucket add versions
+scoop install versions/nodejs20
+```
+
+If you have other Node versions installed via Scoop, make Node 20 the active version:
+
+```powershell
+scoop reset nodejs20
+```
+
+Verify: `node --version` should show `v20.x.x`
+
+#### Windows: Native Module Build Dependencies (Optional)
+
+If you need Node 22+ on Windows, you must install the native build toolchain:
+
+```powershell
+scoop install python
+scoop install extras/vcredist2022
+```
+
+Then install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the **"Desktop development with C++"** workload. Without these, `npm install` will silently fail on native modules (`bcrypt`, `better-sqlite3`).
 
 ### Recommended
 - VS Code or preferred IDE
@@ -169,7 +206,7 @@ See you there!
 - [ ] Email alias delivery verified (e.g., `yourname+test@gmail.com`)
 - [ ] Homebrew (macOS/Linux) or Scoop (Windows) installed
 - [ ] Workato CLI installed (`wk version`)
-- [ ] Node.js 20+ installed (`node --version`)
+- [ ] Node.js 20+ installed (`node --version`) — Windows: must be v20.x specifically
 - [ ] Git installed (`git --version`)
 - [ ] make installed (`make --version`)
 - [ ] IDE installed (VS Code recommended)

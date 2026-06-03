@@ -57,15 +57,24 @@ AWS_REGION=us-west-2
 
 ### 1.4 Start the Application
 
+#### macOS / Linux
+
 ```bash
 app/scripts/dev-tools/server.sh start
+```
+
+#### Windows
+
+```powershell
+cd app
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000){:target="_blank"}
 
 The login page should now show Cognito-based login options instead of mock mode.
 
-> **If the login page still shows mock mode:** Restart the app after env changes — `app/scripts/dev-tools/server.sh restart`
+> **If the login page still shows mock mode:** Restart the app after env changes — `app/scripts/dev-tools/server.sh restart` (macOS/Linux) or press `Ctrl+C` and re-run `npm run dev` (Windows)
 
 ### 1.5 Create Your Accounts
 

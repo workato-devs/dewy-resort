@@ -38,6 +38,39 @@ curl -fsSL https://raw.githubusercontent.com/workato-devs/dewy-resort/main/boots
 powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (curl https://raw.githubusercontent.com/workato-devs/dewy-resort/main/bootstrap.ps1 -UseBasicParsing)"
 ```
 
+<details markdown="block">
+<summary><strong>Windows Manual Setup (Alternative)</strong> — if you prefer not to run the bootstrap script</summary>
+
+Install each dependency via Scoop:
+
+```powershell
+# Install Scoop if not already installed
+irm get.scoop.sh | iex
+
+# Install dependencies
+scoop install git
+scoop bucket add versions
+scoop install versions/nodejs20
+scoop install make
+scoop bucket add workato-devs https://github.com/workato-devs/scoop-bucket
+scoop install wk
+
+# Verify all tools
+git --version          # Any recent version
+node --version         # Must show v20.x.x
+make --version         # Any version
+wk version             # Any version
+```
+
+Then clone the repo manually:
+
+```powershell
+git clone https://github.com/workato-devs/dewy-resort.git
+cd dewy-resort
+```
+
+</details>
+
 Once the script completes, change into the project directory:
 
 ```bash
@@ -58,6 +91,8 @@ This checks that the Workato CLI (`wk`) and Salesforce CLI (`sf`) are both insta
 
 **CHECKPOINT:** `make status` shows both CLIs installed
 
+> **Windows note:** If `make status` shows an interactive "Reinstall anyway? [y/N]" prompt, press `N` and Enter — the Salesforce CLI is already installed. Verify directly with `sf --version`.
+
 ### 1.3 Create an .env file
 
 The `app/` directory includes a `.env.example` file with placeholder values for all of the application's environment variables. Copy it to `app/.env`:
@@ -77,6 +112,9 @@ Copy-Item -Path app\.env.example -Destination app\.env
 > **Important:** This `.env` file will be used throughout the workshop. Future setup steps will have you update its values as you configure each service.
 
 ### 1.4 Initialize Local Database
+
+{: .warning }
+> **Windows users:** Confirm `node --version` shows `v20.x.x` before running `npm install`. If you see v24+ or v26+, run `scoop reset nodejs20` first. Native modules (`bcrypt`, `better-sqlite3`) will fail silently on newer Node versions without Visual Studio Build Tools.
 
 ```bash
 cd app
@@ -299,9 +337,22 @@ This creates two MCP servers (`dewy-resort-guest` and `dewy-resort-manager`) and
 
 ### 4.1 Start the Application
 
+#### macOS / Linux
+
 ```bash
 app/scripts/dev-tools/server.sh start
 ```
+
+#### Windows
+
+The `server.sh` script is macOS/Linux only. On Windows, start the dev server directly:
+
+```powershell
+cd app
+npm run dev
+```
+
+Leave this terminal running and open a new terminal for any subsequent commands. To stop the server later, press `Ctrl+C`.
 
 ### 4.2 Verify the Dashboard
 
@@ -334,6 +385,10 @@ You now have:
 | API call fails silently | Check **Tools → Logs** in Workato for error details |
 | Recipe returns error | Expand the job in Logs to see error message and code |
 | `wk` CLI command errors | Ensure API client scopes match guidance in Step 3.1 |
+| `npm install` succeeds but `db:setup` fails with `Cannot find module ...bcrypt_lib.node` (Windows) | You're on Node 24/26. Switch to Node 20: `scoop reset nodejs20`, delete `node_modules`, re-run `npm install` |
+| `server.sh: command not found` (Windows) | Use `cd app && npm run dev` instead — the `.sh` scripts are macOS/Linux only |
+| `wk plugins install .` fails with "Incorrect function" (Windows) | Use the real versioned path instead of Scoop's `current` symlink — see Unit 3 instructions |
+| `make setup` hangs with "Reinstall anyway?" prompt (Windows) | Press `N` + Enter. The CLI is already installed. Verify with `sf --version` |
 
 ---
 
