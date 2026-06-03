@@ -50,8 +50,20 @@ If you have access to a coding agent (Claude Code, Cursor, GitHub Copilot, etc.)
    Windows:
    ```powershell
    scoop install recipe-lint
-   wk plugins install recipe-lint
    ```
+
+   Then register the plugin with `wk`. Due to a known issue with Scoop's symlinked `current` directory on Windows, you must use the real versioned path:
+
+   ```powershell
+   # Navigate to the real install path (not the 'current' junction)
+   Push-Location "$env:USERPROFILE\scoop\apps\recipe-lint\1.0.6-beta"
+   wk plugins install .
+   Pop-Location
+   ```
+
+   > **Tip:** If you have a different version, list the directory to find it: `ls $env:USERPROFILE\scoop\apps\recipe-lint\`
+
+   Verify: `wk plugins list` should show `recipe-lint`.
 
 3. **(Optional) Install the Recipe Visualizer** — VS Code/Cursor/Windsurf extension that renders recipe JSON as interactive workflow graphs. Download the `.vsix` from the [Workato Labs page](https://workato-devs.github.io/labs/) and install via your IDE.
 
