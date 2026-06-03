@@ -31,31 +31,16 @@ WORKATO_MOCK_MODE=false
 SALESFORCE_ENABLED=true
 ```
 
-### 1.2 Add Cognito Configuration
+### 1.2 Add Cognito & Bedrock Configuration
 
-Your facilitator will provide the following values. Add them to `app/.env`:
+Your facilitator will share the Cognito and Bedrock values via a password-protected link.
+**The password will be shown on screen by your facilitator.**
 
-```bash
-AUTH_PROVIDER=cognito
+🔐 **[Open the values (PrivateBin)](https://privatebin.net/?3782822ed656cd65#CGeJ4JdUR4PcT5zjuqQLLKgYLxBTUcdhGB8unzcSKuNo)**
 
-# Facilitator-provided values
-COGNITO_USER_POOL_ID=<provided>
-COGNITO_CLIENT_ID=<provided>
-COGNITO_REGION=us-west-2
-COGNITO_REDIRECT_URI=http://localhost:3000/api/auth/cognito/callback
-COGNITO_IDENTITY_POOL_ID=<provided>
-```
+Open the link and enter the password shown on screen. Then copy each line from the file and replace the matching line in your local `app/.env` (including setting `AUTH_PROVIDER=cognito`).
 
-### 1.3 Add Bedrock Configuration
-
-These enable the AI chat features. Your facilitator will confirm the model and region:
-
-```bash
-BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
-AWS_REGION=us-west-2
-```
-
-### 1.4 Start the Application
+### 1.3 Start the Application
 
 #### macOS / Linux
 
