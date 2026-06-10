@@ -23,10 +23,10 @@
     "db:dump": "bash scripts/utils/dump-database.sh"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.932.0",
-    "@aws-sdk/client-cognito-identity": "^3.932.0",
-    "@aws-sdk/client-cognito-identity-provider": "^3.931.0",
-    "@aws-sdk/client-dynamodb": "^3.932.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.1066.0",
+    "@aws-sdk/client-cognito-identity": "^3.1066.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1066.0",
+    "@aws-sdk/client-dynamodb": "^3.1066.0",
     "@aws-sdk/util-dynamodb": "^3.932.0",
     "@modelcontextprotocol/sdk": "^1.22.0",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -55,7 +55,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-sts": "^3.932.0",
+    "@aws-sdk/client-sts": "^3.1066.0",
     "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.9",
     "@types/jest": "^30.0.0",
